@@ -1,0 +1,634 @@
+Dump of the parsed Category tests
+
+Description:  TFTP download
+     ['2'] ===>>>  2
+
+Description:  Buffer Overflow (LSASS?), Shellcode, TFTP download
+     ['3'] ===>>>  3
+
+Description:  Oracle DB Exploits
+     ['4.1', '4.2'] ===>>>  4
+
+Description:  Remote Framebuffer VNC Exploits
+     ['5.1.1', '5.1.2', '5.2', '5.3'] ===>>>  5
+
+Description:  Big Yellow (Symantec) Buffer Overflow Exploits
+     ['6.1.1', '6.1.2', '6.2'] ===>>>  6
+
+Description:  TrendMicro ServerProtect Buffer Overflow Exploit
+     ['7'] ===>>>  7
+
+Description:  FTP download (via cmd.exe)
+     ['8'] ===>>>  8
+
+Description:  PORT command buffer overflow exploit against Sasser's FTP builtin daemon
+     ['9'] ===>>>  9
+
+Description:  Webmin Exploit POST /shell/index.cgi
+     ['10'] ===>>>  10
+
+Description:  Webmin Exploit GET /unauthenticated/..%01/...
+     ['11'] ===>>>  11
+
+Description:  RPC/DCOM Buffer Overflow Exploit with simple polymorphic random data
+     ['12'] ===>>>  12
+
+Description:  RPC/DCOM Buffer Overflow Exploit 1
+     ['13.1', '13.2', '13.2', '13.3', '13.4', '13.5'] ===>>>  13
+
+Description:  ASN1 Buffer Overflow Exploit
+     ['14.1.1', '14.1.2', '14.2', '14.3', '14.4.1', '14.4.2', '14.5', '14.6', '14.7', '14.8'] ===>>>  14
+
+Description:  MySQL UDF Injection and Execution with FTP download
+     ['15'] ===>>>  15
+
+Description:  MySQL root access
+     ['16'] ===>>>  16
+
+Description:  Allaple Worm Variant
+     ['17.1', '17.2'] ===>>>  17
+
+Description:  SMB/CIFS Scan
+     ['18'] ===>>>  18
+
+Description:  RDP Buffer Overflow Exploit
+     ['19'] ===>>>  19
+
+Description:  HTTP GET Request (absolute http Path)
+     ['20'] ===>>>  20
+
+Description:  HTTP HEAD Request
+     ['21.1', '21.2'] ===>>>  21
+
+Description:  HTTP GET Request
+     ['22.1', '22.2', '22.3.1', '22.3.2'] ===>>>  22
+
+Description:  HTTP POST Request with Host and Connection Info
+     ['23'] ===>>>  23
+
+Description:  HTTP OPTIONS Request
+     ['24.1', '24.2'] ===>>>  24
+
+Description:  RTSP OPTIONS Request
+     ['25'] ===>>>  25
+
+Description:  HTTP CONNECT Request with Host Info
+     ['26'] ===>>>  26
+
+Description:  Radmin Connection Attempt
+     ['27.1', '27.2'] ===>>>  27
+
+Description:  BrightStor ARCserve Backup Buffer Overflow Exploit
+     ['28'] ===>>>  28
+
+Description:  POP3 Login Attempt
+     ['29, 29.1'] ===>>>  29
+
+Top Level (result class) categories:
+    ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29']
+Line  1 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 0.047619047619  >>>>  14 14 TRUE
+Line  2 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05568905b723062b32619e943b0c8efc.fuzz 0.875  >>>>  14 18 FALSE
+Line  3 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-392b618c7ab897ccfe8cbdad9a1531db.fuzz 0.873015873016  >>>>  14 14 TRUE
+Line  4 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-049078068540731265381d4c26b748ad.fuzz 0.883720930233  >>>>  14 18 FALSE
+Line  5 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-e546169e16d5b1064647ee7f10630634.fuzz 0.525  >>>>  14 14 TRUE
+Line  6 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-047f2bf83972d23be6d195c9d075063c.fuzz 0.882352941176  >>>>  14 18 FALSE
+Line [?1049h[?1h=[?12;25h[?12l[?25h[27m[m[H[2J[?25l[1;1H[34m# One possible way to carve up Fahim's ROC data files
+# by Giovanni July 27, 2011
+
+#===============================================================================[m
+[33mdef[m [36mloadCategories[m (filename):
+[34m#===============================================================================[m
+    [31m"""Load a category file and return a list of lists.
+       The category file has one class of exploits per line and uses :: between the items
+        e.g.
+            5 :: Remote Framebuffer VNC Exploits :: 5.1.1 :: 5.1.2 :: 5.2 :: 5.3
+           29 :: POP3 Login Attempt
+        
+        Each line is turned into a list:      
+          - The first item is the value to return if this class matches (e.g. 14 for 14.1.1, 14.1.2 ...)
+          - the second item is the values to be tested (those like the 14.1.1 or 18 above)
+          - the third is the description of this class of attack/payload ...
+        If there is only one item to test (like the 29 above, the first and second items are the same:
+        The above pair of lines should return:
+         [ [ '5', ['5.1.1', '5.1.2', '5.2', '5.3'], " Remote Framebuffer VNC Exploits"], 
+           [ '29',['29'], 'POP3 Login Attempt'] 
+         ]
+        IMPORTANT: 
+            The items in the list are all strings, even if they look like numbers. This means that a 
+            category file like this is fine (even though it makes no sense):
+            
+              webstuff    :: Web browswer related stuff :: http :: https :: GET :: POST
+              fileTranfer :: File transfer related      :: ftp :: scp :: rcp
+            
+            As it's written, the capitalisation must match when testing the list items    
+    """[m
+    categories = []
+    topLevelCategories = []    [34m# These are the result categories like 14, 15, 18, 29.1 is [m
+    f = [36mopen[m(filename, [31m"r"[m);
+    [33mfor[m line [33min[m f:[35;8H [33mif[m line == [31m""[m: [33mcontinue[m[7C [34m# ignore blank lines[m[36;8H fields = line.split([31m"::"[m)[37;8H fields = [ item.strip() [33mfor[m item [33min[m fields]     [34m# trim leading and trailing spaces[m[38;8H fieldCount = [36mlen[m(fields)[39;8H [33massert[m fieldCount >= [31m2[m, [31m"Line has less than two fields: "[m + line[40;8H description = fields[[31m1[m][41;8H [33mif[m fieldCount == [31m2[m:[10C [34m# No subclasses, so if first value matches return it   [m[42;10H returnValue = fields[[31m0[m][43;10H testValues    = fields[[31m0[m:[31m1[m]  [34m# Make sure the test values are a list, even if only a single item[m[44;151H8,8[11CTop[8;8H[?12l[?25h[44;1H
+[32mW11: Warning: File "Dynamic-category-parser.py" has changed since editing started[m
+[32mSee ":help W11" for more info.[m
+[32m[O]K, (L)oad File: [m[?1l>[?1049lVim: Caught deadly signal HUP
+Vim: Finished.
+[44;1H014925  >>>>  14 17 FALSE
+Line  30 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04b59b71966bcd3d34c96b9ddd9d3edb.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  31 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.2-08d02e1c7246a753b40562bc651879db.fuzz 0.824175824176  >>>>  14 14 TRUE
+Line  32 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-024ac854222d6bd1cbbfc39f43e6365a.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  33 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-94fffddce8696589bf864bde06f9c404.fuzz 0.831168831169  >>>>  14 13 FALSE
+Line  34 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03bc46dc43ab8be1e0ccf40f44180f16.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  35 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-4cc943e36416869fa3daf7ce9f72e8f7.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  36 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05f49084550771ad386282389511b19d.fuzz 0.8625  >>>>  14 18 FALSE
+Line  37 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-37768c407df6f84bd6defa84cdf79041.fuzz 0.530864197531  >>>>  14 14 TRUE
+Line  38 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08201b1f00b0ed0a349ac33e93f1c374.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  39 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-172f38768f36f98de987bc5677c3d051.fuzz 0.885714285714  >>>>  14 17 FALSE
+Line  40 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07412e5ac16d69a4f23cdf99684e6b80.fuzz 0.845238095238  >>>>  14 18 FALSE
+Line  41 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01f111a0dda50c0bd24efe1a0b8538dd.fuzz 0.813953488372  >>>>  14 18 FALSE
+Line  42 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-55e418aed640087cd142b9f2a6d9e448.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  43 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-057e6ca96778345e9a41de090c91e311.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  44 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-3b222054f312de8baaeeac19ff24a8e4.fuzz 0.882352941176  >>>>  14 12 FALSE
+Line  45 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a8c5e61d0596d9ec2fce50c51d7195e.fuzz 0.857142857143  >>>>  14 18 FALSE
+Line  46 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.1-b112adde25720c42e5b55b75cdd8eaca.fuzz 0.867469879518  >>>>  14 13 FALSE
+Line  47 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-69fe99577530652c8750fe96b37bfd55.fuzz 0.430379746835  >>>>  14 14 TRUE
+Line  48 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-b54aaaa36ce27ac888d281f1830c71a6.fuzz 0.810810810811  >>>>  14 17 FALSE
+Line  49 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-000f8e871f1cbd8d0a634c11b21259d3.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  50 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-003fc12d7f8ba9adf92828736ce48ce1.fuzz 0.862068965517  >>>>  14 18 FALSE
+Line  51 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-086131c5e84005c01b0525f9215298ec.fuzz 0.87012987013  >>>>  14 18 FALSE
+Line  52 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01ae83be0d633a42ea4afdf4a3fb649b.fuzz 0.847058823529  >>>>  14 18 FALSE
+Line  53 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0695386115ebab6878e0a2413a06ed77.fuzz 0.845238095238  >>>>  14 18 FALSE
+Line  54 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08363ae317bfb701d8fc1fb2f5effb1e.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  55 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-a217768c5844790c5c90a2fe1f09be8c.fuzz 0.880597014925  >>>>  14 12 FALSE
+Line  56 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-ffd21096f3d26f1fdfa8db6ada1bdbcc.fuzz 0.844444444444  >>>>  14 17 FALSE
+Line  57 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03f0be66159411a15aace03c13146664.fuzz 0.8875  >>>>  14 18 FALSE
+Line  58 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-473284a72556bc1a9dd8ce3f9a0daa49.fuzz 0.854368932039  >>>>  14 10 FALSE
+Line  59 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00e1729b8fcbfa4d8ff96e3b1649a4a5.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  60 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-016f2f3e395872c3fd2512db802cf4c5.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  61 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05459d86ce74743ac26a67ddb22b0aec.fuzz 0.857142857143  >>>>  14 18 FALSE
+Line  62 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09bd709e5d7603c5d518f8f345e7b99f.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  63 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03f24149a2ed8310d58a035ae2924622.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  64 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-5f09831df5e3d93b56c5d0b628f0dec2.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  65 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-86a20bfefe2b942b9c105963480e81a7.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  66 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-0de4ca606abfdf4bbb41cfa9c8f4c873.fuzz 0.542168674699  >>>>  14 14 TRUE
+Line  67 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-0f02ed7e077d741b8e93c5f1084c055a.fuzz 0.891891891892  >>>>  14 14 TRUE
+Line  68 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-29303771b81258c99d79d852ad1bb56d.fuzz 0.530864197531  >>>>  14 14 TRUE
+Line  69 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01bfc23c1defbef4c18818e2aec705de.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  70 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0b1728f380b2862cde4ee1bf65de0411.fuzz 0.871794871795  >>>>  14 18 FALSE
+Line  71 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-020ad940e374eed088c1e6ac8d61cf5c.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  72 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05596524beb7028646a1f121e0743159.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  73 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03fba72cbe928b8647484cda1f850dfd.fuzz 0.883720930233  >>>>  14 18 FALSE
+Line  74 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-06f46c5b7bec3a872fedbf4349147fc5.fuzz 0.848101265823  >>>>  14 13 FALSE
+Line  75 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-013dfedb2c063f336c6a0184c2414daa.fuzz 0.837209302326  >>>>  14 18 FALSE
+Line  76 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-60edf812cf3e97b888713d6b695e5e1b.fuzz 0.89156626506  >>>>  14 14 TRUE
+Line  77 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08af1048e1e555b83363e563b8c5b3e2.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  78 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-0b44c0ff3bc9e2d03336aba4fb0eefd2.fuzz 0.846153846154  >>>>  14 13 FALSE
+Line  79 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05689f993ea4a52c4ebea2413f29554a.fuzz 0.882352941176  >>>>  14 18 FALSE
+Line  80 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.2-2c72f49b0be4c03ddd3054b6c31e6d7d.fuzz 0.821428571429  >>>>  14 13 FALSE
+Line  81 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0044c1b57f3e06ef3e2d4b8e8af809ed.fuzz 0.873417721519  >>>>  14 18 FALSE
+Line  82 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0af802a9296b4ed6f367baf8a5cfb3f2.fuzz 0.876543209877  >>>>  14 18 FALSE
+Line  83 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-021b8a47f2dfd487c3fef8551113df5c.fuzz 0.860759493671  >>>>  14 18 FALSE
+Line  84 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-012ae9ca02515ecca4bd9385900462c5.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  85 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-015813fe461c7ca11ba8de27aa6a768a.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  86 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04c35f167237bb517d0ddae40815b0bf.fuzz 0.860465116279  >>>>  14 18 FALSE
+Line  87 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-28e53f7f15e38ffc3d3bb6f6b00fdf71.fuzz 0.873015873016  >>>>  14 12 FALSE
+Line  88 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0713e22518c49d18b5249064e1ec5879.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  89 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-064d864b273f58ce7499f98dd989b1d2.fuzz 0.865853658537  >>>>  14 18 FALSE
+Line  90 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08d6de7b76c9aa28d6cf2ea188e8e84b.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  91 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01da1fafbddc9e507dca8b47eda8e6d0.fuzz 0.878048780488  >>>>  14 18 FALSE
+Line  92 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00ca99917f5dc30b1c690154b65b4371.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  93 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-648f3855faf8e9d978649435a9b6c668.fuzz 0.857142857143  >>>>  14 13 FALSE
+Line  94 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-063e2484772ca954ab6347c37a157a6e.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  95 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00cbb54730383bfa60c7888c177a3727.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  96 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-d407575fb4e35649004e3b58c8fda5f6.fuzz 0.827586206897  >>>>  14 17 FALSE
+Line  97 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05e75b1643fb7c46f2b631aed5588405.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  98 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02c27380459fbb32462532ba06f95c95.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  99 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-436cd71e70726cd83d07672ca096cd12.fuzz 0.829545454545  >>>>  14 17 FALSE
+Line  100 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-004f08880b3410c75e10883af2dfd96f.fuzz 0.857142857143  >>>>  14 18 FALSE
+Line  101 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-017ffbb4864b482d5e3b907925b1e8c6.fuzz 0.863636363636  >>>>  14 18 FALSE
+Line  102 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-b3350817df8b4325a32beb9fbe3c6dee.fuzz 0.831168831169  >>>>  14 13 FALSE
+Line  103 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08b4daff88b9396d235e179d4660cad9.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  104 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02415237fcf62fc25a38ab45ef54f84a.fuzz 0.825396825397  >>>>  14 18 FALSE
+Line  105 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-093dddb6453c74f1f1eaef5560fa6e3a.fuzz 0.878048780488  >>>>  14 18 FALSE
+Line  106 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00d557ac5d0356fa4f5f645879af766f.fuzz 0.85393258427  >>>>  14 18 FALSE
+Line  107 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-4229eae4ad31fae19a0f6de4b375be3f.fuzz 0.841463414634  >>>>  14 13 FALSE
+Line  108 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a3b842dd9b5f65edd4b2e7dda2fb8ff.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  109 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0197bac0b7ff05adbb5000d2ebf41dd6.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  110 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02f4165a81dd9e1261c13e21e7e93ec1.fuzz 0.851851851852  >>>>  14 18 FALSE
+Line  111 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09285e95fa822c0fe063733a31275468.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  112 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-002e8670cfc11307c01745b95c4c21f1.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  113 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03bdc78d5f0673e0b366ca729d3fbf08.fuzz 0.864197530864  >>>>  14 18 FALSE
+Line  114 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-f162e629ef06e37c805c139dd084bac4.fuzz 0.842105263158  >>>>  14 17 FALSE
+Line  115 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-883516c63f6ca421f208f02e0a53dfda.fuzz 0.518987341772  >>>>  14 14 TRUE
+Line  116 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00419583304c18b869d25ea9e74163e2.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  117 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-6dee1cc129c94f1fa9b84da2db089226.fuzz 0.855263157895  >>>>  14 13 FALSE
+Line  118 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-78ef0a12b949f2cbac528610ceb59f14.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  119 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-030ee731df629e1abf752a09e7867357.fuzz 0.876543209877  >>>>  14 18 FALSE
+Line  120 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08f2cac6dc711d7cf4636e434a7bcc98.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  121 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-cff0404f1e14fce8f17df55e93b4e3c5.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  122 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01dc9bc35b8c0447ba4588b4c6a38cff.fuzz 0.864197530864  >>>>  14 18 FALSE
+Line  123 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-abd246a1cbdc0cde74e6b1cd53452538.fuzz 0.85  >>>>  14 13 FALSE
+Line  124 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04b7352ce8954a70b04ad0aa837f667f.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  125 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-8963969ea5e53c6b6bc2523b164edaf7.fuzz 0.896551724138  >>>>  14 14 TRUE
+Line  126 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a45b8d078478f3b13d8948b0ba83eb6.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  127 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-98efe9600dcebb3f75d8cc0041a5702e.fuzz 0.822429906542  >>>>  14 17 FALSE
+Line  128 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a10d24054c0c10024b9dc1b7eddfeba.fuzz 0.823529411765  >>>>  14 18 FALSE
+Line  129 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-037369dbb21200f8de68cb2bc3e96db9.fuzz 0.875  >>>>  14 18 FALSE
+Line  130 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0759c91e36800a9c3a9115c3f865879d.fuzz 0.863636363636  >>>>  14 18 FALSE
+Line  131 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-069b19a442005164acf1ca1893a1d4bb.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  132 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-072bd8b27d6818d981bd7a8df9b52a66.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  133 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-037862275b5720cabe941a97baccf50c.fuzz 0.875  >>>>  14 18 FALSE
+Line  134 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-082fca5e0a4f3773ac012920c13122f8.fuzz 0.857142857143  >>>>  14 18 FALSE
+Line  135 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.2-4a397f87303fcc30b2198da3ca75e0d8.fuzz 0.822222222222  >>>>  14 14 TRUE
+Line  136 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-9cd1d6aaefada16a119db43a95c6c99d.fuzz 0.828571428571  >>>>  14 12 FALSE
+Line  137 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0b150c629b2eddd3ca50b2b175ff21dc.fuzz 0.825396825397  >>>>  14 18 FALSE
+Line  138 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-06acc1e31cbde7f3b7d532ec8ce83794.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  139 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02ebc6645780c03ff901aff9cdbbdb8f.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  140 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08a7e66a1a8a391c31a26c513d4f69b0.fuzz 0.886075949367  >>>>  14 18 FALSE
+Line  141 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01744b06af90069e0fa421d6542c805f.fuzz 0.8875  >>>>  14 18 FALSE
+Line  142 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a1a36f2686601e1686fcb8b216781b1.fuzz 0.882352941176  >>>>  14 18 FALSE
+Line  143 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07af5a26c4a426e63b53a094f136806c.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  144 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-821e9c215d84e3db9f8bd1fc0fecb3dc.fuzz 0.901234567901  >>>>  14 14 TRUE
+Line  145 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-f7b54254da30b5a67ec959850a877751.fuzz 0.849462365591  >>>>  14 17 FALSE
+Line  146 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02801b3099e7b6205eb0b844322cc797.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  147 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-008db5f063cb1d0b2ccace39006aeb3d.fuzz 0.865853658537  >>>>  14 18 FALSE
+Line  148 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-deed6260b7892f632f1347bd448bdc77.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  149 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-5d3ae64ffe2d25022809bdee7a41c696.fuzz 0.852631578947  >>>>  14 17 FALSE
+Line  150 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-b3fa00116a5c0a2f38dd1e398419ea38.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  151 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-3492a35a64ca34ed877a8756bd085e76.fuzz 0.849315068493  >>>>  14 17 FALSE
+Line  152 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-1e5efe8964d4ff3255f415e51a8781e8.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  153 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.2-b2cb595b1a912a4dd73d9602146904c0.fuzz 0.84375  >>>>  14 17 FALSE
+Line  154 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0b1435872a0872945112d1929249683f.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  155 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02470ec2a905842112c66544d6ab113a.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  156 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0109ecde1ea6a1b4de887aa863e93a73.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  157 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0b0d940b66b8c3a090d6bd456cc643af.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  158 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-030b73a9332a400d98f2a01b3c205a19.fuzz 0.865853658537  >>>>  14 18 FALSE
+Line  159 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-fc7d2b8bc189d4d704731242fa29912a.fuzz 0.847058823529  >>>>  14 13 FALSE
+Line  160 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0713bbeec49ff689ec18dbe045e689e0.fuzz 0.860759493671  >>>>  14 18 FALSE
+Line  161 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04df9a40887a896cbff7639a12ff3459.fuzz 0.866666666667  >>>>  14 18 FALSE
+Line  162 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-069b710c6c1836c7054f5376292aa06f.fuzz 0.880597014925  >>>>  14 18 FALSE
+Line  163 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03726af41eeadd5e15dd31a003609e1a.fuzz 0.8875  >>>>  14 18 FALSE
+Line  164 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-089fb376b1238e3ce786d36a7661f259.fuzz 0.851851851852  >>>>  14 18 FALSE
+Line  165 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0402545a7dbbfe624482adbe28a9dff2.fuzz 0.865853658537  >>>>  14 18 FALSE
+Line  166 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a5c969937b9cd958b52af8983a249ec.fuzz 0.841463414634  >>>>  14 18 FALSE
+Line  167 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05ddf49cb49479be48fdf8ac42eccfc4.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  168 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a781121ce149058a6475570f0fc312a.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  169 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-893dc1052286ca8e3bfe498450ad77df.fuzz 0.892857142857  >>>>  14 14 TRUE
+Line  170 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 15-ca25c55fd256d92b48b81cb36f1a6db7.fuzz 0.82  >>>>  14 15 FALSE
+Line  171 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-784d36ca5d89b031143325e4189fbadd.fuzz 0.361111111111  >>>>  14 14 TRUE
+Line  172 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08b71d89ff7419736c875f3e6c89e227.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  173 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-bb50eab41b5b5da6811b498ba787ebd0.fuzz 0.441176470588  >>>>  14 14 TRUE
+Line  174 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0b22226155b0dedc143dd4bb6019407e.fuzz 0.85  >>>>  14 18 FALSE
+Line  175 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.2-ec28a3adbaa0e9f0f00ec13be5670371.fuzz 0.817204301075  >>>>  14 14 TRUE
+Line  176 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-011b223caf064b902bee018ab705f7fb.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  177 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-06f4d5ed1c5c0dfd1b548a5f3503cdad.fuzz 0.843373493976  >>>>  14 18 FALSE
+Line  178 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a17b408064da1af9001ec745e4ba1f1.fuzz 0.871794871795  >>>>  14 18 FALSE
+Line  179 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-6c1bc1614d57c66fe536d3c31a05cafd.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  180 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03c6b5c018dec690a5c71bfe0c0a5cae.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  181 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00ef778906478c0ace2c818c031c17c7.fuzz 0.857142857143  >>>>  14 18 FALSE
+Line  182 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-5d87c21f6dccbf4b44d07494bb78a553.fuzz 0.423076923077  >>>>  14 14 TRUE
+Line  183 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.3-fa9cc23dc1fbe17b0796559cc8d54e66.fuzz 0.876923076923  >>>>  14 14 TRUE
+Line  184 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-f520762221843b1ffedbed2f3fba23b5.fuzz 0.895348837209  >>>>  14 14 TRUE
+Line  185 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-0cb632c320b38a27aaacf609f569dca2.fuzz 0.845070422535  >>>>  14 13 FALSE
+Line  186 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-032f2aff0051753cfeed862c6b5a8e33.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  187 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01df99159c1ca8ddf08cadd12d32bee6.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  188 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-3a28452fc0b7572a345514aa66a5e628.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  189 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-fa1f225243d5bfe3d6b9ca8dbe9bfe16.fuzz 0.823529411765  >>>>  14 12 FALSE
+Line  190 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-013769c03f94f8c1a9465cc53edfb534.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  191 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0459dc73bde24d5f4d40d3a2946146ff.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  192 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-7615402ce799c327e8045c070a389762.fuzz 0.844155844156  >>>>  14 13 FALSE
+Line  193 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0980409976e2cfc34809db763d571419.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  194 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-081a9d8846a13f86abeb3d93162fbddd.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  195 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-45866d6a2a2b63c23fea2a4add3f45e7.fuzz 0.835443037975  >>>>  14 13 FALSE
+Line  196 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-c2ebd8e7c451ee66d3be2c0d4bc8fa3a.fuzz 0.464788732394  >>>>  14 14 TRUE
+Line  197 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04ec52b5c3a4074c564bd7fa53957182.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  198 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-c3b69b7940ffab4f7ab1c6776621c174.fuzz 0.530864197531  >>>>  14 14 TRUE
+Line  199 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-038d543b16834aa27b1ad23de1138d58.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  200 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-1d0f7e3e20676fa8355d1895c60af91a.fuzz 0.848101265823  >>>>  14 13 FALSE
+Line  201 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-013d11291b60d14ef44e617624ba4e65.fuzz 0.878048780488  >>>>  14 18 FALSE
+Line  202 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02530e44dbd3bb2b3a017a845c3f116c.fuzz 0.875  >>>>  14 18 FALSE
+Line  203 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-c6a0c5b1cc5d0a0f8b394c09d8e73898.fuzz 0.847222222222  >>>>  14 13 FALSE
+Line  204 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02c5401f95864acf1d7cc8cbd5e35408.fuzz 0.882352941176  >>>>  14 18 FALSE
+Line  205 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.2-10ded7db0bdbb4f0acf510ebbb9c7ce5.fuzz 0.82  >>>>  14 14 TRUE
+Line  206 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.3-606273cec64b9aab0ea09b2f338783a9.fuzz 0.880597014925  >>>>  14 14 TRUE
+Line  207 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-0dd14d7c1dd616fbebd590d5f232084e.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  208 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-95ae2769884f19218ea4e2983c69d6d7.fuzz 0.90243902439  >>>>  14 14 TRUE
+Line  209 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-da41b0ee176b220062cea438414927ac.fuzz 0.848101265823  >>>>  14 13 FALSE
+Line  210 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-98a41bbaa058a8f791eb626b183dba8f.fuzz 0.84693877551  >>>>  14 17 FALSE
+Line  211 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-065b9b5036466e18fa0e0dd71e91a69f.fuzz 0.876543209877  >>>>  14 18 FALSE
+Line  212 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-009cdefd09a83f1769ef3dc51ba5120a.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  213 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-016e7dc99b4af99c549f5340e9f9f729.fuzz 0.8625  >>>>  14 18 FALSE
+Line  214 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-bfcc9e7d6147b62b7cd69425b562179a.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  215 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-016e8c77fe677d1d6530706371cb1944.fuzz 0.87012987013  >>>>  14 18 FALSE
+Line  216 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03775e4c6a98913628a4b437f6a85029.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  217 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02d8becd4edcac96762e884effb2f818.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  218 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0250a82786943ba095e51404181d3780.fuzz 0.858823529412  >>>>  14 18 FALSE
+Line  219 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0380b56eea9b80c9f68bbe1f7205b87d.fuzz 0.858823529412  >>>>  14 18 FALSE
+Line  220 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04a6cbb15748cb2825eec071d28f70a9.fuzz 0.895348837209  >>>>  14 18 FALSE
+Line  221 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01775f86cd5b31f9932b1e5bb278245d.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  222 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01f8308ecf9b16fc15cb8778b12372d6.fuzz 0.8875  >>>>  14 18 FALSE
+Line  223 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07f313972aefce9f26fbadcc91376bd2.fuzz 0.851351351351  >>>>  14 18 FALSE
+Line  224 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-5a46ef80786b30853bd02cb399dc35c7.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  225 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-44e1ca7c1b504d63886238df82ee732c.fuzz 0.843373493976  >>>>  14 17 FALSE
+Line  226 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0803d227e188885123c1738cc8b3a9a0.fuzz 0.862068965517  >>>>  14 18 FALSE
+Line  227 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-47248b4882fdd25c8ffbdec4401233ff.fuzz 0.875  >>>>  14 14 TRUE
+Line  228 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0ae8abed93be0999335740e8ed6ba914.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  229 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04e30d07de8e75341a1598c62f1a170f.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  230 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.2-7fbf55c7f5daae01cb0fb09ea5291ac6.fuzz 0.84375  >>>>  14 17 FALSE
+Line  231 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-77c8f4cc2728276d3d02101072da2089.fuzz 0.525  >>>>  14 14 TRUE
+Line  232 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03ab4923c95341edb9705366faebe912.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  233 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0afcc91f98ff7190cf2a8c6cd91f71cb.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  234 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-48d2ab64c90e4a2983ba1b1e76442b07.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  235 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02d1423db3d49cd897a952bdecfd68e2.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  236 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-5ce46116906cb706d8c64836752b2454.fuzz 0.853333333333  >>>>  14 17 FALSE
+Line  237 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-099d6e7a9b5694f6f1adef0e65b0569e.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  238 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-ae4652b546a10c092c22036bbc0db641.fuzz 0.518987341772  >>>>  14 14 TRUE
+Line  239 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0805c47d4e252663e114fed331c4a286.fuzz 0.843373493976  >>>>  14 18 FALSE
+Line  240 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-516eee1c4721dd805bd9c28cceb15fd1.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  241 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-fb04152997f309255ccc6e238b37a531.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  242 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09aa7cead6d2d75b2820b8b41a63c63d.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  243 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-042cfe5d391cd84e0557382889ba7812.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  244 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-044112dde222f0be98c0f68f33ff35b8.fuzz 0.851851851852  >>>>  14 18 FALSE
+Line  245 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a6c12bfbfbc5760a44576e4b69a8edd.fuzz 0.860759493671  >>>>  14 18 FALSE
+Line  246 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a8ead81bef975756c87a48a83a26d6c.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  247 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a9c0910792a92f30999caed8358e644.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  248 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0aede4cd5956d44d4d88dfe4d45a7f65.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  249 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04d7472026d1db4165e19a109763d59f.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  250 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-082e469447a37475e0be0fb8549aedfc.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  251 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07b378206220a274ecf7a196375f99a0.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  252 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09fc94db27f90afe42f53346e0e93335.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  253 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-06e2d0673ddbed6768f4674d88f81b41.fuzz 0.883720930233  >>>>  14 18 FALSE
+Line  254 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-623d1927af531d6fb99c39868a14d943.fuzz 0.86301369863  >>>>  14 13 FALSE
+Line  255 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-8d72001915bb917d8d0200d429aef901.fuzz 0.407894736842  >>>>  14 14 TRUE
+Line  256 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-055d8786e5cb6480ad1ec57c1446bfa1.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  257 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a4f49f012d9e6d3d351429d21067f80.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  258 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09fdd6087714563a4995a767cae7f051.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  259 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-ad85fd04665793ec30b30cd2c7952ce0.fuzz 0.451219512195  >>>>  14 14 TRUE
+Line  260 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04b83c51aeaf742fb0e15d124f470049.fuzz 0.851851851852  >>>>  14 18 FALSE
+Line  261 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-d88a44af955b31b0510976f14e2fbd78.fuzz 0.846153846154  >>>>  14 13 FALSE
+Line  262 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-9034c55e85d8ddd3095a7f35e781215b.fuzz 0.833333333333  >>>>  14 17 FALSE
+Line  263 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-c37f0b15779d7e17a89630ea7a4d8b4e.fuzz 0.457142857143  >>>>  14 14 TRUE
+Line  264 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01067d7db09e697eb03d5b9347fbb437.fuzz 0.858823529412  >>>>  14 18 FALSE
+Line  265 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07531323801086d561df3aaa6c2ca66a.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  266 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-062cde49ebbda57a77bfa57d3602ad01.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  267 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-093c220ede8230ac6b2a91bda6966a2c.fuzz 0.8875  >>>>  14 18 FALSE
+Line  268 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05a227184e97fddac39fbb9ef9ed3f68.fuzz 0.866666666667  >>>>  14 18 FALSE
+Line  269 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07fe449397be518966075d35851d910e.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  270 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-5403d302c56f55a715b3ef885d4822e8.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  271 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05849e6f3d8b2fe8d3ebbb8c4dbd15b5.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  272 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-023d47a31de302bab322a4f15890c6bd.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  273 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01b79dab9cda7819730fa911bad455c8.fuzz 0.865168539326  >>>>  14 18 FALSE
+Line  274 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-068b2a6b8fbb4522c2a4a7ad6b85da14.fuzz 0.865853658537  >>>>  14 18 FALSE
+Line  275 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0795867baec940eb6d0f5e8b53875c47.fuzz 0.878048780488  >>>>  14 18 FALSE
+Line  276 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-8d3ab9604c4b711df7a62725e00d200f.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  277 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-592ff16e8d85bf25599d85144dfd7de5.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  278 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02c42b53f547172941e64e3f277f53a8.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  279 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0af943e7548cdd3e2904c555973c75de.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  280 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-7f7e973fe844fa162f3025843cf4782e.fuzz 0.873015873016  >>>>  14 14 TRUE
+Line  281 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-be64d678f26456582854796b5ff13bf6.fuzz 0.873015873016  >>>>  14 12 FALSE
+Line  282 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04eea9951cc507a0dc50daddfd44b673.fuzz 0.860465116279  >>>>  14 18 FALSE
+Line  283 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-63f4ef9fedf2e6cb56ffecc61154e040.fuzz 0.83  >>>>  14 12 FALSE
+Line  284 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07fef74535e46a561001f78001a7df4f.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  285 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-841c1f8c7c3ed9e12d557080b43b2d15.fuzz 0.833333333333  >>>>  14 12 FALSE
+Line  286 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01e2e4a6c5ecf71392175c1c0c6ab107.fuzz 0.857142857143  >>>>  14 18 FALSE
+Line  287 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-3875b6257d4d21d51ec13247ee4c1cdb.fuzz 0.84375  >>>>  14 17 FALSE
+Line  288 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.4.1-be640f330f030b265e381de8bf0680e8.fuzz 0.836734693878  >>>>  14 14 TRUE
+Line  289 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-377ef3eb6fc66dca14c689ba50093822.fuzz 0.838235294118  >>>>  14 12 FALSE
+Line  290 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0186b9736b7f32eb8d0a744964730101.fuzz 0.890243902439  >>>>  14 18 FALSE
+Line  291 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-ddb7a144b5d17ba4ef36128e47e0687d.fuzz 0.884057971014  >>>>  14 17 FALSE
+Line  292 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.3-89bfdb005a1fda9026cf75b0f4a5c4bd.fuzz 0.878787878788  >>>>  14 14 TRUE
+Line  293 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-b3c713d3e7a13ee86e23356384340ef6.fuzz 0.828571428571  >>>>  14 17 FALSE
+Line  294 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0b30f5d96bb0f9f81ba33ac8a2cb6cbd.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  295 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04e7dc973447ec74edf625a649f7207e.fuzz 0.883720930233  >>>>  14 18 FALSE
+Line  296 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0996455348d83eef7df2efd93189febe.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  297 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02abbc983df1a1057e63f7ff356ee4bb.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  298 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-561bd3c9ec7acc959e13d005efe759c1.fuzz 0.873015873016  >>>>  14 14 TRUE
+Line  299 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-83688afdc9a16f1cfa241e16aa5f6bc2.fuzz 0.883720930233  >>>>  14 14 TRUE
+Line  300 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-b2a61846e9ecfd3a53b6baf50e8b5ba3.fuzz 0.84  >>>>  14 10 FALSE
+Line  301 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0902d7d02fedc7c2f770687151446241.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  302 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-35d864d008ed3f859bc0152e399b7cf7.fuzz 0.873015873016  >>>>  14 14 TRUE
+Line  303 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03dd2085dadcf9037abc113e3b823960.fuzz 0.860465116279  >>>>  14 18 FALSE
+Line  304 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-d4ddd98907f2e92d96645826d2510525.fuzz 0.823529411765  >>>>  14 17 FALSE
+Line  305 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0b3bdb359ed60b6a56f66635f4357261.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  306 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09c6b1194723b5db89c3fb31c23c60a6.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  307 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-7ef030b3d075830fa357e18da73aebdb.fuzz 0.457142857143  >>>>  14 14 TRUE
+Line  308 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.4.1-9072378b68a097e961c8efbd265d9aab.fuzz 0.825242718447  >>>>  14 14 TRUE
+Line  309 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-917c5d8f05e25df60d1b1f207aae08ef.fuzz 0.825242718447  >>>>  14 17 FALSE
+Line  310 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-080d691971c50c55017409a4af64b2a9.fuzz 0.863636363636  >>>>  14 18 FALSE
+Line  311 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09aa874820f07e347f9fce5a1b5b6f78.fuzz 0.8625  >>>>  14 18 FALSE
+Line  312 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07f3249bff54309238deb7b196933a43.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  313 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07196f1dca8e97922184e6697cc2db6f.fuzz 0.882352941176  >>>>  14 18 FALSE
+Line  314 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-1374c85f64bd8bbded4e8b9d2cecfdd4.fuzz 0.472222222222  >>>>  14 14 TRUE
+Line  315 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04ccfe8ee3c09bc07279a7e4e4923ec1.fuzz 0.825396825397  >>>>  14 18 FALSE
+Line  316 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-7cda23d2f617c1793a8d4dd159ad4b97.fuzz 0.873015873016  >>>>  14 10 FALSE
+Line  317 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-8d9a85f86cc0b65990d743ccb28b012f.fuzz 0.841584158416  >>>>  14 10 FALSE
+Line  318 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-9b4c1a83f63d35aae6a33ac519b7899b.fuzz 0.822784810127  >>>>  14 13 FALSE
+Line  319 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04a71b952794ae63992b8d039e9d42f5.fuzz 0.885714285714  >>>>  14 18 FALSE
+Line  320 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.2-3132ef049a142f52d79fa90c65edf0fc.fuzz 0.842696629213  >>>>  14 14 TRUE
+Line  321 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0518bd7f5fd191a20b0ab160227eca69.fuzz 0.875  >>>>  14 18 FALSE
+Line  322 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-c0e600b27a7de6714e7d75c66967151f.fuzz 0.893333333333  >>>>  14 14 TRUE
+Line  323 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-013e10d75490fa7c112ee5bda8557bdc.fuzz 0.873015873016  >>>>  14 10 FALSE
+Line  324 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-26bad5e3648d297b8752a66a0ea55d3e.fuzz 0.441176470588  >>>>  14 14 TRUE
+Line  325 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-041045221c5629ac377b371a12b2c784.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  326 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03b01a356aa089eac02cb26579ed4636.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  327 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-066e5bd8dc830250ad7564c05bacbd91.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  328 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0031a4e6d847eed65d0282893fb46d7a.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  329 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0838ca8acb9e8b0c3f4b68875636fe7d.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  330 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07f58cf74849ec9ea62fe81957045f41.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  331 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.2-93355a866e4ccf75c78c4920a1062866.fuzz 0.83950617284  >>>>  14 13 FALSE
+Line  332 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04b4055c602fce9955203c510def363a.fuzz 0.85393258427  >>>>  14 18 FALSE
+Line  333 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-cac025727138850d90734fab9ae41b14.fuzz 0.873015873016  >>>>  14 12 FALSE
+Line  334 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-0af88469d89e56e428a2cd0c70fdf905.fuzz 0.903614457831  >>>>  14 14 TRUE
+Line  335 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-afb3a89e813e29b90a1ed791577a3100.fuzz 0.877777777778  >>>>  14 14 TRUE
+Line  336 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-7adba206a3d7419c3c568d0271a1f883.fuzz 0.328358208955  >>>>  14 14 TRUE
+Line  337 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.2-d95818b2b0005506151b41dc1868a1e5.fuzz 0.825  >>>>  14 13 FALSE
+Line  338 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-089639b0ca74bb65c07098911332c7d2.fuzz 0.853658536585  >>>>  14 18 FALSE
+Line  339 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-64d06ec702f94a39166e129d93b31205.fuzz 0.470588235294  >>>>  14 14 TRUE
+Line  340 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-b9fe2c1354670d81c61a3d222cfa587f.fuzz 0.882352941176  >>>>  14 12 FALSE
+Line  341 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.2-02d13c223e8d2ebd4469485af335069a.fuzz 0.833333333333  >>>>  14 14 TRUE
+Line  342 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-2469eb8f38dd65695b7f87d457ce1ae3.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  343 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-090bccfa9e6915d0af7d3073ed7cb474.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  344 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0413e8f5cde6da5f3fff0b803f13ad2b.fuzz 0.882352941176  >>>>  14 18 FALSE
+Line  345 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-ab5267f5c1bd6b8ec1b52aabccb083a7.fuzz 0.536585365854  >>>>  14 14 TRUE
+Line  346 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-23fa60e4782edfada8ba8bb071a54a07.fuzz 0.873015873016  >>>>  14 12 FALSE
+Line  347 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0435436994237aebe09e4f2f1df90e96.fuzz 0.878048780488  >>>>  14 18 FALSE
+Line  348 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-035d206e2b3b4810e7f12f8fffd903d4.fuzz 0.890410958904  >>>>  14 14 TRUE
+Line  349 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0124b2b0a1426c47730c3ce2120a4f6f.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  350 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.1-6ae4a2f3fafc1483713b012c06cae323.fuzz 0.614457831325  >>>>  14 14 TRUE
+Line  351 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0946d8ac331e5b6caad226d547c172b5.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  352 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0256cb5e71259d3021089f5522047006.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  353 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00f18888317e19dba8f68e704cb08ae7.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  354 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09574dea2657a726b308a68c23dba3dd.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  355 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-bd63683b8461833784a25c0c5103318f.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  356 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-cf5cc3dafd5b73bed570343a42efc35b.fuzz 0.857142857143  >>>>  14 17 FALSE
+Line  357 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-3bfb4b303c52e2d2dc9cc096c55ad73c.fuzz 0.84  >>>>  14 10 FALSE
+Line  358 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00ad74cd502fb7848902625ddba538b9.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  359 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-7e265d20110a2f46d2cab0cb4e7d680c.fuzz 0.834951456311  >>>>  14 17 FALSE
+Line  360 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-168cab17117f5deacfacd1e4172d5288.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  361 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04a21494b5524996e17fa5743f8eb9ad.fuzz 0.860759493671  >>>>  14 18 FALSE
+Line  362 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-62c2930e8e47709922f86270d6b66680.fuzz 0.366197183099  >>>>  14 14 TRUE
+Line  363 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-043eabd920ca3552f2466bc7bd092aa3.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  364 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-000ff6e7334aa29d19d52b1ce302b7c0.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  365 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00eb1a305e319a03133ab6b3526e98d8.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  366 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01de1c1d77c58e6897a365a6fda1c29c.fuzz 0.857142857143  >>>>  14 18 FALSE
+Line  367 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-ec9916beaf6e6326fcd8aace986c1b0a.fuzz 0.861111111111  >>>>  14 13 FALSE
+Line  368 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01000ed65da0da864cc0b816c02e890d.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  369 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-073e1239b311ad4c6b00f682800a1d31.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  370 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-024a1f2ca282225d23ef54a6f47ddc12.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  371 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-9103109fb14ae9a52874887a738ef1e3.fuzz 0.857142857143  >>>>  14 13 FALSE
+Line  372 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.1-288c8038afd9b6cc56c3f5caafc46659.fuzz 0.864197530864  >>>>  14 13 FALSE
+Line  373 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-011209e06d0872f65b368ee22c361ed9.fuzz 0.862068965517  >>>>  14 18 FALSE
+Line  374 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-5880ea30f83f7971745d70a372f5def4.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  375 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04dec0491db0e0a5fb34bd650c186e15.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  376 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00477cb7148a6f4669be69d5053d6487.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  377 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09bacec6a7af20f8eac8d241a6b782cf.fuzz 0.8875  >>>>  14 18 FALSE
+Line  378 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07881617e12cf8be347cec3caea23136.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  379 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0140f56c4ade8a211210b6939ff5dbeb.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  380 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-060043e5ce4c876de2b2037b933bae2a.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  381 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-003466263e490c619d715e2bbc52d7fd.fuzz 0.858823529412  >>>>  14 18 FALSE
+Line  382 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0319601c4d6f06b6da7d6221bd323051.fuzz 0.855421686747  >>>>  14 18 FALSE
+Line  383 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-083548a0a48097399e891adba630522d.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  384 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0895a8ba1e80678dfe6de74bda8d24e4.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  385 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-b5c50b8bd0b9db915fdfed483f87f3fc.fuzz 0.898734177215  >>>>  14 14 TRUE
+Line  386 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00c8670e9b3dcb9cdb85537c244dda5e.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  387 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-af5ac74936f3423dda283bda6eaec5f3.fuzz 0.844155844156  >>>>  14 13 FALSE
+Line  388 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.5-0f142c762c2ee6a43998a9b1eab39bf9.fuzz 0.876923076923  >>>>  14 14 TRUE
+Line  389 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08afec7aa9e64c8502ff337957e3882f.fuzz 0.873417721519  >>>>  14 18 FALSE
+Line  390 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08c02344456f543b03db89588804d86b.fuzz 0.87012987013  >>>>  14 18 FALSE
+Line  391 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00cd0c184d1c9739e433a54bb3a738e4.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  392 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-ca184e69b3a7fcdba30c286d54ebcc7c.fuzz 0.823529411765  >>>>  14 12 FALSE
+Line  393 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-070fcef76b869422ff8d2de563c4ebab.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  394 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-d82ca5cef2132dae1de0ad0655e692f3.fuzz 0.4375  >>>>  14 14 TRUE
+Line  395 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-4b41641984386e26040f5ee4dd64f555.fuzz 0.432835820896  >>>>  14 14 TRUE
+Line  396 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04aec54329b30ac9c6af4d9c840d14e9.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  397 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-cd471caeca3f74a6be031f7ea8d3006b.fuzz 0.884057971014  >>>>  14 17 FALSE
+Line  398 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0568b06e9eae6351a6086db8be91dea0.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  399 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a073a0bfed8b8f72261acf51279133f.fuzz 0.882352941176  >>>>  14 18 FALSE
+Line  400 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07e6740623e888584916f4af8c443cb9.fuzz 0.8875  >>>>  14 18 FALSE
+Line  401 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04a46bdceeddb7c3f5b45c2609c51ec9.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  402 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00ab2663287c1518c53229bfe0b73258.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  403 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-d280035e2701ab4bc09de0a8c20afc8c.fuzz 0.841584158416  >>>>  14 10 FALSE
+Line  404 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-c1c40b17bdf19b5d7bf74a723201f450.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  405 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-53150ca0f9e16cef2cf5049671377fce.fuzz 0.828947368421  >>>>  14 13 FALSE
+Line  406 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0613af40a4e118fd5d5146eeee7fa472.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  407 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01bcdb8b577a90336981879041975983.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  408 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-002b71edf80576650c86df69ca6aba3a.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  409 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-056b991a69facc31a7c0add58eacb05b.fuzz 0.875  >>>>  14 12 FALSE
+Line  410 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-01eae6a4e83d4139ecfdd33c37aa4322.fuzz 0.890243902439  >>>>  14 18 FALSE
+Line  411 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-5c229ff9ae455faa4d7bc5a6cddf018b.fuzz 0.479452054795  >>>>  14 14 TRUE
+Line  412 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-031ec60bb54857ecec5092a182908ec2.fuzz 0.8875  >>>>  14 18 FALSE
+Line  413 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03aff7c2f1d673c5c080b2a4aadc0151.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  414 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08b9328c2b98a2b7a3467a9bef52e553.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  415 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0839ebbc3ae3b77e5cfb049809701c05.fuzz 0.869047619048  >>>>  14 18 FALSE
+Line  416 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-af18f4527ec7c85a6abfeb25e3b4e62c.fuzz 0.846153846154  >>>>  14 13 FALSE
+Line  417 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-082ede9fb7e53fbab62125a25f10378b.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  418 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-005db5372f39c9083889820e2cddec3f.fuzz 0.860465116279  >>>>  14 18 FALSE
+Line  419 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-0607a0bf149c643e03c78d5af2e8d0ba.fuzz 0.857142857143  >>>>  14 13 FALSE
+Line  420 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-727db1fdb8bb6e9b18cf2cace89dbd74.fuzz 0.873015873016  >>>>  14 14 TRUE
+Line  421 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-098bce5c09aa00ae42ae3762a4a51e83.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  422 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08234abd11f6f05c5d9042a8acf58992.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  423 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-7644aa33556f4c9ff1bb37be4f150c9f.fuzz 0.530864197531  >>>>  14 14 TRUE
+Line  424 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 12-f75612d56668d718454489efd11c364e.fuzz 0.873015873016  >>>>  14 12 FALSE
+Line  425 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-3b8daf3643167e3d7395ad71074b2e7e.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  426 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-7b7565047e8ef9152fde81f3e91224ba.fuzz 0.857142857143  >>>>  14 13 FALSE
+Line  427 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-d031ee923de892c93d95f6ce88cd0ff3.fuzz 0.903614457831  >>>>  14 14 TRUE
+Line  428 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-097120402fad8ed50795f7fed425b722.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  429 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-2cb6ecc31877d3e34d401fc016e9cc71.fuzz 0.840909090909  >>>>  14 17 FALSE
+Line  430 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-c71da8a96f8c77b1046bf28175286cc4.fuzz 0.823529411765  >>>>  14 13 FALSE
+Line  431 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-545358c4de6b0f3b7a4ae540ccf16732.fuzz 0.530864197531  >>>>  14 14 TRUE
+Line  432 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-086739dcffdaae8db78f3999c61433de.fuzz 0.8875  >>>>  14 18 FALSE
+Line  433 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a2e7517f212cfdb07e53fb40ca88a3b.fuzz 0.883116883117  >>>>  14 18 FALSE
+Line  434 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-a83d8b396c494895f572bc3988952a7c.fuzz 0.530864197531  >>>>  14 14 TRUE
+Line  435 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-0e420a2ac372201c3eb95e0813d88bcd.fuzz 0.841463414634  >>>>  14 13 FALSE
+Line  436 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a9576ea1645a534c1bc84518f937734.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  437 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0664318abb26254829c054714c212370.fuzz 0.873563218391  >>>>  14 18 FALSE
+Line  438 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-10ba8d0e754458237fb50442d3c2ca42.fuzz 0.904761904762  >>>>  14 14 TRUE
+Line  439 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0622043e3af9716e14f0cb113344de2a.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  440 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05a5b8fc046b36d59cc19d4a07bcf476.fuzz 0.89156626506  >>>>  14 18 FALSE
+Line  441 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0ac16c5daaa8b59135b9338c0a2c4d73.fuzz 0.873015873016  >>>>  14 18 FALSE
+Line  442 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.7-7fc18d3cef8be806a91167c3cc19e587.fuzz 0.886075949367  >>>>  14 14 TRUE
+Line  443 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-049fbcb6f4beb75c5263d99d1b4031ec.fuzz 0.8625  >>>>  14 18 FALSE
+Line  444 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-073189c3bc3ef497d6d5b1bd2c7926d6.fuzz 0.876543209877  >>>>  14 18 FALSE
+Line  445 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a3da9cf8edbba354126ddea59fbdec9.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  446 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-5146ee29ac94df89999dbae30adbcbce.fuzz 0.8375  >>>>  14 13 FALSE
+Line  447 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-09b72c6a4aa9a96521d21b3a5c3a80fd.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  448 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a2d6f20fb149e9943e3da6342e3aa00.fuzz 0.864197530864  >>>>  14 18 FALSE
+Line  449 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0970d69bb15e898b21f7ad1f0eed40d0.fuzz 0.8625  >>>>  14 18 FALSE
+Line  450 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-05f00539694d6f0d8147e83d1aee8e05.fuzz 0.853658536585  >>>>  14 18 FALSE
+Line  451 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a6b21081220a224bc00f3f7bb8a37e5.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  452 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-049087337974184cfd849711f4282324.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  453 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-003b4dd58235822b4c8a8a897ccdfcf7.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  454 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a888e54c62de90a8b2bd52c08a7138b.fuzz 0.863636363636  >>>>  14 18 FALSE
+Line  455 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.2-8c5d7d0f3f41b060d2cccd31aa728611.fuzz 0.816326530612  >>>>  14 14 TRUE
+Line  456 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-d011f2e0e425bad279521246018c6430.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  457 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-046d8a4aaa4f3137f720e6e4ddd11f1a.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  458 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 10-5d0f0290fc6b35131ce51e66a44166ac.fuzz 0.84693877551  >>>>  14 10 FALSE
+Line  459 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-9c78b3e5740ba04abb92d49357c8b204.fuzz 0.820512820513  >>>>  14 17 FALSE
+Line  460 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.4.2-30fdf03165ebea0292c13394102a9058.fuzz 0.834951456311  >>>>  14 14 TRUE
+Line  461 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.4-47ea273905201c9e02e0fe09b7fb9f8f.fuzz 0.844155844156  >>>>  14 13 FALSE
+Line  462 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-640631fbe49a06e4037addda830ae41d.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  463 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 16-c04668cec90f8c87cec9300c26d4bd2a.fuzz 0.873015873016  >>>>  14 16 FALSE
+Line  464 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-6e8348e0a5ec435fb0201d689d2ba651.fuzz 0.864864864865  >>>>  14 13 FALSE
+Line  465 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-63bb172bbcdcc0457f11841cd20948a8.fuzz 0.441176470588  >>>>  14 14 TRUE
+Line  466 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-091bf00cdc34c1cf271d74fea31c8a45.fuzz 0.890243902439  >>>>  14 18 FALSE
+Line  467 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.5-99025ed3bc73b91bc575090283515075.fuzz 0.831325301205  >>>>  14 13 FALSE
+Line  468 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-d05db4b0982ae0096894612c456e3506.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  469 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-067b285350fb2f2db92c0dafa1255d52.fuzz 0.883720930233  >>>>  14 18 FALSE
+Line  470 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07b5f3c103ef408e5838147170a095a5.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  471 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-086d4b7aaf22879c4f5df49416c37302.fuzz 0.883720930233  >>>>  14 18 FALSE
+Line  472 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-067624b74fc029de3c7505e5dc8ef07f.fuzz 0.850574712644  >>>>  14 18 FALSE
+Line  473 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02aaf860cb7ebde032ad9d53b4aabcf1.fuzz 0.85  >>>>  14 18 FALSE
+Line  474 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 17.1-33e4d82c6877cdcbf819f55b2fe92512.fuzz 0.857142857143  >>>>  14 17 FALSE
+Line  475 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-e1b38353ccbda05aa8fa46b9b22062f4.fuzz 0.432835820896  >>>>  14 14 TRUE
+Line  476 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.6-18e21d0add83d0452212a39cc4f30cc3.fuzz 0.903614457831  >>>>  14 14 TRUE
+Line  477 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-088f50f645c9a5cc8db71c87caa21efa.fuzz 0.867469879518  >>>>  14 18 FALSE
+Line  478 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0677d44eb03327d5d2e96a05f5c1d09c.fuzz 0.876543209877  >>>>  14 18 FALSE
+Line  479 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 13.3-a3a326578f510500d496da838e861e39.fuzz 0.846153846154  >>>>  14 13 FALSE
+Line  480 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-f69c4438d5de197794de3843e0017a8a.fuzz 0.383561643836  >>>>  14 14 TRUE
+Line  481 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-041f233ce21cec16c886fd890d9e192b.fuzz 0.869047619048  >>>>  14 18 FALSE
+Line  482 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0719d3a8e55a82cce6aaaca3677d2476.fuzz 0.875  >>>>  14 18 FALSE
+Line  483 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.3-e5b5593508cc8d760d84cc2cdabdf64b.fuzz 0.876923076923  >>>>  14 14 TRUE
+Line  484 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 14.1.2-f7bf6f2fe003e7150f5e31bf4fd92485.fuzz 0.391891891892  >>>>  14 14 TRUE
+Line  485 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-062b95de1d873eb38de107ed9195eae4.fuzz 0.84126984127  >>>>  14 18 FALSE
+Line  486 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-0668baddd50f55fcb77350bccb125b99.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  487 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 11-0636226af7dffc8dbbb932611f397603.fuzz 0.873015873016  >>>>  14 11 FALSE
+Line  488 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-07215495d703c6eca6565b734382dd76.fuzz 0.870588235294  >>>>  14 18 FALSE
+Line  489 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-00d4fe5a2f70fe1dd72913afaea1ea93.fuzz 0.843373493976  >>>>  14 18 FALSE
+Line  490 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04b512e7bd7e789dc6c0a62795719175.fuzz 0.8875  >>>>  14 18 FALSE
+Line  491 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-03e8a29111263c21a7662c1526ed63ea.fuzz 0.872093023256  >>>>  14 18 FALSE
+Line  492 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-02eeeb96400eb8a4088f86d2ccbb954b.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  493 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04e47b8657659ea97a18112c910282ac.fuzz 0.864197530864  >>>>  14 18 FALSE
+Line  494 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0afc769ad18c49b4063e8c0cedc0addd.fuzz 0.879518072289  >>>>  14 18 FALSE
+Line  495 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-049af6a4751c112559d017c6d7659dce.fuzz 0.888888888889  >>>>  14 18 FALSE
+Line  496 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-024f7d68ff00ad24b4fb06bac64627e8.fuzz 0.880952380952  >>>>  14 18 FALSE
+Line  497 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-04e704c5359224d6b896576e4a9c361d.fuzz 0.865853658537  >>>>  14 18 FALSE
+Line  498 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-08091984a2d092200cc9697a95ec4c8b.fuzz 0.878048780488  >>>>  14 18 FALSE
+Line  499 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-059df87e4c448cadf29cccb00371f13f.fuzz 0.892857142857  >>>>  14 18 FALSE
+Line  500 :  14.1.1-f6e5e49ee210dab5884ff00d06cdc2a2.fuzz 18-0a15a707da2931420a8c599d086c17ca.fuzz 0.892857142857  >>>>  14 18 FALSE
+
+RESULTS:
+Class  2 : Totals =  0        Matching =  0
+Class  3 : Totals =  0        Matching =  0
+Class  4 : Totals =  0        Matching =  0
+Class  5 : Totals =  0        Matching =  0
+Class  6 : Totals =  0        Matching =  0
+Class  7 : Totals =  0        Matching =  0
+Class  8 : Totals =  0        Matching =  0
+Class  9 : Totals =  0        Matching =  0
+Class  10 : Totals =  8        Matching =  0
+Class  11 : Totals =  24       Matching =  0
+Class  12 : Totals =  16       Matching =  0
+Class  13 : Totals =  39       Matching =  0
+Class  14 : Totals =  579      Matching =  158
+Class  15 : Totals =  1        Matching =  0
+Class  16 : Totals =  8        Matching =  0
+Class  17 : Totals =  29       Matching =  0
+Class  18 : Totals =  296      Matching =  0
+Class  19 : Totals =  0        Matching =  0
+Class  20 : Totals =  0        Matching =  0
+Class  21 : Totals =  0        Matching =  0
+Class  22 : Totals =  0        Matching =  0
+Class  23 : Totals =  0        Matching =  0
+Class  24 : Totals =  0        Matching =  0
+Class  25 : Totals =  0        Matching =  0
+Class  26 : Totals =  0        Matching =  0
+Class  27 : Totals =  0        Matching =  0
+Class  28 : Totals =  0        Matching =  0
+Class  29 : Totals =  0        Matching =  0

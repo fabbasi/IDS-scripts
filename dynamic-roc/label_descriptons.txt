@@ -1,0 +1,55 @@
+2	TFTP download
+3	Buffer Overflow (LSASS?), Shellcode, TFTP download
+4.1	Oracle DB Connection Attempt
+4.2	Oracle DB Successful JDBC Thin Client Connection Attempt
+5.1.1	Remote Framebuffer Protocol (VNC) Version String 005
+5.1.2	Remote Framebuffer Protocol (VNC) Version String 008
+5.2	Remote Framebuffer Protocol (VNC) Connection Attempt
+5.3	Remote Framebuffer Protocol (VNC) - Console Commands
+6.1.1	Big Yellow (Symantec) Buffer Overflow Exploit (incomplete, first packet only)
+6.1.2	Big Yellow (Symantec) Buffer Overflow Exploit (incomplete, first two packets only)
+6.2	Big Yellow (Symantec) Buffer Overflow Exploit
+7	TrendMicro ServerProtect Buffer Overflow Exploit
+8	FTP download (via cmd.exe)
+9	PORT command buffer overflow exploit against Sasser's FTP builtin daemon
+10	Webmin Exploit POST /shell/index.cgi
+11	Webmin Exploit GET /unauthenticated/..%01/...
+12	RPC/DCOM Buffer Overflow Exploit with simple polymorphic random data
+13.1	RPC/DCOM Buffer Overflow Exploit 1
+13.2	RPC/DCOM Buffer Overflow Exploit 2
+13.3	RPC/DCOM Buffer Overflow Exploit 3
+13.4	RPC/DCOM Buffer Overflow Exploit 4
+13.5	RPC/DCOM Bind/AUTH3 Request
+14.1.1	ASN1 Buffer Overflow Exploit (Shellcode 1)
+14.1.2	ASN1 Buffer Overflow Exploit (Shellcode + FTP download)
+14.2	ASN1 Buffer Overflow Exploit (Shellcode 2 with two 0x90 Nopsleds)
+14.3	ASN1 Buffer Overflow Exploit (Shellcode 3 with small 0x90 Nopsled)
+14.4.1	ASN1 Buffer Overflow Exploit (Shellcode 4 with big 0x90 Nopsled)
+14.4.2	ASN1 Buffer Overflow Exploit (Shellcode 5 with big 0x90 Nopsled)
+14.5	ASN1 Buffer Overflow Exploit (Shellcode 6 with three or more 0x90 Nopsleds)
+14.6	ASN1 Buffer Overflow Exploit (Shellcode 7 with A Nopsled)
+14.7	ASN1 Buffer Overflow Exploit (Shellcode 9 with huge 0x90 Nopsled)
+14.8	ASN1 Buffer Overflow Exploit (incomplete)
+15	MySQL UDF Injection and Execution with FTP download
+16	MySQL root access
+17.1	Allaple Worm Variant (polymorphic PE File)
+17.2	Allaple Worm Variant (PE File)
+18	SMB/CIFS Scan
+19	RDP Buffer Overflow Exploit
+20	HTTP GET Request (absolute http Path)
+21.1	HTTP HEAD Request with User Agent Infos
+21.2	HTTP HEAD Request
+22.1	HTTP GET Request
+22.2	HTTP GET Request /w00tw00t.at.ISC.SANS.DFind:)
+22.3.1	HTTP GET Request with Host and User Agent Infos
+22.3.2	HTTP GET *admin*.php Request with Host Info
+23	HTTP POST Request with Host and Connection Info
+24.1	HTTP OPTIONS Request
+24.2	HTTP OPTIONS Request with User Agent Infos
+25	RTSP OPTIONS Request
+26	HTTP CONNECT Request with Host Info
+27.1	Radmin Connection Attempt
+27.2	Radmin Connection Attempt with Data
+28	BrightStor ARCserve Backup Buffer Overflow Exploit
+29	POP3 Login Attempt
+29.1	POP3 PASS Command Buffer Overlow Exploit

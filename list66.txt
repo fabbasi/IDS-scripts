@@ -1,0 +1,4 @@
+/home/fimz/Dev/disk-2/datasets/66-dataset/1306809242-ham-out.txt
+/home/fimz/Dev/disk-2/datasets/66-dataset/1306809242-jaro-out.txt
+/home/fimz/Dev/disk-2/datasets/66-dataset/1306809242-lev-out.txt
+/home/fimz/Dev/disk-2/datasets/66-dataset/1306809242-ncd-out.txt
