@@ -57,7 +57,7 @@ def lookuplist(label):
 thres = 0.5
 
 while thres < 0.9:
-	reader = csv.reader( open("/home/fimz/Dev/disk-2/datasets/500-dataset/1305157228-ncd-out.txt",'r'), delimiter = ' ')
+	reader = csv.reader( open("/home/fimz/Dev/datasets/500-dataset/1305157228-ncd-out.txt",'r'), delimiter = ' ')
 	for line in reader:
 	#	cache = line[0]
 		val = line[2]

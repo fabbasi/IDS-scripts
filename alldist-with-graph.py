@@ -261,7 +261,7 @@ os.system("python upgma.py output/" + upgmastr)
 
 f = open("list500.txt",'a')
 
-location = "/home/fimz/Dev/disk-2/datasets/500-results"
+location = "/home/fimz/Dev/datasets/500-results"
 finalham = location + "/" + iteration + "/" + hamstr
 finallev =  location + "/" + iteration + "/" + levstr
 finaldlev =  location + "/" + iteration + "/" + dlevstr

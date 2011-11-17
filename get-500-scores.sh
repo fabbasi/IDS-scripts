@@ -5,7 +5,7 @@ rm list500.txt
 for i in `seq 1 2`
 do
 	echo $i
-	python alldist-with-graph.py /home/fimz/Dev/disk-2/datasets/500-dataset/$i $i
-	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/disk-2/datasets/500-results/$i/
+	python alldist-with-graph.py /home/fimz/Dev/datasets/500-dataset/$i $i
+	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/datasets/500-results/$i/
 done
 #sh run500-dynamic.sh
