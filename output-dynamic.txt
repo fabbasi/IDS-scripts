@@ -126,8 +126,8 @@ Line [?1049h[?1h=[?12;25h[?12l[?25h[27m[m[H[2J[?25l[1;1H[34m# One p
     topLevelCategories = []    [34m# These are the result categories like 14, 15, 18, 29.1 is [m
     f = [36mopen[m(filename, [31m"r"[m);
     [33mfor[m line [33min[m f:[35;8H [33mif[m line == [31m""[m: [33mcontinue[m[7C [34m# ignore blank lines[m[36;8H fields = line.split([31m"::"[m)[37;8H fields = [ item.strip() [33mfor[m item [33min[m fields]     [34m# trim leading and trailing spaces[m[38;8H fieldCount = [36mlen[m(fields)[39;8H [33massert[m fieldCount >= [31m2[m, [31m"Line has less than two fields: "[m + line[40;8H description = fields[[31m1[m][41;8H [33mif[m fieldCount == [31m2[m:[10C [34m# No subclasses, so if first value matches return it   [m[42;10H returnValue = fields[[31m0[m][43;10H testValues    = fields[[31m0[m:[31m1[m]  [34m# Make sure the test values are a list, even if only a single item[m[44;151H8,8[11CTop[8;8H[?12l[?25h[44;1H
-[32mW11: Warning: File "Dynamic-category-parser.py" has changed since editing started[m
-[32mSee ":help W11" for more info.[m
+[32mW11: Warning: File "Dynamic-category-parser.py" has changed since editing started[m
+[32mSee ":help W11" for more info.[m
 [32m[O]K, (L)oad File: [m[?1l>[?1049lVim: Caught deadly signal HUP
 Vim: Finished.
 [44;1H014925  >>>>  14 17 FALSE

@@ -229,6 +229,7 @@ print "##########################################################"
 print "Running Neato on ncd"
 
 os.system("sfdp -Tsvg "+ graphncd + " -o " + ncdpng)
+os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
 
 print "Running Neato on lev"
 
