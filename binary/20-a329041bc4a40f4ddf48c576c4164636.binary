@@ -1,0 +1,5 @@
+GET http://travian.mud.com.cn/check.php HTTP/1.1
+Host: travian.mud.com.cn
+Pragma: no-cache
+Accept: */*
+

