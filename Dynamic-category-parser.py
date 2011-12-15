@@ -1,6 +1,10 @@
 # One possible way to carve up Fahim's ROC data files
 # by Giovanni July 27, 2011
 # Editted by Fahim 20110728
+# Usage:
+# $ python Dynamic-category-parser.py /path/to/ncd-result.txt numeric-metric-value 
+# $ mv *-500-dyn-result-6* /path/to/target
+#
 import sys  ##  For grabbing input from SHELL
 import math ##  For sqrt()
 import time ##  For unique output file name creation
@@ -161,6 +165,7 @@ def processResultFile(filename, out):
     totalTN = 0;
     totalFN = 0;
     samesum = 0;
+    expectedTP = 0;
     accuracy = 0;
     f = open(filename, "r");
 #    out = open(output, 'a')
@@ -175,6 +180,7 @@ def processResultFile(filename, out):
     for cat in topLevelCategories:
  #       print "Threshold = ",thresh," , Class ", cat, ", Total Comb parsed = ", str(categoryCount[cat]).ljust(6), \
  #             ", Packets/Streams = ", str(categoryCount[cat]/500).ljust(6), " , Same class comb = ", int(categoryCount[cat]/500) * int(categoryCount[cat]/500) , ",  TP = ", categoryMatches[cat], ", FP = ", categoryFP[cat], ", FN = ", categoryFN[cat], ", TN = ", categoryTN[cat]
+	expectedTP = expectedTP + (int(categoryCount[cat]/500) * int(categoryCount[cat]/500))
 	totalFP = totalFP + int(categoryFP[cat])
 	totalTP = totalTP + int(categoryMatches[cat])
 	totalTN = totalTN + int(categoryTN[cat])
@@ -188,10 +194,12 @@ def processResultFile(filename, out):
 #    print "Total TN: ",totalTN
 #    print "Sum of all same classes: ", samesum
 #    print "TP+FN = ", totalTP + totalFN
-
     totalTP = totalTP + 0.0
     totalFP = totalFP + 0.0
     totalTN = totalTN + 0.0
+    totalFN = totalFN + 0.0
+    TPperc = (totalTP/expectedTP)*100
+    FPperc = (totalFP/(totalTP+totalFP+totalTN+totalFN))*100
 #===================
 # TPR = TP/P
 # FPR = FP/N
@@ -207,14 +215,27 @@ def processResultFile(filename, out):
 #========================
     accuracy = (totalTP + totalTN)/( (totalTP+totalFN) + (totalFP + totalTN) )
     auc = (1.0 + tpr - fpr)/2
- 
+
+#=========================================
+# Create a list of good results
+#========================================
+#    maxACC = max(accuracy)
+#    maxAUC = max(auc)
+#    goodindex = auc.index(max(auc))
+
+#    goodTN,goodFN,goodThres,goodTP,goodFP,goodTPperc,goodFPperc,goodTPR,goodFPR,goodAccuracy,goodAUC = max(rates)
+
 #    print "TPR = Total TP / Total TP+FN = ", tpr
  #   print "FPR = Total FP / Total FP+TN = ", fpr	
  #   print "Accuracy = ",accuracy
  #   print "AUC = ",auc
 
     res.append(',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc))
-    rates.append(',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
+
+    rates.append( str(totalTN) + ',' + str(totalFN)+ ',' + str(thresh) + ',' + str(totalTP) + ',' + str(totalFP) + ',' + str(TPperc) + ',' + str(FPperc) + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
+
+    optimized.append( str(totalTN) + ',' + str(totalFN)+ ',' + str(thresh) + ',' + str(totalTP) + ',' + str(totalFP) + ',' + str(TPperc) + ',' + str(FPperc) + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
+
 #    print res
 #    print ''.join(res)
     out.write(''.join(res) + "\n")
@@ -234,7 +255,7 @@ def processResultFile(filename, out):
 #    out.close()
 #===============================================================================
 # Main Program starts here    
-categories, topLevelCategories = loadCategories("categories-500.txt")
+categories, topLevelCategories = loadCategories("all-categories.txt")
 # print categories
 #dumpCategories(categories, topLevelCategories)  # can be commented out - diagnostic only - show the categories 
 uniqlabels = []
@@ -247,11 +268,18 @@ categoryTN = {}
 x_list = []
 y_list = []
 rates = []
+optimized = []
 thresh = 0.00
 totalFP = 0
 totalTP = 0
 totalTN = 0
 totalFN = 0
+expectedTP = 0
+TPperc = 0
+FPperc = 0
+#maxACC = 0
+#maxAUC = 0
+mx = 0
 infile = sys.argv[1]
 metric = sys.argv[2]
 output = "%s-500-dyn-result"%int(time.time())
@@ -268,6 +296,10 @@ out = open(fname, 'w')
 out.write("Threshold, Class, Total Combinations, Pkts/Streams, Same Class combinations, TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
 out.close()
 rates.append("Summary:\n")
+rates.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
+#optimized.append("Optimum Result:\n")
+#optimized.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
+
 while(thresh < 1):
 	resetMatchCounts(topLevelCategories)
 	out = open(fname, 'a')
@@ -275,6 +307,15 @@ while(thresh < 1):
 	processResultFile(infile, out)
 	thresh = thresh + 0.05
 #out.close
+good = max(optimized)
+print optimized
+
+print "Max results: ",good
+print "test: ",good[0],good[1],good[2],good[3],good[4],good[5]
+#goodTN,goodFN,goodThres,goodTP,goodFP,goodTPperc,goodFPperc,goodTPR,goodFPR,goodAccuracy,goodAUC = max(optimized)
+rates.append("\nOptimized:\n")
+rates.append(good)
+#rates.append( str(good[0])+ ',' + str(good[1])+ ',' + str(good[2]) + ',' + str(good[3]) + ',' + str(good[4]) + ',' + str(good[5]) + ',' + str(good[6]) + ',' + str(good[7]) + ',' + str(good[8]) + ',' + str(good[9]) + ',' + str(good[10]) )
 out = open(fname, 'a')
 out.write(''.join(rates) + "\n")
 out.close()
@@ -304,6 +345,9 @@ if int(metric) == 5:
 if int(metric) == 6:
 	pylab.title("NCD")
 	print "In NCD"
+if int(metric) == 7:
+	pylab.title("SPAMSUM")
+	print "In SPAMSUM"
 
 pylab.plot(x_list, y_list, 'r')
 pylab.xticks(scipy.arange(0,1.01,0.1))

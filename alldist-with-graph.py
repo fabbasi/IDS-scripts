@@ -14,6 +14,10 @@
 # 4. Use KL
 # 5. Generate Graph
 # 6. Generate UPGMA graph
+#
+# 20111205:
+# Changed 'location' variable to be provided as command line parameter
+# UPGMA file was redundant as the NCD output file is the same thing
 ######################################
 
 
@@ -24,6 +28,7 @@ import random
 import zlib
 import time
 from decimal import *
+import spamsum
 
 def tokenize( _str):
     stopwords = [',']
@@ -93,35 +98,37 @@ def kldiv(_s, _t):
 
 #pathstring = '/home/fimz/Dev/profiler/worm/exp-20110121-normal-n-worm/dataset/ncd'
 
-# Function to calculate the Levenshtein distance of the two files
+## Function to calculate the Levenshtein, D-lev, Hamming, Jaro, Jaro-wink distance and KL and spamsum of the two files ##
 
 def alldist(filex, filey):
     xread = open(filex, 'r').read()
     yread = open(filey, 'r').read()
     lvd = jellyfish.levenshtein_distance(xread,yread)
     dlvd= jellyfish.damerau_levenshtein_distance(xread,yread)
-
+    spsum = spamsum.match(xread,yread)
+    spsum = float(spsum/100.00)
 #    print lvd
     res = float( lvd / 100.00 )
     dres= float(dlvd / 100.00 )
 #    print res
-#print "Levenshtein Distance=",lv_d
+#    print "Levenshtein Distance=",res
     jaro = jellyfish.jaro_distance(xread,yread)
 ## Added jaro-winkler distance by fahim 20111011
     jarowink = jellyfish.jaro_winkler(xread,yread)
     jaro = 1.0 - jaro
     jarowink = 1.0 - jarowink
-#	print "Jaro Distance = ",jaro
+#   print "Jaro Distance = ",jaro
     ham = jellyfish.hamming_distance(xread,yread)
     ham = float ( ham / 100.00)
-#	print "Hamming Distance = ", ham
+    print "Hamming Distance = ", ham
 #	print "KL-divergence between d1 and d2:", kldiv(tokenize(d1), tokenize(d2))
 #	print "KL-divergence between d2 and d1:", kldiv(tokenize(d2), tokenize(d1))
+#    print "Spamsum Match score: ", spsum
     kl = kldiv(tokenize(xread), tokenize(yread))
 
-    return res, dres , jaro, jarowink, ham, kl
+    return res, dres , jaro, jarowink, ham, kl, spsum
 
-# Function to calculate the NCD of two files based on zlib level 9 compression
+## Function to calculate the NCD of two files based on zlib level 9 compression ##
 
 def ncd(filex, filey):
     xbytes = open(filex, 'r').read()
@@ -140,7 +147,13 @@ def ncd(filex, filey):
 # For each unique pair, calculate NCD
 #
 #
+##############################################
+##############################################
+## Main program starts here ##
+##############################################
+##############################################
 
+location = sys.argv[3]
 pathstring = sys.argv[1]
 iteration = sys.argv[2]
 
@@ -159,6 +172,8 @@ jarostr = "%s-jaro-out.txt"%now
 jarowinkstr = "%s-jarowink-out.txt"%now
 hamstr = "%s-ham-out.txt"%now
 upgmastr = "%s-upgma-out.txt"%now
+spsumstr = "%s-spsum-out.txt"%now
+
 output = "output/"
 
 os.system("mkdir output")
@@ -168,6 +183,9 @@ dlevfile = open( output+dlevstr,'w')
 jarofile = open( output+jarostr, 'w')
 jarowinkfile = open( output+jarowinkstr, 'w')
 hamfile = open( output+hamstr,'w')
+spsumfile = open( output+spsumstr,'w')
+
+## Reduntant upgma file, ncd is sufficient
 upgmafile = open (output+upgmastr, 'w')
 
 getcontext().prec = 4
@@ -180,15 +198,19 @@ for i in range(0, len(selection)):
         print fx, fy
         ncdfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(ncd(fx, fy)))) + "\n")
 #        upgmafile.write("\'" + str(selection[i]) + "\'" + "," + "\'" + str(selection[j]) + "\'" + "," + str(ncd(fx, fy))+ "\n")
+## Reduntant upgma file, ncd is sufficient
         upgmafile.write(str(selection[i]) + "," + str(selection[j]) + "," +  str(+Decimal(str(ncd(fx, fy)))) + "\n" )
-
-	lev, dlev, jaro, jarowink,  ham, kl = alldist(fx, fy)
+## Get Scores ##
+	lev, dlev, jaro, jarowink, ham, kl, spsum = alldist(fx, fy)
+#	print "scores: ",lev, dlev, jaro, jarowink, ham, kl, spsum
+#	print "type: ", type(spsum)
+## Write them out ##
         levfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(lev))) + "\n")
-        dlevfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(lev))) + "\n")
+        dlevfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(dlev))) + "\n")
         jarofile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(jaro))) + "\n")
         jarowinkfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(jaro))) + "\n")
         hamfile.write(str(selection[i]) + " " + str(selection[j]) + " " +  str(+Decimal(str(ham))) + "\n")
-#        levfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(lev) + "\n")
+	spsumfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(spsum) + "\n")
 
 ncdfile.close()
 levfile.close()
@@ -197,6 +219,7 @@ jarofile.close()
 jarowinkfile.close()
 hamfile.close()
 upgmafile.close()
+spsumfile.close()
 
 print "Distances Successfully calculated and written out to files"
 print "##########################################################"
@@ -207,6 +230,7 @@ os.system("python ncd-fimz-graph.py " +dlevstr)
 os.system("python ncd-fimz-graph.py " +jarostr)
 os.system("python ncd-fimz-graph.py " +jarowinkstr)
 os.system("python ncd-fimz-graph.py " +hamstr)
+os.system("python ncd-fimz-graph.py " +spsumstr)
 
 
 graphncd = "output/graph-" + ncdstr
@@ -215,6 +239,7 @@ graphjaro = "output/graph-" + jarostr
 graphdlev = "output/graph-" + dlevstr
 graphjarowink = "output/graph-" + jarowinkstr
 graphham = "output/graph-" + hamstr
+graphspsum = "output/graph-" + spsumstr
 
 ncdpng = graphncd + ".svg"
 levpng = graphlev + ".svg"
@@ -222,6 +247,7 @@ jaropng = graphjaro + ".svg"
 hampng = graphham + ".svg"
 dlevpng = graphdlev + ".svg"
 jarowinkpng = graphjarowink + ".svg"
+spsumpng = graphspsum + ".svg"
 
 
 print "Graph files Created"
@@ -229,7 +255,7 @@ print "##########################################################"
 print "Running Neato on ncd"
 
 os.system("sfdp -Tsvg "+ graphncd + " -o " + ncdpng)
-os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
+#os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
 
 print "Running Neato on lev"
 
@@ -250,6 +276,10 @@ print "Running Neato on jarowink"
 
 os.system("sfdp -Tsvg "+ graphjarowink + " -o " + jarowinkpng)
 
+print "Running Neato on spsum"
+
+os.system("sfdp -Tsvg "+ graphspsum + " -o " + spsumpng)
+
 ## Adding UPGMA support
 print "Calculating UPGMA"
 
@@ -261,13 +291,14 @@ os.system("python upgma.py output/" + upgmastr)
 
 f = open("list500.txt",'a')
 
-location = "/home/fimz/Dev/datasets/500-results"
+#location = "/home/fimz/Dev/datasets/500-results"
 finalham = location + "/" + iteration + "/" + hamstr
 finallev =  location + "/" + iteration + "/" + levstr
 finaldlev =  location + "/" + iteration + "/" + dlevstr
 finaljaro =  location + "/" + iteration + "/" + jarostr
 finaljarowink = location + "/" + iteration + "/" + jarowinkstr
 finalncd = location + "/" + iteration + "/" + ncdstr
+finalspsum = location + "/" + iteration + "/" + spsumstr
 
 f.write(finalham  + "\n")
 f.write(finallev  + "\n")
@@ -275,6 +306,8 @@ f.write(finaldlev + "\n")
 f.write(finaljaro  + "\n")
 f.write(finaljarowink  + "\n")
 f.write(finalncd  + "\n")
+f.write(finalspsum  + "\n")
+
 f.close()
 """to -Tsvg ncd-dcb-graph.txt -o graph-ncd-dcb.pngto -Tsvg ncd-dcb-graph.txt -o graph-ncd-dcb.png
 fp1 = open(a1,'r')

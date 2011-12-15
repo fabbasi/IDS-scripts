@@ -1,6 +1,0 @@
-GET http://www.google.com/imghp?hl=en HTTP/1.1
-Host: www.google.com
-Accept: */*
-Pragma: no-cache
-User-Agent: Internet Explorer 4.01
-

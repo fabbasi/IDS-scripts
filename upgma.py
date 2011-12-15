@@ -18,8 +18,8 @@ except NameError:
 
 
 #from sets import Set
-from Numeric import array, transpose, zeros
-
+#from Numeric import array, transpose, zeros
+from numpy import array, transpose, zeros
 
 def matrix_from_pairs(pairs):
     """Takes a list of pairs and their distances and creates the distance matrix.
@@ -114,8 +114,8 @@ def plot_dendrogram(dendrogram, parent, graph):
                     color='lightskyblue3'))
 
                 # they are closely related, make a cluster
-		# Threshold value 0.55
-                if node[-1]<0.55:
+		# Threshold value 0.65
+                if node[-1]<0.65:
                     cluster = pydot.Cluster(label)
                     cluster.set_bgcolor('beige')
                     graph.add_subgraph(cluster)
@@ -150,7 +150,7 @@ def graph_from_upgma(dendrogram):
     plot_dendrogram(dendrogram, 'root', graph)	
                 
     return graph
-
+"""
 val =  [
 	['A','A',0],
 	['A','B',0.5],
@@ -192,7 +192,7 @@ test2 = [
 	 ['C','B',0.713178294574],
 	 ['C','C',0.0728571428571],
 	]
-
+"""
 
 #print "Val=",val
 #print type(val)
@@ -232,7 +232,9 @@ graph = graph_from_upgma(upgma(*matrix_from_pairs(pairs)))
 #print graph;
 size = os.path.getsize(fname)
 print('size = ' + str(size))
-filename = "output/%s-upgma_graph.svg"%(int(time.time()))
+print "Creating SVG file..."
+t = int(time.time())
+filename = "output/%s-upgma_graph.svg"%(t)
 graph.write_raw("output/upgma_raw.dot")
 graph.write_svg(filename)
 
