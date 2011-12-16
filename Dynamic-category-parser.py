@@ -10,6 +10,9 @@ import math ##  For sqrt()
 import time ##  For unique output file name creation
 import pylab ## mathplotlib
 import scipy ## scipy
+import numpy
+from numpy import *
+
 #==========================
 def lookuplist(label):
 #=========================
@@ -166,6 +169,8 @@ def processResultFile(filename, out):
     totalFN = 0;
     samesum = 0;
     expectedTP = 0;
+    global optimized;
+    global counter;
     accuracy = 0;
     f = open(filename, "r");
 #    out = open(output, 'a')
@@ -217,13 +222,13 @@ def processResultFile(filename, out):
     auc = (1.0 + tpr - fpr)/2
 
 #=========================================
-# Create a list of good results
+# Create a list of optimized[maxrow][10] results
 #========================================
 #    maxACC = max(accuracy)
 #    maxAUC = max(auc)
-#    goodindex = auc.index(max(auc))
+#    optimized[maxrow][10]index = auc.index(max(auc))
 
-#    goodTN,goodFN,goodThres,goodTP,goodFP,goodTPperc,goodFPperc,goodTPR,goodFPR,goodAccuracy,goodAUC = max(rates)
+#    optimized[maxrow][10]TN,optimized[maxrow][10]FN,optimized[maxrow][10]Thres,optimized[maxrow][10]TP,optimized[maxrow][10]FP,optimized[maxrow][10]TPperc,optimized[maxrow][10]FPperc,optimized[maxrow][10]TPR,optimized[maxrow][10]FPR,optimized[maxrow][10]Accuracy,optimized[maxrow][10]AUC = max(rates)
 
 #    print "TPR = Total TP / Total TP+FN = ", tpr
  #   print "FPR = Total FP / Total FP+TN = ", fpr	
@@ -234,7 +239,7 @@ def processResultFile(filename, out):
 
     rates.append( str(totalTN) + ',' + str(totalFN)+ ',' + str(thresh) + ',' + str(totalTP) + ',' + str(totalFP) + ',' + str(TPperc) + ',' + str(FPperc) + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
 
-    optimized.append( str(totalTN) + ',' + str(totalFN)+ ',' + str(thresh) + ',' + str(totalTP) + ',' + str(totalFP) + ',' + str(TPperc) + ',' + str(FPperc) + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
+    optimized = numpy.insert(optimized,counter,numpy.array(( totalTN,totalFN,thresh,totalTP,totalFP,TPperc,FPperc,tpr,fpr,accuracy,auc)
 
 #    print res
 #    print ''.join(res)
@@ -268,7 +273,8 @@ categoryTN = {}
 x_list = []
 y_list = []
 rates = []
-optimized = []
+optimized = numpy.zeros((20,11))
+counter = 0
 thresh = 0.00
 totalFP = 0
 totalTP = 0
@@ -307,15 +313,18 @@ while(thresh < 1):
 	processResultFile(infile, out)
 	thresh = thresh + 0.05
 #out.close
-good = max(optimized)
-print optimized
+prev = 0
+for row in range(20):
+	newmax = optimized[row][10]
+	if newmax > prev:
+		prev = newmax
+		maxrow = row
 
-print "Max results: ",good
-print "test: ",good[0],good[1],good[2],good[3],good[4],good[5]
-#goodTN,goodFN,goodThres,goodTP,goodFP,goodTPperc,goodFPperc,goodTPR,goodFPR,goodAccuracy,goodAUC = max(optimized)
+print "Max results: ",prev
+print "Max index: ",maxrow
 rates.append("\nOptimized:\n")
-rates.append(good)
-#rates.append( str(good[0])+ ',' + str(good[1])+ ',' + str(good[2]) + ',' + str(good[3]) + ',' + str(good[4]) + ',' + str(good[5]) + ',' + str(good[6]) + ',' + str(good[7]) + ',' + str(good[8]) + ',' + str(good[9]) + ',' + str(good[10]) )
+rates.append(optimized[maxrow][10])
+rates.append( str(optimized[maxrow][10])+ ',' + str(optimized[maxrow][10])+ ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) )
 out = open(fname, 'a')
 out.write(''.join(rates) + "\n")
 out.close()
