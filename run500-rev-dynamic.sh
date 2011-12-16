@@ -13,7 +13,7 @@ python Dynamic-category-parser.py "$line" "$x"
 x=`expr $x + 1`;
 if [ $x -eq 8 ]
 then
-mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/$y/
+mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/reverse/$y/
 echo "Y:"
 echo $y
 y=`expr $y + 1`;

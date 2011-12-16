@@ -259,7 +259,7 @@ def processResultFile(filename, out):
 #    out.close()
 #===============================================================================
 # Main Program starts here    
-categories, topLevelCategories = loadCategories("all-categories.txt")
+categories, topLevelCategories = loadCategories("categories-500.txt")
 # print categories
 #dumpCategories(categories, topLevelCategories)  # can be commented out - diagnostic only - show the categories 
 uniqlabels = []
