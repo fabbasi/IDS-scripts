@@ -6,7 +6,7 @@
 ## python alldist-with-graph.py /home/fimz/Dev/datasets/500-dataset/$i $i /home/fimz/Dev/datasets/500-results
 ##
 rm list500.txt
-for i in `seq 1 5`
+for i in `seq 1 3`
 do
 	echo $i
 	python alldist-with-graph.py /home/fimz/Dev/datasets/500-dataset/$i $i /home/fimz/Dev/datasets/500-results

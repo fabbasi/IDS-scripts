@@ -228,7 +228,6 @@ def processResultFile(filename, out):
 #    maxAUC = max(auc)
 #    optimized[maxrow][10]index = auc.index(max(auc))
 
-#    optimized[maxrow][10]TN,optimized[maxrow][10]FN,optimized[maxrow][10]Thres,optimized[maxrow][10]TP,optimized[maxrow][10]FP,optimized[maxrow][10]TPperc,optimized[maxrow][10]FPperc,optimized[maxrow][10]TPR,optimized[maxrow][10]FPR,optimized[maxrow][10]Accuracy,optimized[maxrow][10]AUC = max(rates)
 
 #    print "TPR = Total TP / Total TP+FN = ", tpr
  #   print "FPR = Total FP / Total FP+TN = ", fpr	
