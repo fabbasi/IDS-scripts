@@ -5,3 +5,17 @@
 /home/fimz/Dev/datasets/500-results/1/1324014627-jarowink-out.txt
 /home/fimz/Dev/datasets/500-results/1/1324014627-ncd-out.txt
 /home/fimz/Dev/datasets/500-results/1/1324014627-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/2/1324015022-ham-out.txt
+/home/fimz/Dev/datasets/500-results/2/1324015022-lev-out.txt
+/home/fimz/Dev/datasets/500-results/2/1324015022-dlev-out.txt
+/home/fimz/Dev/datasets/500-results/2/1324015022-jaro-out.txt
+/home/fimz/Dev/datasets/500-results/2/1324015022-jarowink-out.txt
+/home/fimz/Dev/datasets/500-results/2/1324015022-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/2/1324015022-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/3/1324015407-ham-out.txt
+/home/fimz/Dev/datasets/500-results/3/1324015407-lev-out.txt
+/home/fimz/Dev/datasets/500-results/3/1324015407-dlev-out.txt
+/home/fimz/Dev/datasets/500-results/3/1324015407-jaro-out.txt
+/home/fimz/Dev/datasets/500-results/3/1324015407-jarowink-out.txt
+/home/fimz/Dev/datasets/500-results/3/1324015407-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/3/1324015407-spsum-out.txt
