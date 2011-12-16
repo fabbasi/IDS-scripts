@@ -2,7 +2,7 @@
 ## Trigger to calculate edit distances across all 10 datasets 
 ## Invokes alldist-with-graph python script
 rm list500.txt
-for i in `seq 1 10`
+for i in `seq 1 5`
 do
 	echo $i
 	python ncddist-with-graph-for-binary.py /home/fimz/Dev/datasets/500-dataset/binary/$i $i
