@@ -238,8 +238,10 @@ def processResultFile(filename, out):
 
     rates.append( str(totalTN) + ',' + str(totalFN)+ ',' + str(thresh) + ',' + str(totalTP) + ',' + str(totalFP) + ',' + str(TPperc) + ',' + str(FPperc) + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
 
-    optimized = numpy.insert(optimized,counter,numpy.array(( totalTN,totalFN,thresh,totalTP,totalFP,TPperc,FPperc,tpr,fpr,accuracy,auc)
+    optimized = numpy.insert(optimized,counter,numpy.array(( totalTN,totalFN,thresh,totalTP,totalFP,TPperc,FPperc,tpr,fpr,accuracy,auc)),0)
 
+    print "Counter: ",counter
+    print "Values: ",optimized[counter]
 #    print res
 #    print ''.join(res)
     out.write(''.join(res) + "\n")
@@ -311,6 +313,7 @@ while(thresh < 1):
 #	out.close()
 	processResultFile(infile, out)
 	thresh = thresh + 0.05
+	counter = counter + 1
 #out.close
 prev = 0
 for row in range(20):
@@ -322,7 +325,7 @@ for row in range(20):
 print "Max results: ",prev
 print "Max index: ",maxrow
 rates.append("\nOptimized:\n")
-rates.append(optimized[maxrow][10])
+#rates.append(optimized[maxrow][10])
 rates.append( str(optimized[maxrow][10])+ ',' + str(optimized[maxrow][10])+ ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) )
 out = open(fname, 'a')
 out.write(''.join(rates) + "\n")
