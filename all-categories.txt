@@ -1,0 +1,28 @@
+2 :: TFTP download
+3 :: Buffer Overflow (LSASS?), Shellcode, TFTP download
+4 :: Oracle DB Exploits :: 4.1 :: 4.2
+5 :: Remote Framebuffer VNC Exploits :: 5.1.1 :: 5.1.2 :: 5.2 :: 5.3
+6 :: Big Yellow (Symantec) Buffer Overflow Exploits :: 6.1.1 :: 6.1.2 :: 6.2
+7 :: TrendMicro ServerProtect Buffer Overflow Exploit
+8 :: FTP download (via cmd.exe)
+9 :: PORT command buffer overflow exploit against Sasser's FTP builtin daemon
+10 :: Webmin Exploit POST /shell/index.cgi
+11 :: Webmin Exploit GET /unauthenticated/..%01/...
+12 :: RPC/DCOM Buffer Overflow Exploit with simple polymorphic random data
+13 :: RPC/DCOM Buffer Overflow Exploit 1 :: 13.1 :: 13.2 :: 13.2 :: 13.3 :: 13.4 :: 13.5
+14 :: ASN1 Buffer Overflow Exploit :: 14.1.1 :: 14.1.2 :: 14.2 :: 14.3 :: 14.4.1 :: 14.4.2 :: 14.5 :: 14.6 :: 14.7 :: 14.8
+15 :: MySQL UDF Injection and Execution with FTP download
+16 :: MySQL root access
+17 :: Allaple Worm Variant :: 17.1 :: 17.2
+18 :: SMB/CIFS Scan
+19 :: RDP Buffer Overflow Exploit
+20 :: HTTP GET Request (absolute http Path)
+21 :: HTTP HEAD Request :: 21.1 :: 21.2
+22 :: HTTP GET Request :: 22.1 :: 22.2 :: 22.3.1 :: 22.3.2
+23 :: HTTP POST Request with Host and Connection Info
+24 :: HTTP OPTIONS Request :: 24.1 :: 24.2
+25 :: RTSP OPTIONS Request
+26 :: HTTP CONNECT Request with Host Info
+27 :: Radmin Connection Attempt :: 27.1 :: 27.2
+28 :: BrightStor ARCserve Backup Buffer Overflow Exploit
+29 :: POP3 Login Attempt :: 29 :: 29.1

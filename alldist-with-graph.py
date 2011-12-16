@@ -106,6 +106,7 @@ def alldist(filex, filey):
     lvd = jellyfish.levenshtein_distance(xread,yread)
     dlvd= jellyfish.damerau_levenshtein_distance(xread,yread)
     spsum = spamsum.match(xread,yread)
+    spsum = 100 - spsum
     spsum = float(spsum/100.00)
 #    print lvd
     res = float( lvd / 100.00 )
