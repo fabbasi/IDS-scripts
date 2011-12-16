@@ -1,5 +1,0 @@
-GET http://203.212.170.99/config/login?.patner=sbc&login=Suck&passwd=MeOff&.save=1 HTTP/1.0 
-Connection: Keep -Alive
-Accept: */*
-Accept: -Language: en
-

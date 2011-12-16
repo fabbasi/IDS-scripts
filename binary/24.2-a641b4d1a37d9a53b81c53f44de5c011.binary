@@ -1,7 +1,0 @@
-OPTIONS / HTTP/1.1
-translate: f
-User-Agent: Microsoft-WebDAV-MiniRedir/5.1.2600
-Host: 192.87.106.84
-Content-Length: 0
-Connection: Keep-Alive
-

@@ -11,6 +11,10 @@
 # http://digitalhistoryhacks.blogspot.com
 # 5. Generate Graph
 # 6. Generate UPGMA graph
+#
+# Usage:
+# $ python ncddist-with-graph-for-binary.py /path/to/dataset iteration-number /path/to/result/folder
+#
 ######################################
 
 
@@ -140,6 +144,7 @@ def ncd(filex, filey):
 
 pathstring = sys.argv[1]
 iteration = sys.argv[2]
+location = sys.argv[3]
 
 listing = os.listdir(pathstring)
 selection = []
@@ -165,7 +170,7 @@ ncdfile = open( output+ncdstr, 'w')
 #jarofile = open( output+jarostr, 'w')
 #jarowinkfile = open( output+jarowinkstr, 'w')
 #hamfile = open( output+hamstr,'w')
-upgmafile = open (output+upgmastr, 'w')
+#upgmafile = open (output+upgmastr, 'w')
 
 getcontext().prec = 4
 
@@ -176,8 +181,10 @@ for i in range(0, len(selection)):
         fy = pathstring + '/' + str(selection[j])
         print fx, fy
         ncdfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(ncd(fx, fy)))) + "\n")
+
+## Redundant inefficient upgma input file, NCD is sufficient here
 #        upgmafile.write("\'" + str(selection[i]) + "\'" + "," + "\'" + str(selection[j]) + "\'" + "," + str(ncd(fx, fy))+ "\n")
-        upgmafile.write(str(selection[i]) + "," + str(selection[j]) + "," +  str(+Decimal(str(ncd(fx, fy)))) + "\n" )
+#        upgmafile.write(str(selection[i]) + "," + str(selection[j]) + "," +  str(+Decimal(str(ncd(fx, fy)))) + "\n" )
 
 #	lev, dlev, jaro, jarowink,  ham, kl = alldist(fx, fy)
 #        levfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(+Decimal(str(lev))) + "\n")
@@ -193,7 +200,7 @@ ncdfile.close()
 #jarofile.close()
 #jarowinkfile.close()
 #hamfile.close()
-upgmafile.close()
+#upgmafile.close()
 
 print "Distances Successfully calculated and written out to files"
 print "##########################################################"
@@ -226,7 +233,7 @@ print "##########################################################"
 print "Running Neato on ncd"
 
 os.system("sfdp -Tsvg "+ graphncd + " -o " + ncdpng)
-os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
+#os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
 
 #print "Running Neato on lev"
 
@@ -250,15 +257,16 @@ os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
 ## Adding UPGMA support
 print "Calculating UPGMA"
 
-os.system("python upgma.py output/" + upgmastr)
+os.system("python upgma.py output/" + ncdstr)
 
 ## Removing list500.txt ##
 #os.system("rm -f list500.txt")
+
 ## Append to output to create the list ##
 
 f = open("list500.txt",'a')
 
-location = "/home/fimz/Dev/datasets/500-results/binary"
+#location = "/home/fimz/Dev/datasets/500-results/binary"
 #finalham = location + "/" + iteration + "/" + hamstr
 #finallev =  location + "/" + iteration + "/" + levstr
 #finaldlev =  location + "/" + iteration + "/" + dlevstr

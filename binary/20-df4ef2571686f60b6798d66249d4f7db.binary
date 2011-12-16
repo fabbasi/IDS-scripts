@@ -1,5 +1,0 @@
-GET http://dev.liyuan.net/check.php HTTP/1.1
-Host: dev.liyuan.net
-Pragma: no-cache
-Accept: */*
-
