@@ -12,13 +12,13 @@ import shutil
 folder = sys.argv[1]
 listing = os.listdir(folder)
 
-for d in range(1,6):
+for d in range(1,4):
 	d = "./" + str(d)
 	if not os.path.exists(d):
 		os.makedirs(d)
 		dst = d + "/" 
-		for i in range(500):
+		for i in range(515):
 			random.shuffle(listing)		
 			name =  str(random.choice(listing))
-			src = "./" + folder + name
+			src = folder + "/" + name
 			shutil.copy(src,dst+name)
