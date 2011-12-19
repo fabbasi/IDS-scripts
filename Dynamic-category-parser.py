@@ -326,7 +326,7 @@ print "Max results: ",prev
 print "Max index: ",maxrow
 rates.append("\nOptimized:\n")
 #rates.append(optimized[maxrow][10])
-rates.append( str(optimized[maxrow][10])+ ',' + str(optimized[maxrow][10])+ ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) + ',' + str(optimized[maxrow][10]) )
+rates.append( str(optimized[maxrow][0])+ ',' + str(optimized[maxrow][1])+ ',' + str(optimized[maxrow][2]) + ',' + str(optimized[maxrow][3]) + ',' + str(optimized[maxrow][4]) + ',' + str(optimized[maxrow][5]) + ',' + str(optimized[maxrow][6]) + ',' + str(optimized[maxrow][7]) + ',' + str(optimized[maxrow][8]) + ',' + str(optimized[maxrow][9]) + ',' + str(optimized[maxrow][10]) )
 out = open(fname, 'a')
 out.write(''.join(rates) + "\n")
 out.close()
