@@ -12,4 +12,5 @@ do
 	python combined-ncdspam.py /home/fimz/Dev/datasets/500-dataset/raw/$i $i /home/fimz/Dev/datasets/500-results/raw
 	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/datasets/500-results/raw/$i/
 done
-#sh run500-dynamic.sh
+
+run500-dynamic-raw.sh

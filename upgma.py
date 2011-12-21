@@ -108,7 +108,7 @@ def plot_dendrogram(dendrogram, parent, graph):
                 graph.add_node(pydot.Node(
                     label,
 #		     label = cluster_cnt,	
-                    label= str(cluster_cnt) + "\n" + str('D=%3.2f%%\\nS=%3.2f%%' % (
+                    label= str(cluster_cnt) + " " + str('D=%3.2f%%\\nS=%3.2f%%' % (
                        100*node[-1], 100*(1-node[-1]))),
 #                    shape='circle',
                     color='lightskyblue3'))
