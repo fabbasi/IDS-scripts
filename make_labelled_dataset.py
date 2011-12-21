@@ -16,7 +16,7 @@ import csv
 print "1 arguments required <target directory/>"
 
 datasetdir = sys.argv[1]
-
+count = 0
 #reportdir = "./report"
 
 try:
@@ -42,11 +42,10 @@ for infile in listing:
 			     print rows
 			     print "Label = ", rows[1]
 		             label = rows[1]
+   			     logfile = label + "-" + mhash + ".raw"
+			     fp = open("./profiles-raw/" + logfile, 'w')
+			     fp.write( f )
+			     print "Written to file successfully"
+			     count = count + 1
 
-		logfile = label + "-" + mhash + ".raw"
-		fp = open("./profiles-raw/" + logfile, 'w')
-		fp.write( f )
-		print "Written to file successfully"
-#		os.system("python get_streams.py "+ pathstr + "/" + infile )		
-		count = count + 1
-
+print "Total Files written: ", count

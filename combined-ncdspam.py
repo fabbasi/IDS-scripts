@@ -1,5 +1,5 @@
 #######################################
-# all-dist-with-ncd.py
+# combined-ncdspam.py
 # Functionality:
 #
 # 1. Use Cilibrasi and Vitanyi's Normalized Compression Distance
@@ -133,7 +133,7 @@ for i in range(0, len(selection)):
 #	print "type: ", type(spsum)
 ## Write them out ##
        	spsumfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(spsum) + "\n")
-       	combinedfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(spsum) + "\n")
+       	combinedfile.write(str(selection[i]) + " " + str(selection[j]) + " " + str(combscore) + "\n")
 
 ncdfile.close()
 upgmafile.close()

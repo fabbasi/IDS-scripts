@@ -12,7 +12,7 @@ import pylab ## mathplotlib
 import scipy ## scipy
 import numpy
 from numpy import *
-
+import math
 #==========================
 def lookuplist(label):
 #=========================
@@ -169,6 +169,8 @@ def processResultFile(filename, out):
     totalFN = 0;
     samesum = 0;
     expectedTP = 0;
+    totalcomb = 0;
+    totalstreams = 0;
     global optimized;
     global counter;
     accuracy = 0;
@@ -182,16 +184,22 @@ def processResultFile(filename, out):
     # When finished, display the counts
     print "\nRESULTS:"
     res = []	
+## Calculate sum of total number of combinations per category
     for cat in topLevelCategories:
- #       print "Threshold = ",thresh," , Class ", cat, ", Total Comb parsed = ", str(categoryCount[cat]).ljust(6), \
- #             ", Packets/Streams = ", str(categoryCount[cat]/500).ljust(6), " , Same class comb = ", int(categoryCount[cat]/500) * int(categoryCount[cat]/500) , ",  TP = ", categoryMatches[cat], ", FP = ", categoryFP[cat], ", FN = ", categoryFN[cat], ", TN = ", categoryTN[cat]
-	expectedTP = expectedTP + (int(categoryCount[cat]/500) * int(categoryCount[cat]/500))
+	totalcomb = totalcomb + int(categoryCount[cat])
+
+    print "Total Comb: ",totalcomb
+    totalstreams =  math.sqrt(totalcomb)
+    print "Total Streams: ",totalstreams
+
+    for cat in topLevelCategories:
+	expectedTP = expectedTP + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
 	totalFP = totalFP + int(categoryFP[cat])
 	totalTP = totalTP + int(categoryMatches[cat])
 	totalTN = totalTN + int(categoryTN[cat])
 	totalFN = totalFN + int(categoryFN[cat])
-	samesum = samesum + (int(categoryCount[cat]/500) * int(categoryCount[cat]/500))
-	res.append( str(thresh) + ","+ cat + "," + str(categoryCount[cat]) + "," + str(categoryCount[cat]/500) + "," + str(int(categoryCount[cat]/500) * int(categoryCount[cat]/500)) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "\n" )
+	samesum = samesum + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
+	res.append( str(thresh) + ","+ cat + "," + str(categoryCount[cat]) + "," + str(categoryCount[cat]/totalstreams) + "," + str(int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams)) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "\n" )
 #	out.write(("%s,%s,%s,%s,%s,%s,%s,%s\n")%(thresh, cat, str(categoryCount[cat]), str(categoryCount[cat]/500), int(categoryCount[cat]/500) * int(categoryCount[cat]/500), categoryMatches[cat],  categoryFP[cat], categoryFN[cat] ))
 #    print "Total FP: ",totalFP
 #    print "Total FN: ",totalFN
@@ -274,7 +282,7 @@ categoryTN = {}
 x_list = []
 y_list = []
 rates = []
-optimized = numpy.zeros((20,11))
+optimized = numpy.zeros((40,11))
 counter = 0
 thresh = 0.00
 totalFP = 0
@@ -307,7 +315,7 @@ rates.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy
 #optimized.append("Optimum Result:\n")
 #optimized.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
 
-while(thresh < 1):
+while(thresh < 2):
 	resetMatchCounts(topLevelCategories)
 	out = open(fname, 'a')
 #	out.close()
@@ -316,7 +324,7 @@ while(thresh < 1):
 	counter = counter + 1
 #out.close
 prev = 0
-for row in range(20):
+for row in range(40):
 	newmax = optimized[row][10]
 	if newmax > prev:
 		prev = newmax
