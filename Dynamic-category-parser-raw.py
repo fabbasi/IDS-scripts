@@ -314,8 +314,11 @@ rates.append("Summary:\n")
 rates.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
 #optimized.append("Optimum Result:\n")
 #optimized.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
-
-while(thresh < 2):
+if int(metric) == 3:
+	maxthresh = 2
+else:
+	maxthresh = 1
+while(thresh < maxthresh):
 	resetMatchCounts(topLevelCategories)
 	out = open(fname, 'a')
 #	out.close()
