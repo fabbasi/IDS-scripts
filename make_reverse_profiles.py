@@ -67,11 +67,11 @@ for infile in listing:
 			     print rows
 			     print "Label = ", rows[1]
 		             label = rows[1]
+			     logfile = label + "-" + mhash + ".rev"
+			     fp = open("./profiles-rev/" + logfile, 'w')
+			     fp.write( fhash )
+			     print "Written to file successfully"
+		#	     os.system("python get_streams.py "+ pathstr + "/" + infile )		
+			     count = count + 1
 
-		logfile = label + "-" + mhash + ".fuzz"
-		fp = open("./profiles-rev/" + logfile, 'w')
-		fp.write( fhash )
-		print "Written to file successfully"
-#		os.system("python get_streams.py "+ pathstr + "/" + infile )		
-		count = count + 1
-
+print "Total files written: ", count

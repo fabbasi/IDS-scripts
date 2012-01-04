@@ -225,13 +225,13 @@ spsumfile.close()
 print "Distances Successfully calculated and written out to files"
 print "##########################################################"
 print "Calculating graph"
-os.system("python ncd-fimz-graph.py " +ncdstr)
-os.system("python ncd-fimz-graph.py " +levstr)
-os.system("python ncd-fimz-graph.py " +dlevstr)
-os.system("python ncd-fimz-graph.py " +jarostr)
-os.system("python ncd-fimz-graph.py " +jarowinkstr)
-os.system("python ncd-fimz-graph.py " +hamstr)
-os.system("python ncd-fimz-graph.py " +spsumstr)
+os.system("python ncd-fimz-graph.py " +ncdstr + " " + 0.65 )
+os.system("python ncd-fimz-graph.py " +levstr + " " + 0.65  )
+os.system("python ncd-fimz-graph.py " +dlevstr+ " " + 0.65  )
+os.system("python ncd-fimz-graph.py " +jarostr+ " " + 0.65  )
+os.system("python ncd-fimz-graph.py " +jarowinkstr + " " + 0.65 )
+os.system("python ncd-fimz-graph.py " +hamstr + " " + 0.65 )
+os.system("python ncd-fimz-graph.py " +spsumstr + " " + 0.95 )
 
 
 graphncd = "output/graph-" + ncdstr

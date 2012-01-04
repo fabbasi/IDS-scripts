@@ -1,7 +1,9 @@
-/home/fimz/Dev/datasets/500-results/1/1324520403-ham-out.txt
-/home/fimz/Dev/datasets/500-results/1/1324520403-lev-out.txt
-/home/fimz/Dev/datasets/500-results/1/1324520403-dlev-out.txt
-/home/fimz/Dev/datasets/500-results/1/1324520403-jaro-out.txt
-/home/fimz/Dev/datasets/500-results/1/1324520403-jarowink-out.txt
-/home/fimz/Dev/datasets/500-results/1/1324520403-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/1/1324520403-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/raw/1/1325649548-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/raw/1/1325649548-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/raw/1/1325649548-combined-out.txt
+/home/fimz/Dev/datasets/500-results/raw/2/1325649846-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/raw/2/1325649846-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/raw/2/1325649846-combined-out.txt
+/home/fimz/Dev/datasets/500-results/raw/3/1325650007-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/raw/3/1325650007-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/raw/3/1325650007-combined-out.txt

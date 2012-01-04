@@ -13,4 +13,4 @@ do
 	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/datasets/500-results/raw/$i/
 done
 
-run500-dynamic-raw.sh
+sh run500-dynamic-raw.sh

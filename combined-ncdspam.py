@@ -142,9 +142,9 @@ combinedfile.close()
 print "Distances Successfully calculated and written out to files"
 print "##########################################################"
 print "Calculating graph"
-os.system("python ncd-fimz-graph.py " +ncdstr)
-os.system("python ncd-fimz-graph.py " +spsumstr)
-os.system("python ncd-fimz-graph.py " +combinedstr)
+os.system("python ncd-fimz-graph.py " +ncdstr + " " + "0.65")
+os.system("python ncd-fimz-graph.py " +spsumstr + " " + "0.95")
+os.system("python ncd-fimz-graph.py " +combinedstr + " " + "1.55")
 
 
 graphncd = "output/graph-" + ncdstr

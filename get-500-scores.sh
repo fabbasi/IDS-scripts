@@ -12,4 +12,4 @@ do
 	python alldist-with-graph.py /home/fimz/Dev/datasets/500-dataset/$i $i /home/fimz/Dev/datasets/500-results
 	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/datasets/500-results/$i/
 done
-#sh run500-dynamic.sh
+sh run500-dynamic.sh

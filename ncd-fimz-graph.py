@@ -13,7 +13,7 @@ import sys
 fname = sys.argv[1]
 output = "output/"
 
-threshold = 0.6
+threshold = sys.argv[2]
 infile = open(output+fname, 'r')
 rows = infile.readlines()
 infile.close()
