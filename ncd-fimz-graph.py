@@ -13,35 +13,25 @@ import sys
 fname = sys.argv[1]
 output = "output/"
 
-threshold = sys.argv[2]
+thres = sys.argv[2]
 infile = open(output+fname, 'r')
 rows = infile.readlines()
 infile.close()
-
+print "Threshold is: ",thres
+threshold = float(thres)
 bios = []
 links = []
 
-if "jaro" in fname:
-	threshold = 0.50
-	for r in rows:
-	    row = r.split()
-	    print row
-	    print "Row[2]=",row[2]
-	    if float(row[2]) > threshold:
-	        bios.append(row[0])
-	        bios.append(row[1])
-	        links.append(row)
-	        print "In Jaro",
-else:
-	for r in rows:
-	    row = r.split()
-	    print row
-	    print "Row[2]=",row[2]
-	    if float(row[2]) < threshold:
-		bios.append(row[0])
-		bios.append(row[1])
-		links.append(row)
-		# print r,
+
+for r in rows:
+    row = r.split()
+    print row
+    print "Row[2]=",row[2]
+    if float(row[2]) < threshold:
+	bios.append(row[0])
+	bios.append(row[1])
+	links.append(row)
+	# print r,
         
 #print list(set(bios))
 #print links

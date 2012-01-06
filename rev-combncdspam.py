@@ -184,8 +184,9 @@ upgmafile.close()
 spsumfile.close()
 combinedfile.close()
 
+print "Distances Successfully calculated and written out to files"
+
 if options.make_graph == 1:
-	print "Distances Successfully calculated and written out to files"
 	print "##########################################################"
 	print "Calculating graph"
 	os.system("python ncd-fimz-graph.py " +ncdstr  + " " + "0.65" )
@@ -210,17 +211,13 @@ if options.make_graph == 1:
 	#os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
 
 	print "Running Neato on spsum"
-
 	os.system("sfdp -Tsvg "+ graphspsum + " -o " + spsumpng)
 
 	print "Running Neato on combined"
-
 	os.system("sfdp -Tsvg "+ graphcombined + " -o " + combinedpng)
-
 
 	## Adding UPGMA support
 	print "Calculating UPGMA"
-
 	os.system("python upgma.py output/" + upgmastr)
 
 ## Removing list500.txt ##

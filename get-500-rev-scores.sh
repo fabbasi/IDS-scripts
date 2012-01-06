@@ -10,7 +10,7 @@ rm list500.txt
 for i in `seq 1 3`
 do
 	echo $i
-	python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/500-dataset/raw/$i --datdir /home/fimz/Dev/datasets/500-dataset/raw/$i --iter $i --outdir /home/fimz/Dev/datasets/500-results/rev
+	python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/signatures/50 --datdir /home/fimz/Dev/datasets/500-dataset/raw/$i --iter $i --outdir /home/fimz/Dev/datasets/500-results/rev -g
 	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/datasets/500-results/rev/$i/
 done
 sh run500-rev-dynamic.sh

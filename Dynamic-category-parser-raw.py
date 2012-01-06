@@ -13,17 +13,45 @@ import scipy ## scipy
 import numpy
 from numpy import *
 import math
+
 #==========================
-def lookuplist(label):
-#=========================
-        if not labellist:
-                labellist.append(label)
+def countUniq(u1,u2):
+#==========================
+
+	global u1categoryCount, u2categoryCount
+
+	for label in u1:
+	    part1Class, part1Details = label.split("-")  # split the first and second headers at the "-" to extract class
+	    category1 = categorisePayload(part1Class, categories)           # Classify the header -> return 14 for 14.1, 14.1.1, 14.1.2
+	    # Make sure both headers are recognised
+	    assert category1 is not None, "Line #" + str(lineNo) +" - Can't find " + str(category1) + " in " + str(line)
+	    u1categoryCount[category1] = u1categoryCount[category1] +1 ;                  # Total Count  # Required only for cat X
+
+	for label in u2:
+	    part2Class, part2Details = label.split("-")
+	    category2 = categorisePayload(part2Class, categories)
+	    assert category2 is not None, "Line #" + str(lineNo) + " - Can't find " + str(category2) + " in " + str(line)
+	    u2categoryCount[category2] = u2categoryCount[category2] +1 ;                  # Total Count  # Required only for cat Y
+
+#==========================
+def lookuplist(label1,label2):
+#==========================
+        if not labellist1:
+                labellist1.append(label1)
+        if not labellist2:
+                labellist2.append(label2)
+
 #       for labels in labellist:
-        if label in labellist:
+        if label1 in labellist1:
                 1
         else:
-                labellist.append(label)
-        return labellist
+                labellist1.append(label1)
+        if label2 in labellist2:
+                1
+        else:
+                labellist2.append(label2)
+
+        return labellist1, labellist2
 #===============================================================================
 def loadCategories (filename):
 #===============================================================================
@@ -108,7 +136,8 @@ def classifyAttack(line, categories, lineNo):
     
     IMPORTANT: This routine assumes the part that should match is terminated with a "-"
     """
-    
+    global uniq1
+    global uniq2
     part1, part2, value = line.split()           # Split the three parts of the line
     part1Class, part1Details = part1.split("-")  # split the first and second headers at the "-" to extract class
     part2Class, part2Details = part2.split("-")
@@ -118,8 +147,8 @@ def classifyAttack(line, categories, lineNo):
     assert category1 is not None, "Line #" + str(lineNo) +" - Can't find " + str(category1) + " in " + str(line)
     assert category1 is not None, "Line #" + str(lineNo) + " - Can't find " + str(category1) + " in " + str(line)
     sameCategories = (category1 == category2)
-
-    uniqlabels = lookuplist(category1)    
+## Added by Fahim to account for signature and dataset lists ##
+    uniq1,uniq2 = lookuplist(part1,part2)    
 #    print "Line ",lineNo, ": ", line, " >>>> ", category1, category2, str(sameCategories).upper()
 #    print type(line)
 #    print value
@@ -139,7 +168,7 @@ def classifyAttack(line, categories, lineNo):
 		categoryTN[category1] = categoryTN[category1] + 1;
 
     categoryCount[category1] = categoryCount[category1] +1 ;                  # Total Count  # Required only for cat X
- #   categoryCount[category2] = categoryCount[category2] +1;
+#    categoryCount[category2] = categoryCount[category2] +1;
     return sameCategories
     
 #===============================================================================
@@ -149,10 +178,12 @@ def resetMatchCounts(topLevelCategories):
     Reset two arrays that maintain the counts of what matched and the total 
     number of tests for each category to zero. Actually they're dictionaries
     """
-    global categoryCount, categoryMatches, categoryFP, categoryFN
+    global categoryCount, categoryMatches, categoryFP, categoryFN, u1categoryCount, u2categoryCount
     for cat in topLevelCategories:         # Initialise an array of counts
         categoryCount[cat] = 0
-        categoryMatches[cat] = 0
+	u1categoryCount[cat] = 0
+	u2categoryCount[cat] = 0
+	categoryMatches[cat] = 0
 	categoryFP[cat] = 0
 	categoryFN[cat] = 0
 	categoryTN[cat] = 0
@@ -173,6 +204,9 @@ def processResultFile(filename, out):
     totalstreams = 0;
     global optimized;
     global counter;
+    global uniq1;
+    global uniq2;
+    global u1categoryCount, u2categoryCount
     accuracy = 0;
     f = open(filename, "r");
 #    out = open(output, 'a')
@@ -187,19 +221,22 @@ def processResultFile(filename, out):
 ## Calculate sum of total number of combinations per category
     for cat in topLevelCategories:
 	totalcomb = totalcomb + int(categoryCount[cat])
-
+    countUniq(uniq1,uniq2)
     print "Total Comb: ",totalcomb
-    totalstreams =  math.sqrt(totalcomb)
+#    totalstreams =  math.sqrt(totalcomb)
+    totalstreams = len(uniq2) + len(uniq1) 
     print "Total Streams: ",totalstreams
 
     for cat in topLevelCategories:
-	expectedTP = expectedTP + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
+	expectedTP = expectedTP + (int(u1categoryCount[cat]) * int(u2categoryCount[cat]))
 	totalFP = totalFP + int(categoryFP[cat])
 	totalTP = totalTP + int(categoryMatches[cat])
 	totalTN = totalTN + int(categoryTN[cat])
 	totalFN = totalFN + int(categoryFN[cat])
 	samesum = samesum + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
-	res.append( str(thresh) + ","+ cat + "," + str(categoryCount[cat]) + "," + str(categoryCount[cat]/totalstreams) + "," + str(int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams)) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "\n" )
+	res.append( str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "\n" )
+
+#	res.append( str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(categoryCount[cat]/len(uniq2))) + "," + str(int(categoryCount[cat]/len(uniq2)) * int(categoryCount[cat]/len(uniq2))) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "\n" )
 #	out.write(("%s,%s,%s,%s,%s,%s,%s,%s\n")%(thresh, cat, str(categoryCount[cat]), str(categoryCount[cat]/500), int(categoryCount[cat]/500) * int(categoryCount[cat]/500), categoryMatches[cat],  categoryFP[cat], categoryFN[cat] ))
 #    print "Total FP: ",totalFP
 #    print "Total FN: ",totalFN
@@ -242,7 +279,7 @@ def processResultFile(filename, out):
  #   print "Accuracy = ",accuracy
  #   print "AUC = ",auc
 
-    res.append(',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc))
+    res.append(',' + ',' +',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc))
 
     rates.append( str(totalTN) + ',' + str(totalFN)+ ',' + str(thresh) + ',' + str(totalTP) + ',' + str(totalFP) + ',' + str(TPperc) + ',' + str(FPperc) + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
 
@@ -272,9 +309,13 @@ def processResultFile(filename, out):
 categories, topLevelCategories = loadCategories("categories-500.txt")
 # print categories
 #dumpCategories(categories, topLevelCategories)  # can be commented out - diagnostic only - show the categories 
-uniqlabels = []
-labellist = []
+uniq1 = []
+uniq2 = []
+labellist1 = []
+labellist2 = []
 categoryCount   = {}
+u1categoryCount   = {}
+u2categoryCount   = {}
 categoryMatches = {}
 categoryFP = {}
 categoryFN = {}
@@ -308,7 +349,7 @@ header = []
 #out.close()
 fname = output
 out = open(fname, 'w')
-out.write("Threshold, Class, Total Combinations, Pkts/Streams, Same Class combinations, TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
+out.write("Threshold, Class, SignatureCount, DatasetCount, Total Combinations, Pkts/Streams, Same Class combinations, TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
 out.close()
 rates.append("Summary:\n")
 rates.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
