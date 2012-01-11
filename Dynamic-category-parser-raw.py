@@ -13,6 +13,24 @@ import scipy ## scipy
 import numpy
 from numpy import *
 import math
+import os ## for all os commands
+#==========================
+def hitUniq(row):
+#==========================
+## Create a list of unique hits TP and FP in the form cat1, cat2, score
+   global hits
+
+   if not hits:
+        hits.append(row)
+#   for row in hits:
+   if row in hits:
+            1
+   else:
+        hits.append(row)
+#	print "\nrow: ", 
+#   print "\nLenght of hits: ", len(hits)
+#        return labellist1, labellist2
+
 
 #==========================
 def countUniq(u1,u2):
@@ -159,11 +177,13 @@ def classifyAttack(line, categories, lineNo):
 	if float(value) < thresh:
 	        categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 #	        categoryMatches[category2] = categoryMatches[category2] + 1;
-        else:
+#		hitUniq(line)
+	else:
 		categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh 
     else:
 	if float(value) < thresh:
 		categoryFP[category1] = categoryFP[category1] + 1; ## FP counter (diff labels but score below threshold)
+#		hitUniq(line)
 	if (float(value) > thresh):  ## TN Test Added by Fahim on 20110824. Diff category and above thres i.e. true rejection
 		categoryTN[category1] = categoryTN[category1] + 1;
 
@@ -305,7 +325,11 @@ def processResultFile(filename, out):
 #    print labellist
 #    out.close()
 #===============================================================================
+#===============================================================================
 # Main Program starts here    
+#===============================================================================
+#===============================================================================
+
 categories, topLevelCategories = loadCategories("categories-500.txt")
 # print categories
 #dumpCategories(categories, topLevelCategories)  # can be commented out - diagnostic only - show the categories 
@@ -313,6 +337,7 @@ uniq1 = []
 uniq2 = []
 labellist1 = []
 labellist2 = []
+hits = []
 categoryCount   = {}
 u1categoryCount   = {}
 u2categoryCount   = {}
@@ -349,7 +374,7 @@ header = []
 #out.close()
 fname = output
 out = open(fname, 'w')
-out.write("Threshold, Class, SignatureCount, DatasetCount, Total Combinations, Pkts/Streams, Same Class combinations, TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
+out.write("Threshold, Class, SignatureCount/category, DatasetCount/category, Total Combinations(sig * len(dataset)), Pkts/Streams (Sig+Dat), Same Class/Expected true combinations (sigCount[cat] * datasetCount[cat], TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
 out.close()
 rates.append("Summary:\n")
 rates.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
@@ -376,6 +401,7 @@ for row in range(40):
 
 print "Max results: ",prev
 print "Max index: ",maxrow
+optthresh = optimized[maxrow][2]
 rates.append("\nOptimized:\n")
 #rates.append(optimized[maxrow][10])
 rates.append( str(optimized[maxrow][0])+ ',' + str(optimized[maxrow][1])+ ',' + str(optimized[maxrow][2]) + ',' + str(optimized[maxrow][3]) + ',' + str(optimized[maxrow][4]) + ',' + str(optimized[maxrow][5]) + ',' + str(optimized[maxrow][6]) + ',' + str(optimized[maxrow][7]) + ',' + str(optimized[maxrow][8]) + ',' + str(optimized[maxrow][9]) + ',' + str(optimized[maxrow][10]) )
@@ -390,15 +416,27 @@ pylab.ylabel("TPR")
 #pylab.axis(-1,1,-1,1)
 print "Metric: ", metric
 #print "Type: ", type(metric)
+## Copy file to output folder ##
+os.system("cp " + infile + " output/")
+fstring = infile.split("/")
+## Check Metric to add label and create graph ##
 if int(metric) == 1:
 	pylab.title("NCD")
 	print "In NCD"
+	os.system("python ncd-fimz-graph.py " + fstring[-1]  + " " + str(optthresh) )
+	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 if int(metric) == 2:
 	pylab.title("SPAMSUM")
 	print "In spamsum"
+
+	os.system("python ncd-fimz-graph.py " + fstring[-1] + " " + str(optthresh) )
+	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
+
 if int(metric) == 3:
 	pylab.title("COMBINED")
 	print "In COMBINED"
+	os.system("python ncd-fimz-graph.py " + fstring[-1] + " " + str(optthresh) )
+	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 
 pylab.plot(x_list, y_list, 'r')
 pylab.xticks(scipy.arange(0,1.01,0.1))

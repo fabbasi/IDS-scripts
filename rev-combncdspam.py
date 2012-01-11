@@ -119,7 +119,7 @@ oparser.add_option("-g","--makegraph",
                    action='store_true',
                    dest = "make_graph",
                    default = False,
-                   help = "Create graph")
+                   help = "Create graphs")
 
 (options, args) = oparser.parse_args()
 
