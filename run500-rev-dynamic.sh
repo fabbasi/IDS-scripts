@@ -13,8 +13,10 @@ python Dynamic-category-parser-raw.py "$line" "$x"
 x=`expr $x + 1`;
 if [ $x -eq 4 ]
 then
-mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/$y/
-mv output/* /home/fimz/Dev/datasets/500-results/rev/$y/
+#mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/$y/
+#mv output/* /home/fimz/Dev/datasets/500-results/rev/$y/
+mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/balanced/
+mv output/* /home/fimz/Dev/datasets/500-results/rev/balanced/
 echo "Y:"
 echo $y
 y=`expr $y + 1`;

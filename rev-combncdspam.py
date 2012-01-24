@@ -227,9 +227,9 @@ if options.make_graph == 1:
 f = open("list500.txt",'a')
 
 #location = "/home/fimz/Dev/datasets/500-results"
-finalncd = location + "/" + iteration + "/" + ncdstr
-finalspsum = location + "/" + iteration + "/" + spsumstr
-finalcombined = location + "/" + iteration + "/" + combinedstr
+finalncd = location + "/" +  ncdstr
+finalspsum = location + "/" + spsumstr
+finalcombined = location + "/" + combinedstr
 
 f.write(finalncd  + "\n")
 f.write(finalspsum  + "\n")

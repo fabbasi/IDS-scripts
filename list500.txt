@@ -1,9 +1,3 @@
-/home/fimz/Dev/datasets/500-results/rev/1/1326249661-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/1/1326249661-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/1/1326249661-combined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/2/1326249677-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/2/1326249677-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/2/1326249677-combined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/3/1326249694-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/3/1326249694-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/3/1326249694-combined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1327369087-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1327369087-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1327369087-combined-out.txt

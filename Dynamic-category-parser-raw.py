@@ -140,6 +140,25 @@ def categorisePayload(header, categories):
            return vector[0]
     return None      # This should never happen, it's checked later 
 
+r = {}
+
+def rank(s,p):
+	return r[(s,p)]
+def claswt(s,p,t):
+	r = rank(s,p)
+	if r < t:
+		return (s,r)
+	else :
+		return (0,10)
+def classmaxwt(S,t,p):
+	uset = set()
+	for s in S:
+		uset.union(classwt(s,p,t))
+	minny = list(uset)[0]
+	for v in uset:
+		if minny[1] > v[1]:
+			minny = v
+	return v[0]
 #===============================================================================
 def classifyAttack(line, categories, lineNo):
 #===============================================================================
@@ -218,6 +237,10 @@ def processResultFile(filename, out):
     totalTP = 0;
     totalTN = 0;
     totalFN = 0;
+    tprcat = 0.0;
+    fprcat = 0.0
+    acccat = 0.0;
+    auccat = 0.0;
     samesum = 0;
     expectedTP = 0;
     totalcomb = 0;
@@ -254,9 +277,33 @@ def processResultFile(filename, out):
 	totalTN = totalTN + int(categoryTN[cat])
 	totalFN = totalFN + int(categoryFN[cat])
 	samesum = samesum + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
-	res.append( str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "\n" )
+	#========
+	# TPR per cat = TP/TP+FN
+	# FPR per cat = FP/FP+TN
+	# Accuracy per cat = (TP+TN/P+N)
+	# AUC per cat = (1+TPR-FPR)/2
+	#=======
+#	print "category = ",cat
+#	print "TP cat = ",categoryMatches[cat]
+#	print "FP cat = ",categoryFP[cat]
+#	print "FN cat = ",categoryFN[cat]
+	try:
+		tprcat = int(categoryMatches[cat])/(int(categoryMatches[cat]) + int(categoryFN[cat]) + 0.0 )
+	except ZeroDivisionError:
+		tprcat = 0.0
 
-#	res.append( str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(categoryCount[cat]/len(uniq2))) + "," + str(int(categoryCount[cat]/len(uniq2)) * int(categoryCount[cat]/len(uniq2))) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "\n" )
+	if int(categoryFP[cat]) > 0:
+		fprcat = int(categoryFP[cat])/(int(categoryFP[cat]) + int(categoryTN[cat]) + 0.0 )
+	else:
+		fprcat = 0.0
+	try:
+		acccat = (int(categoryMatches[cat]) + int(categoryTN[cat]) + 0.0 )/( int(categoryMatches[cat]) + int(categoryFN[cat])  + int(categoryFP[cat]) +  int(categoryTN[cat]) )
+	except ZeroDivisionError:
+		acccat = 0.0
+
+	auccat = (1+tprcat-fprcat)/2.0
+	res.append( str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
+
 #	out.write(("%s,%s,%s,%s,%s,%s,%s,%s\n")%(thresh, cat, str(categoryCount[cat]), str(categoryCount[cat]/500), int(categoryCount[cat]/500) * int(categoryCount[cat]/500), categoryMatches[cat],  categoryFP[cat], categoryFN[cat] ))
 #    print "Total FP: ",totalFP
 #    print "Total FN: ",totalFN
@@ -269,22 +316,25 @@ def processResultFile(filename, out):
     totalTN = totalTN + 0.0
     totalFN = totalFN + 0.0
     TPperc = (totalTP/expectedTP)*100
-    FPperc = (totalFP/(totalTP+totalFP+totalTN+totalFN))*100
+    FPperc = (totalFP/(totalFP+totalTN))*100
 #===================
 # TPR = TP/P
 # FPR = FP/N
 #===================
     tpr = totalTP/(totalTP + totalFN)
     if totalFP > 0:
+#	    fpr = totalFP/(totalFP + totalTN) SUGGESTED BY NAFEES
 	    fpr = totalFP/(totalFP + totalTN)
     else:
 	    fpr = 0.0
 #========================
-# Accuracy = (TP=TN)/P+N
+# Accuracy = (TP+TN)/P+N
 # AUC = (1+TPR-FPR)/2
 #========================
     accuracy = (totalTP + totalTN)/( (totalTP+totalFN) + (totalFP + totalTN) )
-    auc = (1.0 + tpr - fpr)/2
+    auc = (1.0 + tpr - fpr)/2 
+#Edited by nafees
+#    auc = (1.0 + tpr - (1-totalTN))
 
 #=========================================
 # Create a list of optimized[maxrow][10] results
@@ -392,12 +442,29 @@ while(thresh < maxthresh):
 	thresh = thresh + 0.05
 	counter = counter + 1
 #out.close
-prev = 0
+prev = 0.0
+prevacc = 0.0
+lowfp = 0.0
+maxrowacc = 0
+fpacc = 0.0
 for row in range(40):
 	newmax = optimized[row][10]
-	if newmax > prev:
+	accmax = optimized[row][9]
+	fprate = optimized[row][8]
+	## FOR SITUATIONS WHERE ACCURACY IS BETTER THAN AUC, then look for fpr ##
+	if (newmax > prev):
 		prev = newmax
 		maxrow = row
+		lowfp = fprate
+	if (accmax > prevacc):
+		prevacc = accmax
+#	if (prevacc > newmax) and (prevacc > prev):
+		maxrowacc = row
+		fpacc = fprate
+
+if (prevacc > prev) and (fpacc <= lowfp):
+	maxrow = maxrowacc
+
 
 print "Max results: ",prev
 print "Max index: ",maxrow
