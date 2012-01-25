@@ -245,6 +245,7 @@ def processResultFile(filename, out):
     expectedTP = 0;
     totalcomb = 0;
     totalstreams = 0;
+    global perclassdict;
     global optimized;
     global counter;
     global uniq1;
@@ -304,6 +305,15 @@ def processResultFile(filename, out):
 	auccat = (1+tprcat-fprcat)/2.0
 	res.append( str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
+	#=======================================================#
+	# Adding per class dictionary to keep per class results #
+	#=======================================================#
+	if cat in perclassdict:
+		perclassdict[cat].append(str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
+	else:
+		perclassdict[cat] = []	
+		perclassdict[cat].append(str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
+	
 #	out.write(("%s,%s,%s,%s,%s,%s,%s,%s\n")%(thresh, cat, str(categoryCount[cat]), str(categoryCount[cat]/500), int(categoryCount[cat]/500) * int(categoryCount[cat]/500), categoryMatches[cat],  categoryFP[cat], categoryFN[cat] ))
 #    print "Total FP: ",totalFP
 #    print "Total FN: ",totalFN
@@ -374,6 +384,25 @@ def processResultFile(filename, out):
 #    print uniqlabels
 #    print labellist
 #    out.close()
+
+#============================================
+# DRAW ROC CURVE roc(xlist,ylist,filename)
+#===========================================
+def roc(xlist,ylist,filename,title,xlabel,ylabel):
+	pylab.title(title)
+	pylab.xlabel(xlabel)
+	pylab.ylabel(ylabel)
+	pylab.plot(xlist, ylist, 'r')
+	pylab.xticks(scipy.arange(0,1.01,0.1))
+	pylab.yticks(scipy.arange(0,1.01,0.1))
+	pylab.ylim(ymin = 0, ymax = 1.01)
+	pylab.xlim(xmin=-.025, xmax = 1.01)
+	#fig.show()
+	## Save plot as PNG
+	pylab.grid(True)
+	pylab.savefig(filename + '.png')
+	pylab.close()
+
 #===============================================================================
 #===============================================================================
 # Main Program starts here    
@@ -395,10 +424,16 @@ categoryMatches = {}
 categoryFP = {}
 categoryFN = {}
 categoryTN = {}
+perclassdict = {}
 x_list = []
 y_list = []
+xcoord = []
+ycoord = []
 rates = []
 optimized = numpy.zeros((40,11))
+title = ""
+xlabel = ""
+ylabel = ""
 counter = 0
 thresh = 0.00
 totalFP = 0
@@ -442,6 +477,56 @@ while(thresh < maxthresh):
 	thresh = thresh + 0.05
 	counter = counter + 1
 #out.close
+out = open(fname, 'a')
+#========================
+# Write per class results
+#=========================
+prev = 0.0
+prevacc = 0.0
+lowfp = 0.0
+maxrowacc = 0
+fpacc = 0.0
+aucmax = 0.0
+for cat in topLevelCategories:
+	for i in range(len(perclassdict[cat])):
+#	if perclassdict[cat][i].split(',')[3] > 0 or perclassdict[cat][i].split(',')[2] > 0: 
+		out.write(''.join(perclassdict[cat][i])) ## Write Class results to csv
+#		print "whole y: ",perclassdict[cat][i] # TPR for that class
+#		print "whole x: ",perclassdict[cat][i] # FPR for that class
+#		print "y: ",perclassdict[cat][i].split(',')[11] # TPR for that class
+#		print "x: ",perclassdict[cat][i].split(',')[12] # FPR for that class
+		ycoord.append(perclassdict[cat][i].split(',')[11]) # TPR for that class
+		xcoord.append(perclassdict[cat][i].split(',')[12]) # FPR for that class
+		aucmax = perclassdict[cat][i].split(',')[14]
+		accmax = perclassdict[cat][i].split(',')[13]
+		fprate = perclassdict[cat][i].split(',')[12]
+	## CALCULATE OPTIMIZED ROW AND WRITE IT AT THE END ##
+	## FOR SITUATIONS WHERE ACCURACY IS BETTER THAN AUC, then look for fpr ##
+	        if (aucmax > prev):
+			prev = aucmax
+	                maxrow = i
+	                lowfp = fprate
+		if (accmax > prevacc):
+			prevacc = accmax
+			maxrowacc = i
+	                fpacc = fprate
+	if (prevacc > prev) and (fpacc <= lowfp):
+		        maxrow = maxrowacc
+
+	out.write("\n")
+	out.write("Class Optimized:\n")					
+	out.write(''.join(perclassdict[cat][maxrow]))
+## Add labels and plot roc
+	xlabel = "FPR"
+	ylabel = "TPR"
+	title = "CLASS "+cat
+	filename = fname+"-class-"+cat
+	roc(xcoord,ycoord,filename,title,xlabel,ylabel)
+## Reset list
+	xcoord =[]
+	ycoord =[]
+	out.write("\n")
+out.close()
 prev = 0.0
 prevacc = 0.0
 lowfp = 0.0
@@ -478,8 +563,11 @@ out.close()
 # ##########################
 # Define Axes and plot graph
 # ##########################
-pylab.xlabel("FPR")
-pylab.ylabel("TPR")
+#pylab.xlabel("FPR")
+#pylab.ylabel("TPR")
+xlabel = "FPR"
+ylabel = "TPR"
+
 #pylab.axis(-1,1,-1,1)
 print "Metric: ", metric
 #print "Type: ", type(metric)
@@ -488,37 +576,25 @@ os.system("cp " + infile + " output/")
 fstring = infile.split("/")
 ## Check Metric to add label and create graph ##
 if int(metric) == 1:
-	pylab.title("NCD")
+#	pylab.title("NCD")
+	title="NCD"
 	print "In NCD"
 	os.system("python ncd-fimz-graph.py " + fstring[-1]  + " " + str(optthresh) )
 	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 if int(metric) == 2:
-	pylab.title("SPAMSUM")
+#	pylab.title("SPAMSUM")
+	title="SPAMSUM"
 	print "In spamsum"
 
 	os.system("python ncd-fimz-graph.py " + fstring[-1] + " " + str(optthresh) )
 	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 
 if int(metric) == 3:
-	pylab.title("COMBINED")
+#	pylab.title("COMBINED")
+	title = "COMBINED"
 	print "In COMBINED"
 	os.system("python ncd-fimz-graph.py " + fstring[-1] + " " + str(optthresh) )
 	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 
-pylab.plot(x_list, y_list, 'r')
-pylab.xticks(scipy.arange(0,1.01,0.1))
-pylab.yticks(scipy.arange(0,1.01,0.1))
+roc(x_list,y_list,fname,title,xlabel,ylabel)
 
-pylab.ylim(ymin = 0, ymax = 1.01)
-pylab.xlim(xmin=-.025, xmax = 1.01)
-#pylab.ylim(ymin=-.025, ymax = 1.01)
-#fig, ax = pyplot.subplot()
-#pylab.xaxis.set_major_locator(MultipleLocator(0.1))
-#fig = pylab.figure()
-#ax = fig.add_subplot(1,1,1)
-#ax.plot(x_list, y_list, 'r')
-#ax.set_xticks(scipy.arange(-0.25,1.01, 0.1))
-#fig.show()
-## Save plot as PNG
-pylab.grid(True)
-pylab.savefig(fname + '.png')
