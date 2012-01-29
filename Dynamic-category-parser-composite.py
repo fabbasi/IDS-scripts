@@ -207,37 +207,50 @@ def classifyAttack(line, categories, lineNo):
 #	        categoryMatches[category2] = categoryMatches[category2] + 1;
 #		hitUniq(line)
 	else:
-		if category1 in fnhitHistory:
-			fnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
-
-		if part1 not in fnhitHistory:  ## If the sample has not been previously seen/hit by the class
+		if category1 in fnhitHistory and part1 not in fnhitHistory[category1]:
+			fnhitHistory[category1].append(str(part1))  ## add it to the history list
+		if category1 not in fnhitHistory:
 			fnhitHistory[category1] = []
-			fnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
+#			fnhitHistory[category1].append(str(part1))  ## add it to the history list
+		if part1 not in fnhitHistory:  ## If the sample has not been previously seen/hit by the class
+#			fnhitHistory[category1] = []
+#			fnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
 			fnhitHistory[part1] = []
 			fnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
 			categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
     else:  ## Both categories not same
-	if float(value) < thresh:
+	if float(value) < float(thresh):
+		if category1 in fphitHistory and part1 not in fphitHistory[category1]:
+			fphitHistory[category1].append(str(part1))  ## add it to the history list
+		if category1 not in fphitHistory:
+			fphitHistory[category1] = []
+			fphitHistory[category1].append(str(part1))  ## add it to the history list
 		if part1 in fphitHistory:
 			fphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list	
-			fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list	
+#			fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list	
 		if part1 not in fphitHistory:  ## If the sample has not been previously seen/hit
                         fphitHistory[part1] = []
                         fphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
-		        fphitHistory[category1] = []
-                        fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
+#		        fphitHistory[category1] = []
+#                       fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
 
 		categoryFP[category1] = categoryFP[category1] + 1; ## FP counter (diff labels but score below threshold)
 #		hitUniq(line)
 	if (float(value) > thresh):  ## TN Test Added by Fahim on 20110824. Diff category and above thres i.e. true rejection
+		if category2 in tnhitHistory and part1 not in tnhitHistory[category2]:
+			tnhitHistory[category2].append(str(part1))  ## add it to the history list
+		if category2 not in tnhitHistory:
+			tnhitHistory[category2] = []
+			tnhitHistory[category2].append(str(part1))  ## add it to the history list
+
 		if part1 in tnhitHistory:
 			tnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list	
-			tnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list	
+#			tnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list	
 		if part1 not in tnhitHistory:
 			tnhitHistory[part1] = []
 			tnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
-			tnhitHistory[category1] = []
-			tnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
+#			tnhitHistory[category1] = []
+#			tnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
 			categoryTN[category1] = categoryTN[category1] + 1;
 
     categoryCount[category1] = categoryCount[category1] + 1 ;                  # Total Count  # Required only for cat X
@@ -376,7 +389,7 @@ def processResultFile(filename, out):
 	print "TNcat: ", tnhit
 	print "FNcat: ", fnhit
 
-	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(int(len(uniqueData) - int(categoryMatches[cat]) - int(categoryFP[cat]) - int(categoryFN[cat]) )) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
+	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(int(len(uniqueData) - int(tphit) - int(fphit) - int(fnhit) )) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
 #	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
