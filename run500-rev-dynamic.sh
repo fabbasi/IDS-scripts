@@ -15,8 +15,9 @@ if [ $x -eq 4 ]
 then
 #mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/$y/
 #mv output/* /home/fimz/Dev/datasets/500-results/rev/$y/
-mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/balanced/
-mv output/* /home/fimz/Dev/datasets/500-results/rev/balanced/
+#python Dynamic-category-parser-composite.py "$line" "3"
+mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/
+mv output/* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/
 echo "Y:"
 echo $y
 y=`expr $y + 1`;

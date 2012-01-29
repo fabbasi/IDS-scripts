@@ -146,6 +146,7 @@ ncdstr = "%s-ncd-out.txt"%now
 upgmastr = "%s-upgma-out.txt"%now
 spsumstr = "%s-spsum-out.txt"%now
 combinedstr = "%s-combined-out.txt"%now
+newcombinedstr = "%s-newcombined-out.txt"%now
 
 output = "output/"
 
@@ -153,6 +154,7 @@ os.system("mkdir output")
 ncdfile = open( output+ncdstr, 'w')
 spsumfile = open( output+spsumstr,'w')
 combinedfile = open( output+combinedstr,'w')
+newcombinedfile = open( output+newcombinedstr,'w')
 
 ## Reduntant upgma file, ncd is sufficient
 upgmafile = open (output+upgmastr, 'w')
@@ -177,12 +179,26 @@ for i in range(0, len(sigselect)):
 #	print "type: ", type(spsum)
 ## Write them out ##
        	spsumfile.write(str(sigselect[i]) + " " + str(selection[j]) + " " + str(spsum) + "\n")
-       	combinedfile.write(str(sigselect[i]) + " " + str(selection[j]) + " " + str(combscore) + "\n")
+#	newcombinedfile.write(str(selection[j]) + " " + str(sigselect[i]) + " " + str(combscore) + "\n")
+	combinedfile.write(str(sigselect[i]) + " " + str(selection[j]) + " " + str(combscore) + "\n")
+
+for i in range(0, len(selection)):
+#    print i
+    for j in range(0, len(sigselect)):
+        fx = sigdir + '/' + str(sigselect[j])
+        fy = datdir + '/' + str(selection[i])
+	ncdscore = ncd(fx,fy)		 
+	spsum = alldist(fx, fy)
+        combscore = float(spsum) + float(ncdscore)
+        newcombinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(combscore) + "\n")
+
+
 
 ncdfile.close()
 upgmafile.close()
 spsumfile.close()
 combinedfile.close()
+newcombinedfile.close()
 
 print "Distances Successfully calculated and written out to files"
 
@@ -230,10 +246,12 @@ f = open("list500.txt",'a')
 finalncd = location + "/" +  ncdstr
 finalspsum = location + "/" + spsumstr
 finalcombined = location + "/" + combinedstr
+finalnewcombined = location + "/" + newcombinedstr
 
 f.write(finalncd  + "\n")
 f.write(finalspsum  + "\n")
 f.write(finalcombined  + "\n")
+f.write(finalnewcombined  + "\n")
 
 f.close()
 

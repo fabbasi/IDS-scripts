@@ -5,6 +5,7 @@
 # $ python Dynamic-category-parser.py /path/to/ncd-result.txt numeric-metric-value 
 # $ mv *-500-dyn-result-6* /path/to/target
 #
+#!/usr/bin/python
 import sys  ##  For grabbing input from SHELL
 import math ##  For sqrt()
 import time ##  For unique output file name creation
@@ -14,6 +15,7 @@ import numpy
 from numpy import *
 import math
 import os ## for all os commands
+import pickle
 #==========================
 def hitUniq(row):
 #==========================
@@ -142,23 +144,6 @@ def categorisePayload(header, categories):
 
 r = {}
 
-def rank(s,p):
-	return r[(s,p)]
-def claswt(s,p,t):
-	r = rank(s,p)
-	if r < t:
-		return (s,r)
-	else :
-		return (0,10)
-def classmaxwt(S,t,p):
-	uset = set()
-	for s in S:
-		uset.union(classwt(s,p,t))
-	minny = list(uset)[0]
-	for v in uset:
-		if minny[1] > v[1]:
-			minny = v
-	return v[0]
 #===============================================================================
 def classifyAttack(line, categories, lineNo):
 #===============================================================================
@@ -175,6 +160,8 @@ def classifyAttack(line, categories, lineNo):
     """
     global uniq1
     global uniq2
+    global tphitHistory, fphitHistory, tnhitHistory, fnhitHistory
+#    global thresh
     part1, part2, value = line.split()           # Split the three parts of the line
     part1Class, part1Details = part1.split("-")  # split the first and second headers at the "-" to extract class
     part2Class, part2Details = part2.split("-")
@@ -182,31 +169,78 @@ def classifyAttack(line, categories, lineNo):
     category2 = categorisePayload(part2Class, categories)
     # Make sure both headers are recognised
     assert category1 is not None, "Line #" + str(lineNo) +" - Can't find " + str(category1) + " in " + str(line)
-    assert category1 is not None, "Line #" + str(lineNo) + " - Can't find " + str(category1) + " in " + str(line)
+    assert category2 is not None, "Line #" + str(lineNo) + " - Can't find " + str(category2) + " in " + str(line)
     sameCategories = (category1 == category2)
 ## Added by Fahim to account for signature and dataset lists ##
     uniq1,uniq2 = lookuplist(part1,part2)    
 #    print "Line ",lineNo, ": ", line, " >>>> ", category1, category2, str(sameCategories).upper()
 #    print type(line)
-#    print value
+#    print valu
+    
+    ## Get threshold specific to signature class ##
+    thresh = get_thresh(category2)
+#    print "Threshold value is: ",thresh
+#=================================================================================
+# TP, FP, TN, FN CALCULATIONS
+#=================================================================================
     # NOW DO SOMETHING :-)
     if sameCategories:                   # Increment Correct classification count
 ## Added by fahim: test for threshold
 #	combcounter = combcounter + 1
-	if float(value) < thresh:
-	        categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+	if float(value) < float(thresh):
+		if category1 in tphitHistory and part1 not in tphitHistory[category1]:
+			tphitHistory[category1].append(str(part1))  ## add it to the history list
+		if category1 not in tphitHistory:
+			tphitHistory[category1] = []
+			tphitHistory[category1].append(str(part1))  ## add it to the history list
+		if part1 not in tphitHistory:  ## If the sample has not been previously seen/hit by the class
+			tphitHistory[part1] = []
+#			tphitHistory[category1] = []
+#			tphitHistory[category1].append(str(part)+","+str(value))  ## add it to the history list
+			tphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
+		        categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+
+#		if part1 in hitHistory and hitHistory[part1]:  ## If the sample has been previously seen/hit
+#			hitHistory[part1].append(str(part2)+","+str(value)+","+"TP")  ## add it to the history list
+#		        categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+
 #	        categoryMatches[category2] = categoryMatches[category2] + 1;
 #		hitUniq(line)
 	else:
-		categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh 
-    else:
+		if category1 in fnhitHistory:
+			fnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
+
+		if part1 not in fnhitHistory:  ## If the sample has not been previously seen/hit by the class
+			fnhitHistory[category1] = []
+			fnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
+			fnhitHistory[part1] = []
+			fnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
+			categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
+    else:  ## Both categories not same
 	if float(value) < thresh:
+		if part1 in fphitHistory:
+			fphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list	
+			fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list	
+		if part1 not in fphitHistory:  ## If the sample has not been previously seen/hit
+                        fphitHistory[part1] = []
+                        fphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
+		        fphitHistory[category1] = []
+                        fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
+
 		categoryFP[category1] = categoryFP[category1] + 1; ## FP counter (diff labels but score below threshold)
 #		hitUniq(line)
 	if (float(value) > thresh):  ## TN Test Added by Fahim on 20110824. Diff category and above thres i.e. true rejection
-		categoryTN[category1] = categoryTN[category1] + 1;
+		if part1 in tnhitHistory:
+			tnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list	
+			tnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list	
+		if part1 not in tnhitHistory:
+			tnhitHistory[part1] = []
+			tnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
+			tnhitHistory[category1] = []
+			tnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
+			categoryTN[category1] = categoryTN[category1] + 1;
 
-    categoryCount[category1] = categoryCount[category1] +1 ;                  # Total Count  # Required only for cat X
+    categoryCount[category1] = categoryCount[category1] + 1 ;                  # Total Count  # Required only for cat X
 #    categoryCount[category2] = categoryCount[category2] +1;
     return sameCategories
     
@@ -251,13 +285,29 @@ def processResultFile(filename, out):
     global uniq1;
     global uniq2;
     global u1categoryCount, u2categoryCount
+    global thresh;
+    global tphitHistory, fphitHistory, tnhitHistory, fnhitHistory
     accuracy = 0;
     f = open(filename, "r");
 #    out = open(output, 'a')
     for line in f:
         line = line[:-1]
         lineNo = lineNo+1
-        same = classifyAttack(line, categories, lineNo)  # Same Class?
+        same = classifyAttack(line, categories, lineNo)  # Same Class? call to main classify function
+    f.close()
+
+    f = open(filename, "r");
+    for lin in f:  
+#	print lin
+	lin = lin[:-1]
+	data,sig,t = lin.split()
+#	print "data: ",data
+	if data in uniqueData:
+		0
+	else:
+		uniqueData.append(data) ## Create a list of unique dataset samples
+    print "Unique labels=",len(uniqueData)
+
 #    result = []         
     # When finished, display the counts
     print "\nRESULTS:"
@@ -269,7 +319,7 @@ def processResultFile(filename, out):
     print "Total Comb: ",totalcomb
 #    totalstreams =  math.sqrt(totalcomb)
     totalstreams = len(uniq2) + len(uniq1) 
-    print "Total Streams: ",totalstreams
+#    print "Total Streams: ",totalstreams
 
     for cat in topLevelCategories:
 	expectedTP = expectedTP + (int(u1categoryCount[cat]) * int(u2categoryCount[cat]))
@@ -301,89 +351,61 @@ def processResultFile(filename, out):
 		acccat = (int(categoryMatches[cat]) + int(categoryTN[cat]) + 0.0 )/( int(categoryMatches[cat]) + int(categoryFN[cat])  + int(categoryFP[cat]) +  int(categoryTN[cat]) )
 	except ZeroDivisionError:
 		acccat = 0.0
-
 	auccat = (1+tprcat-fprcat)/2.0
-	res.append( str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
+	print "Category: ",cat
+	try:
+		tphit = len(tphitHistory[cat])
+	except KeyError, e:
+		tphit = 0;
+	try:
+		fphit = len(fphitHistory[cat])
+	except KeyError, e:
+		fphit = 0;
+	try:
+		tnhit = len(tnhitHistory[cat])
+	except KeyError, e:
+		tnhit = 0;
+	try:
+		fnhit = len(fnhitHistory[cat])
+	except KeyError, e:
+		fnhit = 0;
 
-	#=======================================================#
-	# Adding per class dictionary to keep per class results #
-	#=======================================================#
-	if cat in perclassdict:
-		perclassdict[cat].append(str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
-	else:
-		perclassdict[cat] = []	
-		perclassdict[cat].append(str(thresh) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
-	
-#	out.write(("%s,%s,%s,%s,%s,%s,%s,%s\n")%(thresh, cat, str(categoryCount[cat]), str(categoryCount[cat]/500), int(categoryCount[cat]/500) * int(categoryCount[cat]/500), categoryMatches[cat],  categoryFP[cat], categoryFN[cat] ))
-#    print "Total FP: ",totalFP
-#    print "Total FN: ",totalFN
-#    print "Total TP: ",totalTP
-#    print "Total TN: ",totalTN
-#    print "Sum of all same classes: ", samesum
-#    print "TP+FN = ", totalTP + totalFN
-    totalTP = totalTP + 0.0
-    totalFP = totalFP + 0.0
-    totalTN = totalTN + 0.0
-    totalFN = totalFN + 0.0
-    TPperc = (totalTP/expectedTP)*100
-    FPperc = (totalFP/(totalFP+totalTN))*100
-#===================
-# TPR = TP/P
-# FPR = FP/N
-#===================
-    tpr = totalTP/(totalTP + totalFN)
-    if totalFP > 0:
-#	    fpr = totalFP/(totalFP + totalTN) SUGGESTED BY NAFEES
-	    fpr = totalFP/(totalFP + totalTN)
-    else:
-	    fpr = 0.0
-#========================
-# Accuracy = (TP+TN)/P+N
-# AUC = (1+TPR-FPR)/2
-#========================
-    accuracy = (totalTP + totalTN)/( (totalTP+totalFN) + (totalFP + totalTN) )
-    auc = (1.0 + tpr - fpr)/2 
-#Edited by nafees
-#    auc = (1.0 + tpr - (1-totalTN))
+	print "TPcat: ", tphit
+	print "catmatches; ", categoryMatches[cat]
+	print "FPcat: ", fphit
+	print "TNcat: ", tnhit
+	print "FNcat: ", fnhit
 
-#=========================================
-# Create a list of optimized[maxrow][10] results
-#========================================
-#    maxACC = max(accuracy)
-#    maxAUC = max(auc)
-#    optimized[maxrow][10]index = auc.index(max(auc))
+	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(int(len(uniqueData) - int(categoryMatches[cat]) - int(categoryFP[cat]) - int(categoryFN[cat]) )) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
+#	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
-#    print "TPR = Total TP / Total TP+FN = ", tpr
- #   print "FPR = Total FP / Total FP+TN = ", fpr	
- #   print "Accuracy = ",accuracy
- #   print "AUC = ",auc
-
-    res.append(',' + ',' +',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + ',' + str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc))
-
-    rates.append( str(totalTN) + ',' + str(totalFN)+ ',' + str(thresh) + ',' + str(totalTP) + ',' + str(totalFP) + ',' + str(TPperc) + ',' + str(FPperc) + ',' +  str(tpr) + "," + str(fpr) + "," + str(accuracy) + "," + str(auc) + '\n')
-
-    optimized = numpy.insert(optimized,counter,numpy.array(( totalTN,totalFN,thresh,totalTP,totalFP,TPperc,FPperc,tpr,fpr,accuracy,auc)),0)
-
-    print "Counter: ",counter
-    print "Values: ",optimized[counter]
-#    print res
-#    print ''.join(res)
     out.write(''.join(res) + "\n")
     out.close()
-    x_list.append(fpr)
-    y_list.append(tpr)
+#    x_list.append(fpr)
+#    y_list.append(tpr)
 	
 
-#	print ": Total Streams =", sqrt(int(str(categoryCount[cat]).ljust(6)))
-#	out.writelines(("%s,%s,%s,%s,%s,%s\n") % (thresh, cat,  str(categoryCount[cat]).ljust(6),  categoryMatches[cat], categoryFP[cat],  categoryFN[cat]))
-#	out.writelines(("%s,%s,%s,%s,%s\n") % (thresh, str(categoryCount[cat]).ljust(6),  categoryMatches[cat], categoryFP[cat],  categoryFN[cat]))
-#	result[] = 
-#    print categoryMatches
-#    print categoryCount
-#    print uniqlabels
-#    print labellist
-#    out.close()
+#============================================
+# GET THRESHOLD FOR A CLASS get_thresh(class)
+#===========================================
+def get_thresh(testclass):
+	if testclass in threshDict:
+		return float(threshDict[testclass])
+	else:
+		return 0
+#===========================================================
+# Load optimum threshold for each class in a dict loadThresh(filename)
+#===========================================================
+def loadThresh(filename):
+	global threshDict;
+	f = open(filename,'r')
+	for line in f:
+		if line == "": continue  ## ignore empty lines
+		line = line.strip()
+		cat,t = line.split(',')
+		threshDict[cat] = []
+		threshDict[cat] = t
 
 #============================================
 # DRAW ROC CURVE roc(xlist,ylist,filename)
@@ -408,213 +430,139 @@ def roc(xlist,ylist,filename,title,xlabel,ylabel):
 # Main Program starts here    
 #===============================================================================
 #===============================================================================
+if __name__ == '__main__':
 
-categories, topLevelCategories = loadCategories("categories-500.txt")
-# print categories
-#dumpCategories(categories, topLevelCategories)  # can be commented out - diagnostic only - show the categories 
-uniq1 = []
-uniq2 = []
-labellist1 = []
-labellist2 = []
-hits = []
-categoryCount   = {}
-u1categoryCount   = {}
-u2categoryCount   = {}
-categoryMatches = {}
-categoryFP = {}
-categoryFN = {}
-categoryTN = {}
-perclassdict = {}
-x_list = []
-y_list = []
-xcoord = []
-ycoord = []
-rates = []
-optimized = numpy.zeros((40,11))
-title = ""
-xlabel = ""
-ylabel = ""
-counter = 0
-thresh = 0.00
-totalFP = 0
-totalTP = 0
-totalTN = 0
-totalFN = 0
-expectedTP = 0
-TPperc = 0
-FPperc = 0
-#maxACC = 0
-#maxAUC = 0
-mx = 0
-infile = sys.argv[1]
-metric = sys.argv[2]
-output = "%s-500-dyn-result"%int(time.time())
-output = output + "-" + metric + ".csv"
-print topLevelCategories
-print "Threshold ," , ",".join(topLevelCategories)
-header = []
+	categories, topLevelCategories = loadCategories("categories-500.txt") ## Load categories from cat file
+	# print categories
+	#dumpCategories(categories, topLevelCategories)  # can be commented out - diagnostic only - show the categories 
+	uniq1 = []
+	uniq2 = []
+	labellist1 = []
+	labellist2 = []
+	hits = []
+	uniqueData = []
+	categoryCount   = {}
+	u1categoryCount   = {}
+	u2categoryCount   = {}
+	categoryMatches = {}
+	categoryFP = {}
+	categoryFN = {}
+	categoryTN = {}
+	perclassdict = {}
+	fphitHistory = {}
+	tphitHistory = {}
+	fnhitHistory = {}
+	tnhitHistory = {}
+	threshDict = {}
+	x_list = []
+	y_list = []
+	xcoord = []
+	ycoord = []
+	rates = []
+	optimized = numpy.zeros((40,11))
+	title = ""
+	xlabel = ""
+	ylabel = ""
+	counter = 0
+	thresh = 0.00
+	totalFP = 0
+	totalTP = 0
+	totalTN = 0
+	totalFN = 0
+	expectedTP = 0
+	TPperc = 0
+	FPperc = 0
+	#maxACC = 0
+	#maxAUC = 0
+	mx = 0
+	#========================================================================
+	## Command line arguments ##
+	infile = sys.argv[1]	## input result file to process
+	metric = sys.argv[2]	## Metric used to determine file
+	#threshfile = sys.argv[3] ## path to threshold file
+	#========================================================================
+	loadThresh("perclassthresh.txt")	## load the threshold file and build a dictionary
+	output = "%s-500-dyn-result"%int(time.time())
+	output = output + "-composite-" + metric + ".csv"
+	print topLevelCategories
+	print "Threshold ," , ",".join(topLevelCategories)
+	header = []
 
-#out = open(output,'w')
-#out.writelines("Threshold,  TotalStreams, TotalCombinations, TP, FP, FN")
-#out.close()
-fname = output
-out = open(fname, 'w')
-out.write("Threshold, Class, SignatureCount/category, DatasetCount/category, Total Combinations(sig * len(dataset)), Pkts/Streams (Sig+Dat), Same Class/Expected true combinations (sigCount[cat] * datasetCount[cat], TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
-out.close()
-rates.append("Summary:\n")
-rates.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
-#optimized.append("Optimum Result:\n")
-#optimized.append("TotalTN,TotalFN,Threshold,TotalTP,TotalFP,TP%,FP%,TPR,FPR,Accuracy,AUC\n")
-if int(metric) == 3:
-	maxthresh = 2
-else:
-	maxthresh = 1
-while(thresh < maxthresh):
+	#out = open(output,'w')
+	#out.writelines("Threshold,  TotalStreams, TotalCombinations, TP, FP, FN")
+	#out.close()
+	fname = output
+	out = open(fname, 'w')
+	out.write("Threshold, Class, DatasetCount/category, SignatureCount/category, Total Combinations(sig * len(dataset)), Pkts/Streams (Sig+Dat), Same Class/Expected true combinations (sigCount[cat] * datasetCount[cat], TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
+	out.close()
+	if int(metric) == 3:
+		maxthresh = 2
+	else:
+		maxthresh = 1
+	#======================================================
+	# Create confusion matrix for optimum T
+	#======================================================
+
 	resetMatchCounts(topLevelCategories)
 	out = open(fname, 'a')
-#	out.close()
-	processResultFile(infile, out)
-	thresh = thresh + 0.05
+	#	out.close()
+	processResultFile(infile, out)  ## This is the main processing function to call
 	counter = counter + 1
-#out.close
-out = open(fname, 'a')
-if int(metric) == 3:   ## For combined only
-	tout = open("perclassthresh.txt", 'w')
-	#========================
-	# Write per class results
-	#=========================
-	for cat in topLevelCategories:
-		prev = 0.0
-		prevacc = 0.0
-		fpauc = 0.0
-		fprate = 0.0
-		tprate = 0.0
-		maxrowacc = 0
-		fpacc = 0.0
-		aucmax = 0.0
-		for i in range(len(perclassdict[cat])):
-	#	if perclassdict[cat][i].split(',')[3] > 0 or perclassdict[cat][i].split(',')[2] > 0: 
-			out.write(''.join(perclassdict[cat][i])) ## Write Class results to csv
-	#		print "whole y: ",perclassdict[cat][i] # TPR for that class
-	#		print "whole x: ",perclassdict[cat][i] # FPR for that class
-	#		print "y: ",perclassdict[cat][i].split(',')[11] # TPR for that class
-	#		print "x: ",perclassdict[cat][i].split(',')[12] # FPR for that class
-			ycoord.append(perclassdict[cat][i].split(',')[11]) # TPR for that class
-			xcoord.append(perclassdict[cat][i].split(',')[12]) # FPR for that class
-			aucmax = perclassdict[cat][i].split(',')[14]
-			accmax = perclassdict[cat][i].split(',')[13]
-			fprate = perclassdict[cat][i].split(',')[12]
-			tprate = perclassdict[cat][i].split(',')[11]
-			fpnbr =  perclassdict[cat][i].split(',')[8]
 
-	#		print "cat: ",cat
-	#		print "length: ",len(perclassdict[cat])
-		## CALCULATE OPTIMIZED ROW AND WRITE IT AT THE END ##
-		## FOR SITUATIONS WHERE ACCURACY IS BETTER THAN AUC, then look for fpr ##
-			if (aucmax > prev):
-				prev = aucmax
-				maxrow = i
-				fpauc = fprate
-				fpnbrauc = fpnbr
-			if (accmax > prevacc):
-				prevacc = accmax
-				maxrowacc = i
-				fpacc = fprate
-				fpnbracc = fpnbr
-		if (prevacc > prev) and (fpacc < fpauc) and (tprate>0.0):
-				maxrow = maxrowacc
-	#	print "MAXROW: ",maxrow
-		out.write("\n")
-		out.write("Class Optimized:\n")					
-		out.write(''.join(perclassdict[cat][maxrow])) ## Write result row with optimized threshold 
-		if int(metric) == 3:  ## for combined only
-			tout.write(perclassdict[cat][maxrow].split(',')[1]+","+perclassdict[cat][maxrow].split(',')[0])  ## Write per class threshold to threshold score output file
-			tout.write("\n")
+	#=======================================================
+	# Dump TP,FP,TN,FN lists to output file #
 
-	## Add labels and plot roc
-		xlabel = "FPR"
-		ylabel = "TPR"
-		title = "CLASS "+cat
-		filename = fname+"-class-"+cat
-		roc(xcoord,ycoord,filename,title,xlabel,ylabel)
-	## Reset list
-		xcoord =[]
-		ycoord =[]
-		out.write("\n")
-	out.close()
-if int(metric) == 3:  ## for combined only
-	tout.close()
-##======================================================================================================
+	tnoutput = open('tnlist.pkl', 'w')
+	fnoutput = open('fnlist.pkl', 'w')
+	tpoutput = open('tplist.pkl', 'w')
+	fpoutput = open('fplist.pkl', 'w')
 
-prev = 0.0
-prevacc = 0.0
-lowfp = 0.0
-maxrowacc = 0
-fpacc = 0.0
-for row in range(40):
-	newmax = optimized[row][10]
-	accmax = optimized[row][9]
-	fprate = optimized[row][8]
-#	fpnbr =  optimized[row][
-	## FOR SITUATIONS WHERE ACCURACY IS BETTER THAN AUC, then look for fpr ##
-	if (newmax > prev):
-		prev = newmax
-		maxrow = row
-		lowfp = fprate
-	if (accmax > prevacc):
-		prevacc = accmax
-#	if (prevacc > newmax) and (prevacc > prev):
-		maxrowacc = row
-		fpacc = fprate
+	pickle.dump(tnhitHistory, tnoutput)
+	pickle.dump(tphitHistory, tpoutput)
+	pickle.dump(fphitHistory, fpoutput)
+	pickle.dump(fnhitHistory, fnoutput)
 
-if (prevacc > prev) and (fpacc <= lowfp):
-	maxrow = maxrowacc
+	tnoutput.close()
+	tpoutput.close()
+	fnoutput.close()
+	fpoutput.close()
 
 
-print "Max results: ",prev
-print "Max index: ",maxrow
-optthresh = optimized[maxrow][2]
-rates.append("\nOptimized:\n")
-#rates.append(optimized[maxrow][10])
-rates.append( str(optimized[maxrow][0])+ ',' + str(optimized[maxrow][1])+ ',' + str(optimized[maxrow][2]) + ',' + str(optimized[maxrow][3]) + ',' + str(optimized[maxrow][4]) + ',' + str(optimized[maxrow][5]) + ',' + str(optimized[maxrow][6]) + ',' + str(optimized[maxrow][7]) + ',' + str(optimized[maxrow][8]) + ',' + str(optimized[maxrow][9]) + ',' + str(optimized[maxrow][10]) )
-out = open(fname, 'a')
-out.write(''.join(rates) + "\n")
-out.close()
-# ##########################
-# Define Axes and plot graph
-# ##########################
-#pylab.xlabel("FPR")
-#pylab.ylabel("TPR")
-xlabel = "FPR"
-ylabel = "TPR"
+	# ##########################
+	# Define Axes and plot graph
+	# ##########################
+	#pylab.xlabel("FPR")
+	#pylab.ylabel("TPR")
+	xlabel = "FPR"
+	ylabel = "TPR"
 
-#pylab.axis(-1,1,-1,1)
-print "Metric: ", metric
-#print "Type: ", type(metric)
-## Copy file to output folder ##
-os.system("cp " + infile + " output/")
-fstring = infile.split("/")
-## Check Metric to add label and create graph ##
-if int(metric) == 1:
-#	pylab.title("NCD")
-	title="NCD"
-	print "In NCD"
-	os.system("python ncd-fimz-graph.py " + fstring[-1]  + " " + str(optthresh) )
-	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
-if int(metric) == 2:
-#	pylab.title("SPAMSUM")
-	title="SPAMSUM"
-	print "In spamsum"
+	#pylab.axis(-1,1,-1,1)
+	print "Metric: ", metric
+	#print "Type: ", type(metric)
+	## Copy file to output folder ##
+	os.system("cp " + infile + " output/")
+	fstring = infile.split("/")
+	## Check Metric to add label and create graph ##
+	if int(metric) == 1:
+	#	pylab.title("NCD")
+		title="NCD"
+		print "In NCD"
+	#	os.system("python ncd-fimz-graph.py " + fstring[-1]  + " " + str(optthresh) )
+	#	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
+	if int(metric) == 2:
+	#	pylab.title("SPAMSUM")
+		title="SPAMSUM"
+		print "In spamsum"
 
-	os.system("python ncd-fimz-graph.py " + fstring[-1] + " " + str(optthresh) )
-	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
+	#	os.system("python ncd-fimz-graph.py " + fstring[-1] + " " + str(optthresh) )
+	#	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 
-if int(metric) == 3:
-#	pylab.title("COMBINED")
-	title = "COMBINED"
-	print "In COMBINED"
-	os.system("python ncd-fimz-graph.py " + fstring[-1] + " " + str(optthresh) )
-	os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
+	if int(metric) == 3:
+	#	pylab.title("COMBINED")
+		title = "COMBINED"
+		print "In COMBINED"
+		os.system("python create_optimized_graph.py " + fstring[-1] )
+		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 
-roc(x_list,y_list,fname,title,xlabel,ylabel)
-
+	#roc(x_list,y_list,fname,title,xlabel,ylabel)
+#else __name__ == 'Dynamic-category-parser-composite': 
