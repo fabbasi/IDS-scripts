@@ -193,49 +193,53 @@ test2 = [
 	 ['C','C',0.0728571428571],
 	]
 """
+#===================================
+# Main starts from here
+#==================================
+if __name__ == '__main__':
 
-#print "Val=",val
-#print type(val)
-#valfile = open( "val.out",'w')
-#valfile.write(str(val))
+	#print "Val=",val
+	#print type(val)
+	#valfile = open( "val.out",'w')
+	#valfile.write(str(val))
 
-#print "Test=",test
-fname = sys.argv[1]
-#print "Test2=",test2
-pairs = []
-ncdfile = csv.reader(open(fname, 'r'), delimiter=",")
-#pairs = ncdfile.readlines()
-for rows in ncdfile:
-#	print rows
-	pairs.append(rows)
+	#print "Test=",test
+	fname = sys.argv[1]
+	#print "Test2=",test2
+	pairs = []
+	ncdfile = csv.reader(open(fname, 'r'), delimiter=",")
+	#pairs = ncdfile.readlines()
+	for rows in ncdfile:
+	#	print rows
+		pairs.append(rows)
 
 
-#ncdfile.close()
-#print type(pairs )
-#pairs = val
-#print "Pairs",pairs
-#view = matrix_from_pairs(val)
+	#ncdfile.close()
+	#print type(pairs )
+	#pairs = val
+	#print "Pairs",pairs
+	#view = matrix_from_pairs(val)
 
-#view = matrix_from_pairs(pairs)
-#print "Data=",view[0]
-#mat = test[0]
-#print "Label=",view[1]
-#lab = test[1]
-#print(upgma(mat,lab))
-#temp = upgma(*matrix_from_pairs(val))
-#print temp
-#temp = upgma(*matrix_from_pairs(pairs))
-#print temp
-#graph = graph_from_upgma(upgma(*matrix_from_pairs(val)))
-graph = graph_from_upgma(upgma(*matrix_from_pairs(pairs)))
+	#view = matrix_from_pairs(pairs)
+	#print "Data=",view[0]
+	#mat = test[0]
+	#print "Label=",view[1]
+	#lab = test[1]
+	#print(upgma(mat,lab))
+	#temp = upgma(*matrix_from_pairs(val))
+	#print temp
+	#temp = upgma(*matrix_from_pairs(pairs))
+	#print temp
+	#graph = graph_from_upgma(upgma(*matrix_from_pairs(val)))
+	graph = graph_from_upgma(upgma(*matrix_from_pairs(pairs)))
 
-#print graph;
-size = os.path.getsize(fname)
-print('size = ' + str(size))
-print "Creating SVG file..."
-t = int(time.time())
-filename = "output/%s-upgma_graph.svg"%(t)
-graph.write_raw("output/upgma_raw.dot")
-graph.write_svg(filename)
+	#print graph;
+	size = os.path.getsize(fname)
+	print('size = ' + str(size))
+	print "Creating SVG file..."
+	t = int(time.time())
+	filename = "output/%s-upgma_graph.svg"%(t)
+	graph.write_raw("output/upgma_raw.dot")
+	graph.write_svg(filename)
 
 

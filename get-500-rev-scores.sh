@@ -15,7 +15,10 @@ i='1'
 
 #	python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/signatures/balanced --datdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-50 --iter $i --outdir /home/fimz/Dev/datasets/500-results/rev/imbalanced-50 
 
-	python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/signatures/balanced --datdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --iter $i --outdir /home/fimz/Dev/datasets/500-results/rev/imbalanced-100 
+#	python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/signatures/balanced --datdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --iter $i --outdir /home/fimz/Dev/datasets/500-results/rev/imbalanced-100 
+
+	python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100  --datdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --iter $i --outdir /home/fimz/Dev/datasets/500-results/rev/imbalanced-100 
+	
 
 #	python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/signatures/balanced --datdir /home/fimz/Dev/datasets/balanced-raw/10-each --iter $i --outdir /home/fimz/Dev/datasets/500-results/rev/balanced 
 
@@ -29,4 +32,4 @@ i='1'
 	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/
 
 #done
-sh run500-rev-dynamic.sh
+./run500-rev-dynamic.sh

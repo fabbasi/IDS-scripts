@@ -195,26 +195,14 @@ def classifyAttack(line, categories, lineNo):
 			tphitHistory[category1].append(str(part1))  ## add it to the history list
 		if part1 not in tphitHistory:  ## If the sample has not been previously seen/hit by the class
 			tphitHistory[part1] = []
-#			tphitHistory[category1] = []
-#			tphitHistory[category1].append(str(part)+","+str(value))  ## add it to the history list
 			tphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
 		        categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
-
-#		if part1 in hitHistory and hitHistory[part1]:  ## If the sample has been previously seen/hit
-#			hitHistory[part1].append(str(part2)+","+str(value)+","+"TP")  ## add it to the history list
-#		        categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
-
-#	        categoryMatches[category2] = categoryMatches[category2] + 1;
-#		hitUniq(line)
 	else:
 		if category1 in fnhitHistory and part1 not in fnhitHistory[category1]:
 			fnhitHistory[category1].append(str(part1))  ## add it to the history list
 		if category1 not in fnhitHistory:
 			fnhitHistory[category1] = []
-#			fnhitHistory[category1].append(str(part1))  ## add it to the history list
 		if part1 not in fnhitHistory:  ## If the sample has not been previously seen/hit by the class
-#			fnhitHistory[category1] = []
-#			fnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
 			fnhitHistory[part1] = []
 			fnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
 			categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
@@ -227,12 +215,9 @@ def classifyAttack(line, categories, lineNo):
 			fphitHistory[category1].append(str(part1))  ## add it to the history list
 		if part1 in fphitHistory:
 			fphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list	
-#			fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list	
 		if part1 not in fphitHistory:  ## If the sample has not been previously seen/hit
                         fphitHistory[part1] = []
                         fphitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
-#		        fphitHistory[category1] = []
-#                       fphitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
 
 		categoryFP[category1] = categoryFP[category1] + 1; ## FP counter (diff labels but score below threshold)
 #		hitUniq(line)
@@ -341,30 +326,6 @@ def processResultFile(filename, out):
 	totalTN = totalTN + int(categoryTN[cat])
 	totalFN = totalFN + int(categoryFN[cat])
 	samesum = samesum + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
-	#========
-	# TPR per cat = TP/TP+FN
-	# FPR per cat = FP/FP+TN
-	# Accuracy per cat = (TP+TN/P+N)
-	# AUC per cat = (1+TPR-FPR)/2
-	#=======
-#	print "category = ",cat
-#	print "TP cat = ",categoryMatches[cat]
-#	print "FP cat = ",categoryFP[cat]
-#	print "FN cat = ",categoryFN[cat]
-	try:
-		tprcat = int(categoryMatches[cat])/(int(categoryMatches[cat]) + int(categoryFN[cat]) + 0.0 )
-	except ZeroDivisionError:
-		tprcat = 0.0
-
-	if int(categoryFP[cat]) > 0:
-		fprcat = int(categoryFP[cat])/(int(categoryFP[cat]) + int(categoryTN[cat]) + 0.0 )
-	else:
-		fprcat = 0.0
-	try:
-		acccat = (int(categoryMatches[cat]) + int(categoryTN[cat]) + 0.0 )/( int(categoryMatches[cat]) + int(categoryFN[cat])  + int(categoryFP[cat]) +  int(categoryTN[cat]) )
-	except ZeroDivisionError:
-		acccat = 0.0
-	auccat = (1+tprcat-fprcat)/2.0
 	print "Category: ",cat
 	try:
 		tphit = len(tphitHistory[cat])
@@ -384,12 +345,35 @@ def processResultFile(filename, out):
 		fnhit = 0;
 
 	print "TPcat: ", tphit
-	print "catmatches; ", categoryMatches[cat]
 	print "FPcat: ", fphit
 	print "TNcat: ", tnhit
 	print "FNcat: ", fnhit
+	#========
+	# TPR per cat = TP/TP+FN
+	# FPR per cat = FP/FP+TN
+	# Accuracy per cat = (TP+TN/P+N)
+	# AUC per cat = (1+TPR-FPR)/2
+	#=======
+#	print "category = ",cat
+#	print "TP cat = ",categoryMatches[cat]
+#	print "FP cat = ",categoryFP[cat]
+#	print "FN cat = ",categoryFN[cat]
+	try:
+		tprcat = int(tphit)/(int(tphit) + int(fnhit) + 0.0 )
+	except ZeroDivisionError:
+		tprcat = 0.0
 
-	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(int(len(uniqueData) - int(tphit) - int(fphit) - int(fnhit) )) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
+	if int(categoryFP[cat]) > 0:
+		fprcat = int(fphit)/(int(fphit) + int(tnhit) + 0.0 )
+	else:
+		fprcat = 0.0
+	try:
+		acccat = (int(tphit) + int(tnhit) + 0.0 )/( int(tphit) + int(fnhit)  + int(fphit) +  int(tnhit) )
+	except ZeroDivisionError:
+		acccat = 0.0
+	auccat = (1+tprcat-fprcat)/2.0
+
+	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(tnhit) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
 #	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
