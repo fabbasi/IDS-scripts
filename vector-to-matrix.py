@@ -1,13 +1,22 @@
-import csv,os,sys,numpy
+####
+# 
+# Usage:
+# python vector-to-matrix.py /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1328050699-newcombined-out.txt
+#
+import csv,os,sys,numpy,dynamic
 
 def sum_labels(labels, distance_matrix):
 	val = {}
 	res = {}
 	ressum = 0
-
+	global categories
 	for label in labels:
+	   part1Class, part1Details = label.split("-")
+	   category1 = dynamic.categorisePayload(part1Class, categories)           # Classify the header -> return 14 for 14.1, 14.1.1, 14.1.2
 	   for i in range(0,len(labels)):
-		if label.split('-')[0] == labels[i].split('-')[0]:
+		part2Class, part2Details = labels[i].split("-")
+		category2 = dynamic.categorisePayload(part2Class, categories)
+		if category1 == category2 :  ## Match main category or sub-cat
 			if label in val:
 			       val[label].append(distance_matrix[labels.index(label)][i]) ## Append values from same category
 			if label not in val:
@@ -48,11 +57,15 @@ def matrix_from_pairs(pairs):
 #===================
 # MAIN starts here
 #===================
-res = {}
-val = {}
+res = {} ## result of the sum
+val = {} ## values per sample
+sums = {} ## sums per category
+ref = {} ## reference of sum and sample
+minres = {} ## result for minimum
 ressum = 0;
 fname = sys.argv[1]
 pairs = []
+categories, topLevelCategories = dynamic.loadCategories("categories-500.txt") ## Load categories from cat file
 resfile = csv.reader(open(fname, 'r'), delimiter=" ")
 for row in resfile:
 	pairs.append(row)
@@ -74,14 +87,52 @@ for row in distance_matrix:
 res,val = sum_labels(labels,distance_matrix) ## Return the sum of all the values for each label and the dictionary of all values
 print res
 temp = []
+score = []
+writer.writerow(["Labels and score of matching labels per category"])
 for label in labels:
+	s = []
+	score = []
 	for item in res[label]:
 		ressum = ressum + item
-	writer.writerow([label,','.join(map(str,val[label]))])
-#	sumofcat.append(label+","+resstr)
+	print label
+	print val[label]
+	score = val[label][:]
+#	score.append(s)
+	score.insert(0,label)
+#	,s.format(locals()).strip('"')]
+	writer.writerow(score)
 
+#writer.writerow([label,','.join(map(str,val[label]))])
+#	sumofcat.append(label+","+resstr)
+	
+writer.writerow(["Labels,Sum of matches"])
 for label in labels:
 	writer.writerow([label,','.join(map(str,res[label]))])
 
+for cat in topLevelCategories:
+   sums[cat] = []
+   minres[cat] = []
+   ref[cat] = []
+   for label in labels:
+	part1Class, part1Details = label.split("-")
+	category1 = dynamic.categorisePayload(part1Class, categories)           # Classify the header -> return 14 for 14.1, 14.1.1, 14.1.2
+	if cat == category1:  ## need to verify category from label via dynamic functions
+		sums[cat].append(res[label])
+		ref[cat].append([label,res[label]])
+#   print cat
+#   print sums[cat]
+#   print min(sums[cat])		
+   try:
+	   minres[cat].append(min(sums[cat]))
+	   writer.writerow([cat,"(Labels,Scores)",','.join(map(str,ref[cat])).strip("[]")])
+	   writer.writerow([cat,"Minimum:",','.join(map(str,minres[cat])).strip("[]")])
+	   for i in range(len(ref[cat])):
+		   if ref[cat][i][1] == min(sums[cat]):
+			   print ref[cat][i]
+			   writer.writerow([cat,"(Label,Min)",ref[cat][i]])
+			   writer.writerow([cat,"(Label,MaxT)",max(val[ref[cat][i][0]]) ])
+
+   except ValueError:
+	   print "ValueError occured for cat:",cat
 
 
