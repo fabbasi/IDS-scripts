@@ -3,10 +3,46 @@
 # Usage:
 # python vector-to-matrix.py /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1328050699-newcombined-out.txt
 #
-import csv,os,sys,numpy,dynamic
+#
+import csv,os,sys,numpy,dynamic,math
+import matplotlib
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.mlab as mlab
+
+def euc_dist(p1,p2):
+	return math.sqrt(math.pow((p2[0] - p1[0]), 2) +
+	                 math.pow((p2[1] - p1[1]), 2) )
+               
+def plot_scat(x,y,name):
+	# Create a figure with size 6 x 6 inches.
+	fig = Figure(figsize=(6,6))
+	# Create a canvas and add the figure to it.
+	canvas = FigureCanvas(fig)
+	# Create a subplot.
+	ax = fig.add_subplot(111)
+	# Set the title.
+	ax.set_title("Exemplar "+name,fontsize=14)
+
+	# Set the X Axis label.
+	ax.set_xlabel("Packages or Samples",fontsize=12)
+
+	# Set the Y Axis label.
+	ax.set_ylabel("Similarity Score",fontsize=12)
+	# Display Grid.
+	ax.grid(True,linestyle="-",color="0.75")
+
+	# Generate the Scatter Plot.
+	ax.scatter(x,y,s=20,color="tomato");
+
+	# Save the generated Scatter Plot to a PNG file.
+	canvas.print_figure(name+".png",dpi=300)
 
 def sum_labels(labels, distance_matrix):
 	val = {}
+	match_labels = {}
+	possfpval = {}
+	possfp_labels = {}
 	res = {}
 	ressum = 0
 	global categories
@@ -19,15 +55,29 @@ def sum_labels(labels, distance_matrix):
 		if category1 == category2 :  ## Match main category or sub-cat
 			if label in val:
 			       val[label].append(distance_matrix[labels.index(label)][i]) ## Append values from same category
+			       match_labels[label].append(labels[i]) ## Append corresponding label for the values from same category
 			if label not in val:
 			       val[label] = [] ## setup dictionary key for val 
+			       match_labels[label] = []
 			       res[label] = [] ## setup dicitonary key for res
 			       val[label].append(distance_matrix[labels.index(label)][i]) ## Append corresponding values from same category
+			       match_labels[label].append(labels[i]) ## Append corresponding label for the values from same category
+		else:  ## the categories dont match
+			if label in possfpval:
+			       possfpval[label].append(distance_matrix[labels.index(label)][i]) ## Append values from diff category
+			       possfp_labels[label].append(labels[i]) ## Append corresponding label for the values from diff category
+			if label not in possfpval:
+			       possfpval[label] = [] ## setup dictionary key for fpval 
+			       possfp_labels[label] = []
+#			       res[label] = [] ## setup dicitonary key for res
+			       possfpval[label].append(distance_matrix[labels.index(label)][i]) ## Append corresponding values from same category
+			       possfp_labels[label].append(labels[i]) ## Append corresponding label for the values from same category
+		
 	   ressum = 0
 	   for item in val[label]:      ## for every item in the dictionary key
 		ressum = ressum + item  ## Add each item with its predecessor
 	   res[label].append(ressum)    ## Append the sum to the result corresponding the label
-	return res,val  ## return result and val dict
+	return possfpval,possfp_labels,res,val,match_labels  ## return result and val dict
 
 
 def matrix_from_pairs(pairs):
@@ -62,6 +112,16 @@ val = {} ## values per sample
 sums = {} ## sums per category
 ref = {} ## reference of sum and sample
 minres = {} ## result for minimum
+maxt = {} ## for sample to threshold mapping per cat
+matches = {} ## All matches under the eucl dist of 1.95
+match_labels = {} ## All matching labels for that category
+miss_hits = {} ## miss hits
+possfpval = {} ## possible fp values
+possfp_labels = {} # possible fp labels
+fpval = {} ## fp value
+fp_labels = {} ## fp label
+add =0
+count = 0
 ressum = 0;
 fname = sys.argv[1]
 pairs = []
@@ -84,7 +144,7 @@ for row in distance_matrix:
         writer.writerow(temp)
         counter = counter + 1
 
-res,val = sum_labels(labels,distance_matrix) ## Return the sum of all the values for each label and the dictionary of all values
+possfpval,possfp_labels,res,val,match_labels = sum_labels(labels,distance_matrix) ## Return the sum of all the values for each label and the dictionary of all values
 print res
 temp = []
 score = []
@@ -100,8 +160,8 @@ for label in labels:
 #	score.append(s)
 	score.insert(0,label)
 #	,s.format(locals()).strip('"')]
+	writer.writerow(match_labels[label])
 	writer.writerow(score)
-
 #writer.writerow([label,','.join(map(str,val[label]))])
 #	sumofcat.append(label+","+resstr)
 	
@@ -127,12 +187,76 @@ for cat in topLevelCategories:
 	   writer.writerow([cat,"(Labels,Scores)",','.join(map(str,ref[cat])).strip("[]")])
 	   writer.writerow([cat,"Minimum:",','.join(map(str,minres[cat])).strip("[]")])
 	   for i in range(len(ref[cat])):
-		   if ref[cat][i][1] == min(sums[cat]):
-			   print ref[cat][i]
+		   if ref[cat][i][1] == min(sums[cat]): ## if minimum value in list is same as current cat
+#			   print ref[cat][i]  ## label and its min value pair
 			   writer.writerow([cat,"(Label,Min)",ref[cat][i]])
-			   writer.writerow([cat,"(Label,MaxT)",max(val[ref[cat][i][0]]) ])
+			   writer.writerow([cat,"Max Threshold",max(val[ref[cat][i][0]]) ])
+			   #####
+			   # Check possible fp with this threshold
+			   #####
+			   for z in range(len(possfpval[ref[cat][i][0]])):
+#			   for z in range(len(dist)):
+				   if possfpval[ref[cat][i][0]][z] < max(val[ref[cat][i][0]]):
+   				        if ref[cat][i][0] in fpval:
+					   fp_labels[ref[cat][i][0]].append(possfp_labels[ref[cat][i][0]][z])
+					   fpval[ref[cat][i][0]].append(possfpval[ref[cat][i][0]][z])
+					else:
+					   fpval[ref[cat][i][0]] = []
+					   fpval[ref[cat][i][0]].append(possfpval[ref[cat][i][0]][z])
+					   fp_labels[ref[cat][i][0]] = []
+					   fp_labels[ref[cat][i][0]].append(possfp_labels[ref[cat][i][0]][z])
+			   if ref[cat][i][0] in fp_labels: 
+				writer.writerow([cat,"FP labels",fp_labels[ref[cat][i][0]] ])
+				writer.writerow([cat,"FP values",fpval[ref[cat][i][0]] ])
 
+			   ##########################################
+			   matches[ref[cat][i][0]] = []
+			   sane = []
+			   count = 0
+			   for myscore in val[ref[cat][i][0]]:
+				if myscore < 0.75: ## Sanity threshold changed for NCD and spsum
+# 				   print myscore
+				   sane.append(myscore)
+				   count = count + 1
+#			   y1 = add/count  ## Average of possible result values
+#			   x1 = len(val[ref[cat][i][0]])/2
+#			   p1 = [x1,y1]
+#			   y1 = numpy.median(val[ref[cat][i][0]])  ## Replace avg with median for all values
+			   y1 = numpy.median(sane)  ## Replace avg with median for all values
+			   for j in range(len(val[ref[cat][i][0]])):
+				y2 = val[ref[cat][i][0]][j]
+				x2 = j
+				p1 = [j,y1]
+				p2 = [x2,y2]
+				if ( (euc_dist(p1,p2) < 0.4 and y2 < 0.75) or (y2 < 0.3) ):  ## Match if eucl dist is below 1.95
+#					print match_labels[ref[cat][i][0]][j]
+#					print i,j
+					matches[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Append labels of matching criteria of eucl distance of < 1.96
+				else:
+					matches[ref[cat][i][0]].append("MISS-HITS") ## Did not match
+					miss_hits[ref[cat][i][0]] = []
+					miss_hits[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Did not match
+			
+			   writer.writerow([ euc_dist( [j,y1],[j,val[ref[cat][i][0]][j]]) for j in range(len(val[ref[cat][i][0]])) ])
+			   writer.writerow(matches[ref[cat][i][0]])
+			   maxt[cat] = []
+			   maxt[cat].append(ref[cat][i][0])
+			   maxt[cat].append( max(val[ref[cat][i][0]]) )
    except ValueError:
 	   print "ValueError occured for cat:",cat
 
-
+writer.writerow(["Model(Median Exemplar, Max Threshold)"])
+for cat in topLevelCategories:
+   t = []
+   x = []
+   y = []
+   try:
+	t = maxt[cat][:]
+	print t
+	writer.writerow(t)
+	y = val[t[0]][:]
+	x = range(0,len(y))
+#	x = match_labels[t[0]][:]
+	plot_scat(x,y,t[0])
+   except KeyError:
+	   print "Key Error:",cat

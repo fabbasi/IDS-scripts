@@ -161,6 +161,7 @@ upgmafile = open (output+upgmastr, 'w')
 
 getcontext().prec = 4
 
+'''
 for i in range(0, len(sigselect)):
 #    print i
     for j in range(0, len(selection)):
@@ -181,6 +182,7 @@ for i in range(0, len(sigselect)):
        	spsumfile.write(str(sigselect[i]) + " " + str(selection[j]) + " " + str(spsum) + "\n")
 #	newcombinedfile.write(str(selection[j]) + " " + str(sigselect[i]) + " " + str(combscore) + "\n")
 	combinedfile.write(str(sigselect[i]) + " " + str(selection[j]) + " " + str(combscore) + "\n")
+'''
 
 for i in range(0, len(selection)):
 #    print i
@@ -189,8 +191,13 @@ for i in range(0, len(selection)):
         fy = datdir + '/' + str(selection[i])
 	ncdscore = ncd(fx,fy)		 
 	spsum = alldist(fx, fy)
-        combscore = float(spsum) + float(ncdscore)
-        newcombinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(combscore) + "\n")
+	combscore = []
+        combscore = [float(spsum) , float(ncdscore)]
+        newcombinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(min(combscore)) + "\n")
+        ncdfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + "\n")
+        spsumfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(spsum) + "\n")
+        upgmafile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + "\n")
+        combinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + " " + str(spsum)  + "\n")
 
 
 

@@ -4,6 +4,7 @@
 # Usage:
 # $ python Dynamic-category-parser.py /path/to/ncd-result.txt numeric-metric-value 
 # $ mv *-500-dyn-result-6* /path/to/target
+#python Dynamic-category-parser-composite.py /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1327628422-newcombined-out.txt 3; mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/;mv output/* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/
 #
 #!/usr/bin/python
 import sys  ##  For grabbing input from SHELL

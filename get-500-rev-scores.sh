@@ -32,4 +32,4 @@ i='1'
 	mv /home/fimz/Dev/scripts/output/* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/
 
 #done
-./run500-rev-dynamic.sh
+#./run500-rev-dynamic.sh
