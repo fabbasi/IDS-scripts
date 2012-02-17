@@ -62,7 +62,7 @@ def sum_labels(labels, distance_matrix):
 			       res[label] = [] ## setup dicitonary key for res
 			       val[label].append(distance_matrix[labels.index(label)][i]) ## Append corresponding values from same category
 			       match_labels[label].append(labels[i]) ## Append corresponding label for the values from same category
-		else:  ## the categories dont match
+		else:  ## the categories dont match list of possible fp
 			if label in possfpval:
 			       possfpval[label].append(distance_matrix[labels.index(label)][i]) ## Append values from diff category
 			       possfp_labels[label].append(labels[i]) ## Append corresponding label for the values from diff category
@@ -120,6 +120,8 @@ possfpval = {} ## possible fp values
 possfp_labels = {} # possible fp labels
 fpval = {} ## fp value
 fp_labels = {} ## fp label
+model = {}
+match_score = {}
 add =0
 count = 0
 ressum = 0;
@@ -154,9 +156,11 @@ for label in labels:
 	score = []
 	for item in res[label]:
 		ressum = ressum + item
-	print label
-	print val[label]
+#	print label
+#	print val[label]
 	score = val[label][:]
+	match_score[label] = []
+	match_score[label].append(val[label])
 #	score.append(s)
 	score.insert(0,label)
 #	,s.format(locals()).strip('"')]
@@ -184,6 +188,8 @@ for cat in topLevelCategories:
 #   print min(sums[cat])		
    try:
 	   minres[cat].append(min(sums[cat]))
+	   writer.writerow([""])
+	   writer.writerow(["### NEW RECORD ###"])
 	   writer.writerow([cat,"(Labels,Scores)",','.join(map(str,ref[cat])).strip("[]")])
 	   writer.writerow([cat,"Minimum:",','.join(map(str,minres[cat])).strip("[]")])
 	   for i in range(len(ref[cat])):
@@ -191,12 +197,18 @@ for cat in topLevelCategories:
 #			   print ref[cat][i]  ## label and its min value pair
 			   writer.writerow([cat,"(Label,Min)",ref[cat][i]])
 			   writer.writerow([cat,"Max Threshold",max(val[ref[cat][i][0]]) ])
-			   #####
+		           writer.writerow(match_labels[ref[cat][i][0]]) ## write matching labels per exemplar
+	   	           writer.writerow(match_score[ref[cat][i][0]]) ## write score of these labels per exemplar
+			   model[cat] = []  ## create model
+			   model[cat].append([ref[cat][i][0],max(val[ref[cat][i][0]])]) ## model with exemplar and threshold pair
+			   ########################################
 			   # Check possible fp with this threshold
-			   #####
+			   #########################################
+			   has_fp = 0
+			   fpcount = 0
 			   for z in range(len(possfpval[ref[cat][i][0]])):
 #			   for z in range(len(dist)):
-				   if possfpval[ref[cat][i][0]][z] < max(val[ref[cat][i][0]]):
+				   if possfpval[ref[cat][i][0]][z] < max(val[ref[cat][i][0]]):  ## if value is less than the threshold
    				        if ref[cat][i][0] in fpval:
 					   fp_labels[ref[cat][i][0]].append(possfp_labels[ref[cat][i][0]][z])
 					   fpval[ref[cat][i][0]].append(possfpval[ref[cat][i][0]][z])
@@ -205,10 +217,13 @@ for cat in topLevelCategories:
 					   fpval[ref[cat][i][0]].append(possfpval[ref[cat][i][0]][z])
 					   fp_labels[ref[cat][i][0]] = []
 					   fp_labels[ref[cat][i][0]].append(possfp_labels[ref[cat][i][0]][z])
+					has_fp = 1  ## sample has fp, need to revise model
+					fpcount = fpcount + 1 ## fp counter
+#					temp = val[ref[cat][i][0]][:]
 			   if ref[cat][i][0] in fp_labels: 
-				writer.writerow([cat,"FP labels",fp_labels[ref[cat][i][0]] ])
-				writer.writerow([cat,"FP values",fpval[ref[cat][i][0]] ])
-
+ 			        writer.writerow([cat,"FP labels:",fp_labels[ref[cat][i][0]] ])
+				writer.writerow([cat,"FP values:",fpval[ref[cat][i][0]] ])
+				writer.writerow([cat,"FP count:",fpval[ref[cat][i][0]] ])
 			   ##########################################
 			   matches[ref[cat][i][0]] = []
 			   sane = []
@@ -234,11 +249,27 @@ for cat in topLevelCategories:
 					matches[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Append labels of matching criteria of eucl distance of < 1.96
 				else:
 					matches[ref[cat][i][0]].append("MISS-HITS") ## Did not match
-					miss_hits[ref[cat][i][0]] = []
-					miss_hits[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Did not match
-			
+					if ref[cat][i][0] in miss_hits:
+						 miss_hits[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Did not match
+					else:
+						miss_hits[ref[cat][i][0]] = []
+						miss_hits[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Did not match
+			   writer.writerow(["Euclidean Distance, Matching Labels, Missmatch Labels"])
 			   writer.writerow([ euc_dist( [j,y1],[j,val[ref[cat][i][0]][j]]) for j in range(len(val[ref[cat][i][0]])) ])
 			   writer.writerow(matches[ref[cat][i][0]])
+			   if ref[cat][i][0] in miss_hits:
+				writer.writerow(miss_hits[ref[cat][i][0]])
+				if len(miss_hits[ref[cat][i][0]]) == 1: ## create model with additional exemplar and tight threshold
+	  			   if has_fp == 1 and fpcount > 0: ## update/revise model with new threshold
+	   			       tempval = val[ref[cat][i][0]][:]
+				       del tempval[matches[ref[cat][i][0]].index("MISS-HITS")] ## delete miss hit value
+				       writer.writerow(["MODEL REVISED"])
+				       model[cat] = []
+				       model[cat] = [ ref[cat][i][0],max(tempval) ] ## recreate model with adjusted threshold
+				   model[cat].append([ ref[cat][i][0],0.1  ])
+				else:  ## Handle more than 1 miss matches here
+					1	
+			   writer.writerow(["MODEL: ",model[cat]])
 			   maxt[cat] = []
 			   maxt[cat].append(ref[cat][i][0])
 			   maxt[cat].append( max(val[ref[cat][i][0]]) )
