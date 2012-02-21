@@ -104,6 +104,126 @@ def matrix_from_pairs(pairs):
         distance_matrix[i][j] = float(pair[2])
 
     return distance_matrix, labels
+
+
+#############################################
+# Evaluate the Model for more than 1 misshits
+##############################################
+
+def evaluate_model(miss_hits,val,ref,cat,writer,model):
+	misshit_val = {}
+	misshit_lab = {}
+	miss_index = {}
+	corr_misshit_lab = {}
+	corr_misshit_val = {}
+	sumbad = {}
+	badlab = {}
+	sumbad[cat] = []
+	badlab[cat] = []
+	is_match = []
+	newhits = {}
+	new_misshits = {}
+	writer.writerow(["Evaluate function:"])
+
+#	print "Misshits:",miss_hits
+
+	for item in miss_hits: ## Create list of values and labels of misshit samples
+		misshit_val[item] = []
+		misshit_lab[item] = []
+#		print "Item:",item
+#		print "val:",val[item]
+#		print "ref:",ref[item]
+		misshit_val[item].append(val[item])
+		misshit_lab[item].append(ref[item])
+#		print "misshit_val:",misshit_val[item]
+
+	for item in miss_hits: ## Create list of the index of misshit samples only
+		miss_index[item] = []
+		for i in range(len(misshit_lab[item][0])):
+#			print "len:",len(misshit_lab[item][0])
+#			print "i",i
+#			print "item in misshit_lab:", misshit_lab[item][0][i]
+			if misshit_lab[item][0][i] in miss_hits: ## index of misshit samples
+#				print "Matching index found"
+				miss_index[item].append(i)
+#	print "missindex:",miss_index
+	for item in miss_hits:
+		corr_misshit_lab[item] = []
+		corr_misshit_val[item] = []
+#		print "missindex:",miss_index[item]
+		for ind in miss_index[item]: ## Corrected misshit val and lab
+#			print "item:",item
+#			print "index:",ind
+#			print "val:",misshit_val[item][0][0][ind]
+#			print "lab:",misshit_lab[item][0][ind]
+			corr_misshit_val[item].append(misshit_val[item][0][0][ind])
+			corr_misshit_lab[item].append(misshit_lab[item][0][ind])
+	
+	## Now for MDL calculations ##
+	sumbad[cat] = []
+	for item in miss_hits: ## create a list of sums of bad samples and their labels
+#		print "item",item
+#		print "misshitval:",corr_misshit_val[item]
+#		print "sum:",sum(corr_misshit_val[item])
+		sumbad[cat].append(sum(corr_misshit_val[item]))
+		badlab[cat].append(item)
+	print "sumbad:",sumbad[cat]
+	print "badlab:",badlab[cat]
+	mdl_val = min(sumbad[cat]) ## minimum of the sums
+	mdl_ind = sumbad[cat].index(min(sumbad[cat])) ## index of the min sum
+	mdl_lab = badlab[cat][mdl_ind] ## label of mdl
+	print "MDL val:",mdl_val
+	print "MDL lab:",mdl_lab
+	writer.writerow([cat,"NewLabel,Newmin",mdl_lab,mdl_val])
+	writer.writerow([cat,"Max Threshold",max(corr_misshit_val[mdl_lab])])
+
+#	x1 = x2 = y1 = y2 = 0	
+	## Now for median and euclid calc ##
+	writer.writerow(["New MDL Labels and Scores:"])
+	writer.writerow(corr_misshit_lab[mdl_lab])
+	writer.writerow(corr_misshit_val[mdl_lab])
+
+	temp = []
+	temp = corr_misshit_val[mdl_lab][:]
+#	print "mdl values",corr_misshit_val[mdl_lab]
+	y1 = numpy.median(temp)
+	print "Median: ",y1
+	x1 = x2 = 0
+	p1 = [x1,y1]
+	
+	newhits[mdl_lab] = []
+	new_misshits[mdl_lab] = []
+	eucd = []
+	for v in corr_misshit_val[mdl_lab]:
+#		print "v:",v
+		y2 = v
+		p2 = [x2,y2]
+#		print "euclid: ",euc_dist(p1,p2)
+		eucd.append(euc_dist(p1,p2))
+		if ( (euc_dist(p1,p2) < 0.4 and y2 < 0.75) or (y2 < 0.3) ):  ## Match if eucl dist is below 0.75
+			newhits[mdl_lab].append(corr_misshit_lab[mdl_lab][corr_misshit_val[mdl_lab].index(v)])
+			is_match.append(corr_misshit_lab[mdl_lab][corr_misshit_val[mdl_lab].index(v)])
+		else:
+			is_match.append("MISS-HIT")
+			new_misshits[mdl_lab].append(corr_misshit_lab[mdl_lab][corr_misshit_val[mdl_lab].index(v)])
+	
+	writer.writerow(["Euclidean distance:"])
+	writer.writerow(eucd)
+#	writer.writerow([ euc_dist([x1,y1],[x2,j]) for j in corr_misshit_val[mdl_lab] ])
+	writer.writerow(is_match) ## write is_match results
+	## add revised model ##
+#	if has_fp == 1 and fpcount > 0: ## update/revise model with new threshold
+#	       tempval = val[ref[cat][i][0]][:]
+#	       del tempval[matches[ref[cat][i][0]].index("MISS-HITS")] ## delete miss hit value
+	writer.writerow(["MODEL REVISED"])
+#	       model[cat] = []
+	       ## recreate model with adjusted threshold
+	model[cat].append([ mdl_lab,max(corr_misshit_val[mdl_lab]) ])
+	writer.writerow(model[cat])
+
+	return new_misshits[mdl_lab], newhits[mdl_lab]
+
+
 #===================
 # MAIN starts here
 #===================
@@ -168,10 +288,13 @@ for label in labels:
 	writer.writerow(score)
 #writer.writerow([label,','.join(map(str,val[label]))])
 #	sumofcat.append(label+","+resstr)
-	
+
 writer.writerow(["Labels,Sum of matches"])
 for label in labels:
 	writer.writerow([label,','.join(map(str,res[label]))])
+########################################
+##### MAIN ITERATOR FOR CALCULATIONS ###
+########################################
 
 for cat in topLevelCategories:
    sums[cat] = []
@@ -268,7 +391,50 @@ for cat in topLevelCategories:
 				       model[cat] = [ ref[cat][i][0],max(tempval) ] ## recreate model with adjusted threshold
 				   model[cat].append([ ref[cat][i][0],0.1  ])
 				else:  ## Handle more than 1 miss matches here
-					1	
+					new_misshits, newhits = evaluate_model(miss_hits[ref[cat][i][0]],match_score,match_labels,cat,writer,model)
+#					while(len(new_misshits) > 0):
+#						new_misshits, newhits = evaluate_model(new_misshits,val,ref,cat,writer)
+					print "ok"
+					'''
+					misscount = len(miss_hits[ref[cat][i][0]]) ##number of miss hits
+					tempval = val[ref[cat][i][0]][:] ## values
+					templabel = miss_hits[ref[cat][i][0]][:] ## labels
+					missindex = []
+					leftovers = []
+					[ missindex.append(m) for m,x in enumerate(matches[ref[cat][i][0]]) if x == "MISS-HITS"]
+					print ref[cat][i][0]
+					for ind in sorted(missindex, reverse=True):
+						print ind
+						print tempval[ind]
+						del tempval[ind] ## delete miss hit values
+					for lab in templabel:
+						leftovers.append(res[lab])
+	#				print "New exemplar: ",templabel[leftovers.index(min(leftovers))]
+					newlabel = []
+					newscore = []
+					badindex = []
+					exemplist = []
+					exemplab = []
+#					for lab in labels:
+					newlabel = match_labels[templabel[leftovers.index(min(leftovers))]][:]
+					newscore = match_score[templabel[leftovers.index(min(leftovers))]][:]
+					for badl in templabel:
+						badindex.append(newlabel.index(badl))
+						print "badboyz",badl
+						print newlabel.index(badl)
+					for badi in badindex:
+						print "badi:",badi
+#						print match_score[templabel[leftovers.index(min(leftovers))]]
+						print match_score[templabel[leftovers.index(min(leftovers))]][0][badi]
+						exemplist.append(newscore[0][badi])
+						exemplab.append(newlabel[badi])
+					print exemplist
+					writer.writerow(["New Exemplar",templabel[leftovers.index(min(leftovers))]])	
+					writer.writerow(exemplist)
+					writer.writerow(exemplab)
+					writer.writerow(["Max new:", max(exemplist)])
+
+'''					
 			   writer.writerow(["MODEL: ",model[cat]])
 			   maxt[cat] = []
 			   maxt[cat].append(ref[cat][i][0])
