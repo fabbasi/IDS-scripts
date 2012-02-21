@@ -223,6 +223,33 @@ def evaluate_model(miss_hits,val,ref,cat,writer,model):
 
 	return new_misshits[mdl_lab], newhits[mdl_lab]
 
+########################################
+# Check possible fp with this threshold
+#########################################
+def check_fp(possfpval,possfp_labels,writer)):
+   has_fp = 0
+   fpcount = 0
+   for z in range(len(possfpval[ref[cat][i][0]])):
+#			   for z in range(len(dist)):
+	   if possfpval[ref[cat][i][0]][z] < max(val[ref[cat][i][0]]):  ## if value is less than the threshold
+		if ref[cat][i][0] in fpval:
+		   fp_labels[ref[cat][i][0]].append(possfp_labels[ref[cat][i][0]][z])
+		   fpval[ref[cat][i][0]].append(possfpval[ref[cat][i][0]][z])
+		else:
+		   fpval[ref[cat][i][0]] = []
+		   fpval[ref[cat][i][0]].append(possfpval[ref[cat][i][0]][z])
+		   fp_labels[ref[cat][i][0]] = []
+		   fp_labels[ref[cat][i][0]].append(possfp_labels[ref[cat][i][0]][z])
+		has_fp = 1  ## sample has fp, need to revise model
+		fpcount = fpcount + 1 ## fp counter
+#					temp = val[ref[cat][i][0]][:]
+   if ref[cat][i][0] in fp_labels: 
+	writer.writerow([cat,"FP labels:",fp_labels[ref[cat][i][0]] ])
+	writer.writerow([cat,"FP values:",fpval[ref[cat][i][0]] ])
+	writer.writerow([cat,"FP count:",fpval[ref[cat][i][0]] ])
+##########################################
+
+
 
 #===================
 # MAIN starts here
@@ -327,6 +354,7 @@ for cat in topLevelCategories:
 			   ########################################
 			   # Check possible fp with this threshold
 			   #########################################
+
 			   has_fp = 0
 			   fpcount = 0
 			   for z in range(len(possfpval[ref[cat][i][0]])):
