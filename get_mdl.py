@@ -221,7 +221,7 @@ def evaluate_model(miss_hits,val,ref,cat,writer,model):
 	model[cat].append([ mdl_lab,max(corr_misshit_val[mdl_lab]) ])
 	writer.writerow(model[cat])
 
-	return new_misshits[mdl_lab], newhits[mdl_lab]
+	return new_misshits[mdl_lab], newhits[mdl_lab], model
 
 ########################################
 # Check possible fp with this threshold
@@ -252,9 +252,9 @@ def check_fp(possfp_labels,possfpval,fp_labels,fpval,val,cat,exemplar,writer):
 	print "FP result written out to file"
 	writer.writerow([cat,"FP labels:",fp_labels[exemplar] ])
 	writer.writerow([cat,"FP values:",fpval[exemplar] ])
-	writer.writerow([cat,"FP count:",fpval[exemplar] ])
+	writer.writerow([cat,"FP count:",fpcount ])
 
-   return has_fp, fpcount, fp_labels, fpval
+   return has_fp, fpcount, fp_labels, fpval, min(fpval[exemplar]) ## added min fp val
 ##########################################
 
 
@@ -309,6 +309,8 @@ possfpval,possfp_labels,res,val,match_labels = sum_labels(labels,distance_matrix
 temp = []
 score = []
 writer.writerow(["Labels and score of matching labels per category"])
+
+# labels,res,ressum,val,
 for label in labels:
 	s = []
 	score = []
@@ -318,7 +320,7 @@ for label in labels:
 #	print val[label]
 	score = val[label][:]
 	match_score[label] = []
-	match_score[label].append(val[label])
+	match_score[label].append(val[label]) ## store list of values/scores against the given label
 #	score.append(s)
 	score.insert(0,label)
 #	,s.format(locals()).strip('"')]
@@ -362,107 +364,158 @@ for cat in topLevelCategories:
 	   	           writer.writerow(match_score[ref[cat][i][0]]) ## write score of these labels per exemplar
 			   model[cat] = []  ## create model
 			   model[cat].append([ref[cat][i][0],max(val[ref[cat][i][0]])]) ## model with exemplar and threshold pair
-			   exemplar = ref[cat][i][0]
+			   ### E X E M P L A R S ###
+			   exemplar_lab = ref[cat][i][0] ## Exemplar label
+			   exemplar_val = val[ref[cat][i][0]][:] ## Exemplar value
+			   exemplar_thresh = max(val[ref[cat][i][0]])
+
 			   ########################################
 			   # Check possible fp with this threshold
 			   #########################################
-			   has_fp,fpcount,fp_labels,fpval = check_fp(possfp_labels,possfpval,fp_labels,fpval,val,cat,exemplar,writer)
+			   has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(possfp_labels,possfpval,fp_labels,fpval,val,cat,exemplar_lab,writer)
 			   ##########################################
-			   matches[ref[cat][i][0]] = []
-			   sane = []
-			   count = 0
-			   for myscore in val[ref[cat][i][0]]:
+			   ### H A S  F A L S E P O S I T I V E S ###
+			   ##########################################
+			   
+			   if (has_fp):
+
+			     matches[exemplar_lab] = []
+			     outlier_lab[exemplar_lab] = []
+			     outlier_val[exemplar_lab] = []
+			     sane = []
+			     count = 0
+			     
+			     for myscore in val[exemplar_lab]:
 				if myscore < 0.85: ## Sanity threshold changed for NCD and spsum
-# 				   print myscore
-				   sane.append(myscore)
-				   count = count + 1
+	# 				   print myscore
+					   sane.append(myscore)
+					   count = count + 1
 				else:
-					outlier_lab[exemplar].append(val[exemplar])
-					outlier_val[exemplar].append(val[exemplar])
+					outlier_lab[exemplar_lab].append(val[exemplar_lab])
+					outlier_val[exemplar_lab].append(val[exemplar_lab])
 
-#			   y1 = add/count  ## Average of possible result values
-#			   x1 = len(val[ref[cat][i][0]])/2
-#			   p1 = [x1,y1]
-#			   y1 = numpy.median(val[ref[cat][i][0]])  ## Replace avg with median for all values
-			   y1 = numpy.median(sane)  ## Replace avg with median for all values
-			   for j in range(len(val[ref[cat][i][0]])):
-				y2 = val[ref[cat][i][0]][j]
-				x2 = j
-				p1 = [j,y1]
+			     y1 = numpy.median(sane)  ## Replace avg with median for all values
+			     split_thresh = math.fabs(fpmin - y1)/2.0## the threshold required to split data into groups
+
+			     for j in range(len(val[exemplar_lab])):
+				y2 = val[exemplar_lab][j]
+				x1 = x2 = 0
+				p1 = [x1,y1]
 				p2 = [x2,y2]
-				if ( (euc_dist(p1,p2) < 0.4 and y2 < 0.75) or (y2 < 0.3) ):  ## Match if eucl dist is below 1.95
-#					print match_labels[ref[cat][i][0]][j]
-#					print i,j
-					matches[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Append labels of matching criteria of eucl distance of < 1.96
+				if ( (euc_dist(p1,p2) < split_threh and y2 < 0.85) or (y2 < 0.3) ):  ## Match if eucl dist is below 1.95
+	#					print match_labels[ref[cat][i][0]][j]
+	#					print i,j
+					matches[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 1.96
 				else:
-					matches[ref[cat][i][0]].append("MISS-HITS") ## Did not match
-					if ref[cat][i][0] in miss_hits:
-						 miss_hits[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Did not match
+					matches[ref[exemplar_lab].append("MISS-HITS") ## Did not match
+					if exemplar_lab in miss_hits:
+						 miss_hits[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Did not match
 					else:
-						miss_hits[ref[cat][i][0]] = []
-						miss_hits[ref[cat][i][0]].append(match_labels[ref[cat][i][0]][j]) ## Did not match
-			   writer.writerow(["Euclidean Distance, Matching Labels, Missmatch Labels"])
-			   writer.writerow([ euc_dist( [j,y1],[j,val[ref[cat][i][0]][j]]) for j in range(len(val[ref[cat][i][0]])) ])
-			   writer.writerow(matches[ref[cat][i][0]])
-			   if ref[cat][i][0] in miss_hits:
-				writer.writerow(miss_hits[ref[cat][i][0]])
-				if len(miss_hits[ref[cat][i][0]]) == 1: ## create model with additional exemplar and tight threshold
-	  			   if has_fp == 1 and fpcount > 0: ## update/revise model with new threshold
-	   			       tempval = val[ref[cat][i][0]][:]
-				       del tempval[matches[ref[cat][i][0]].index("MISS-HITS")] ## delete miss hit value
-				       writer.writerow(["MODEL REVISED"])
-				       model[cat] = []
-				       model[cat] = [ ref[cat][i][0],max(tempval) ] ## recreate model with adjusted threshold
-				   model[cat].append([ ref[cat][i][0],0.1  ])
-				else:  ## Handle more than 1 miss matches here
-					new_misshits, newhits = evaluate_model(miss_hits[ref[cat][i][0]],match_score,match_labels,cat,writer,model)
-#					while(len(new_misshits) > 0):
-#						new_misshits, newhits = evaluate_model(new_misshits,val,ref,cat,writer)
-					print "ok"
-					'''
-					misscount = len(miss_hits[ref[cat][i][0]]) ##number of miss hits
-					tempval = val[ref[cat][i][0]][:] ## values
-					templabel = miss_hits[ref[cat][i][0]][:] ## labels
-					missindex = []
-					leftovers = []
-					[ missindex.append(m) for m,x in enumerate(matches[ref[cat][i][0]]) if x == "MISS-HITS"]
-					print ref[cat][i][0]
-					for ind in sorted(missindex, reverse=True):
-						print ind
-						print tempval[ind]
-						del tempval[ind] ## delete miss hit values
-					for lab in templabel:
-						leftovers.append(res[lab])
-	#				print "New exemplar: ",templabel[leftovers.index(min(leftovers))]
-					newlabel = []
-					newscore = []
-					badindex = []
-					exemplist = []
-					exemplab = []
-#					for lab in labels:
-					newlabel = match_labels[templabel[leftovers.index(min(leftovers))]][:]
-					newscore = match_score[templabel[leftovers.index(min(leftovers))]][:]
-					for badl in templabel:
-						badindex.append(newlabel.index(badl))
-						print "badboyz",badl
-						print newlabel.index(badl)
-					for badi in badindex:
-						print "badi:",badi
-#						print match_score[templabel[leftovers.index(min(leftovers))]]
-						print match_score[templabel[leftovers.index(min(leftovers))]][0][badi]
-						exemplist.append(newscore[0][badi])
-						exemplab.append(newlabel[badi])
-					print exemplist
-					writer.writerow(["New Exemplar",templabel[leftovers.index(min(leftovers))]])	
-					writer.writerow(exemplist)
-					writer.writerow(exemplab)
-					writer.writerow(["Max new:", max(exemplist)])
+						miss_hits[exemplar_lab] = []
+						miss_hits[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Did not match
+			   
+			     new_misshits,newhits,model = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model,fpmin)
+			     while(len(new_misshits) > 0):
 
-'''					
-			   writer.writerow(["MODEL: ",model[cat]])
-			   maxt[cat] = []
-			   maxt[cat].append(ref[cat][i][0])
-			   maxt[cat].append( max(val[ref[cat][i][0]]) )
+					new_misshits, newhits, model = evaluate_model(new_misshits,match_score,match_labels,cat,writer,model)
+
+			   else:
+
+				   matches[exemplar_lab] = []
+				   sane = []
+				   count = 0
+				   for myscore in val[exemplar_lab]:
+					if myscore < 0.85: ## Sanity threshold changed for NCD and spsum
+	# 				   print myscore
+					   sane.append(myscore)
+					   count = count + 1
+					else:
+						outlier_lab[exemplar_lab].append(val[exemplar_lab])
+						outlier_val[exemplar_lab].append(val[exemplar_lab])
+
+	#			   y1 = add/count  ## Average of possible result values
+	#			   x1 = len(val[ref[cat][i][0]])/2
+	#			   p1 = [x1,y1]
+	#			   y1 = numpy.median(val[ref[cat][i][0]])  ## Replace avg with median for all values
+				   y1 = numpy.median(sane)  ## Replace avg with median for all values
+				   for j in range(len(val[exemplar_lab])):
+					y2 = val[exemplar_lab][j]
+					x2 = j
+					p1 = [j,y1]
+					p2 = [x2,y2]
+					if ( (euc_dist(p1,p2) < 0.4 and y2 < 0.75) or (y2 < 0.3) ):  ## Match if eucl dist is below 1.95
+	#					print match_labels[ref[cat][i][0]][j]
+	#					print i,j
+						matches[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 1.96
+					else:
+						matches[ref[exemplar_lab].append("MISS-HITS") ## Did not match
+						if exemplar_lab in miss_hits:
+							 miss_hits[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Did not match
+						else:
+							miss_hits[exemplar_lab] = []
+							miss_hits[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Did not match
+				   writer.writerow(["Euclidean Distance, Matching Labels, Missmatch Labels"])
+				   writer.writerow([ euc_dist( [j,y1],[j,val[exemplar_lab][j]]) for j in range(len(val[exemplar_lab])) ])
+				   writer.writerow(matches[exemplar_lab])
+				   if exemplar_lab in miss_hits:
+					writer.writerow(miss_hits[exemplar_lab])
+					if len(miss_hits[exemplar_lab]) == 1: ## create model with additional exemplar and tight threshold
+					   if has_fp == 1 and fpcount > 0: ## update/revise model with new threshold
+					       tempval = val[exemplar_lab][:]
+					       del tempval[matches[exemplar_lab].index("MISS-HITS")] ## delete miss hit value
+					       writer.writerow(["MODEL REVISED"])
+					       model[cat] = []
+					       model[cat] = [ exemplar_lab,max(tempval) ] ## recreate model with adjusted threshold
+					   model[cat].append([ exemplar_lab,0.1  ])
+					else:  ## Handle more than 1 miss matches here
+						new_misshits, newhits = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model)
+	#					while(len(new_misshits) > 0):
+	#						new_misshits, newhits = evaluate_model(new_misshits,val,ref,cat,writer)
+						print "ok"
+						'''
+						misscount = len(miss_hits[ref[cat][i][0]]) ##number of miss hits
+						tempval = val[ref[cat][i][0]][:] ## values
+						templabel = miss_hits[ref[cat][i][0]][:] ## labels
+						missindex = []
+						leftovers = []
+						[ missindex.append(m) for m,x in enumerate(matches[ref[cat][i][0]]) if x == "MISS-HITS"]
+						print ref[cat][i][0]
+						for ind in sorted(missindex, reverse=True):
+							print ind
+							print tempval[ind]
+							del tempval[ind] ## delete miss hit values
+						for lab in templabel:
+							leftovers.append(res[lab])
+		#				print "New exemplar: ",templabel[leftovers.index(min(leftovers))]
+						newlabel = []
+						newscore = []
+						badindex = []
+						exemplist = []
+						exemplab = []
+	#					for lab in labels:
+						newlabel = match_labels[templabel[leftovers.index(min(leftovers))]][:]
+						newscore = match_score[templabel[leftovers.index(min(leftovers))]][:]
+						for badl in templabel:
+							badindex.append(newlabel.index(badl))
+							print "badboyz",badl
+							print newlabel.index(badl)
+						for badi in badindex:
+							print "badi:",badi
+	#						print match_score[templabel[leftovers.index(min(leftovers))]]
+							print match_score[templabel[leftovers.index(min(leftovers))]][0][badi]
+							exemplist.append(newscore[0][badi])
+							exemplab.append(newlabel[badi])
+						print exemplist
+						writer.writerow(["New Exemplar",templabel[leftovers.index(min(leftovers))]])	
+						writer.writerow(exemplist)
+						writer.writerow(exemplab)
+						writer.writerow(["Max new:", max(exemplist)])
+
+	'''					
+				   writer.writerow(["MODEL: ",model[cat]])
+				   maxt[cat] = []
+				   maxt[cat].append(ref[cat][i][0])
+				   maxt[cat].append( max(val[ref[cat][i][0]]) )
    except ValueError:
 	   print "ValueError occured for cat:",cat
 
