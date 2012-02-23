@@ -110,7 +110,7 @@ def matrix_from_pairs(pairs):
 # Evaluate the Model for more than 1 misshits
 ##############################################
 
-def evaluate_model(miss_hits,val,ref,cat,writer,model):
+def evaluate_model(miss_hits,val,ref,cat,writer,model,fpmin):
 	misshit_val = {}
 	misshit_lab = {}
 	miss_index = {}
@@ -159,7 +159,7 @@ def evaluate_model(miss_hits,val,ref,cat,writer,model):
 			corr_misshit_val[item].append(misshit_val[item][0][0][ind])
 			corr_misshit_lab[item].append(misshit_lab[item][0][ind])
 	
-	## Now for MDL calculations ##
+	## Now for Exemplar calculations ##
 	sumbad[cat] = []
 	for item in miss_hits: ## create a list of sums of bad samples and their labels
 #		print "item",item
@@ -169,43 +169,44 @@ def evaluate_model(miss_hits,val,ref,cat,writer,model):
 		badlab[cat].append(item)
 	print "sumbad:",sumbad[cat]
 	print "badlab:",badlab[cat]
-	mdl_val = min(sumbad[cat]) ## minimum of the sums
-	mdl_ind = sumbad[cat].index(min(sumbad[cat])) ## index of the min sum
-	mdl_lab = badlab[cat][mdl_ind] ## label of mdl
-	print "MDL val:",mdl_val
-	print "MDL lab:",mdl_lab
-	writer.writerow([cat,"NewLabel,Newmin",mdl_lab,mdl_val])
-	writer.writerow([cat,"Max Threshold",max(corr_misshit_val[mdl_lab])])
+	exemp_val = min(sumbad[cat]) ## minimum of the sums
+	exemp_ind = sumbad[cat].index(min(sumbad[cat])) ## index of the min sum
+	exemp_lab = badlab[cat][exemp_ind] ## label of mdl
+	print "exemp val:",exemp_val
+	print "exemp lab:",exemp_lab
+	writer.writerow([cat,"NewLabel,Newmin",exemp_lab,exemp_val])
+	writer.writerow([cat,"Max Threshold",max(corr_misshit_val[exemp_lab])])
 
 #	x1 = x2 = y1 = y2 = 0	
 	## Now for median and euclid calc ##
-	writer.writerow(["New MDL Labels and Scores:"])
-	writer.writerow(corr_misshit_lab[mdl_lab])
-	writer.writerow(corr_misshit_val[mdl_lab])
+	writer.writerow(["New exemp Labels and Scores:"])
+	writer.writerow(corr_misshit_lab[exemp_lab])
+	writer.writerow(corr_misshit_val[exemp_lab])
 
 	temp = []
-	temp = corr_misshit_val[mdl_lab][:]
+	temp = corr_misshit_val[exemp_lab][:]
 #	print "mdl values",corr_misshit_val[mdl_lab]
 	y1 = numpy.median(temp)
 	print "Median: ",y1
 	x1 = x2 = 0
 	p1 = [x1,y1]
 	
-	newhits[mdl_lab] = []
-	new_misshits[mdl_lab] = []
+	newhits[exemp_lab] = []
+	new_misshits[exemp_lab] = []
 	eucd = []
-	for v in corr_misshit_val[mdl_lab]:
+	for v in corr_misshit_val[exemp_lab]:
 #		print "v:",v
 		y2 = v
 		p2 = [x2,y2]
+		split_thresh = math.fabs(fpmin - y1)/2.0
 #		print "euclid: ",euc_dist(p1,p2)
 		eucd.append(euc_dist(p1,p2))
-		if ( (euc_dist(p1,p2) < 0.4 and y2 < 0.75) or (y2 < 0.3) ):  ## Match if eucl dist is below 0.75
-			newhits[mdl_lab].append(corr_misshit_lab[mdl_lab][corr_misshit_val[mdl_lab].index(v)])
-			is_match.append(corr_misshit_lab[mdl_lab][corr_misshit_val[mdl_lab].index(v)])
+		if ( (euc_dist(p1,p2) < split_thresh and y2 < 0.75) or (y2 < 0.3) ):  ## Match if eucl dist is below 0.75
+			newhits[exemp_lab].append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
+			is_match.append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 		else:
 			is_match.append("MISS-HIT")
-			new_misshits[mdl_lab].append(corr_misshit_lab[mdl_lab][corr_misshit_val[mdl_lab].index(v)])
+			new_misshits[exemp_lab].append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 	
 	writer.writerow(["Euclidean distance:"])
 	writer.writerow(eucd)
@@ -218,10 +219,10 @@ def evaluate_model(miss_hits,val,ref,cat,writer,model):
 	writer.writerow(["MODEL REVISED"])
 #	       model[cat] = []
 	       ## recreate model with adjusted threshold
-	model[cat].append([ mdl_lab,max(corr_misshit_val[mdl_lab]) ])
+	model[cat].append([ exemp_lab,max(corr_misshit_val[exemp_lab]) ])
 	writer.writerow(model[cat])
 
-	return new_misshits[mdl_lab], newhits[mdl_lab], model
+	return new_misshits[exemp_lab], newhits[exemp_lab], model
 
 ########################################
 # Check possible fp with this threshold
@@ -378,7 +379,7 @@ for cat in topLevelCategories:
 			   ##########################################
 			   
 			   if (has_fp):
-
+			     ## Run calculations once to create misshits list and then pass it to the iterator ##		
 			     matches[exemplar_lab] = []
 			     outlier_lab[exemplar_lab] = []
 			     outlier_val[exemplar_lab] = []
@@ -417,8 +418,8 @@ for cat in topLevelCategories:
 			     new_misshits,newhits,model = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model,fpmin)
 			     while(len(new_misshits) > 0):
 
-					new_misshits, newhits, model = evaluate_model(new_misshits,match_score,match_labels,cat,writer,model)
-
+					new_misshits, newhits, model, fpmin = evaluate_model(new_misshits,match_score,match_labels,cat,writer,model,fpmin)
+					has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(possfp_labels,possfpval,fp_labels,fpval,val,cat,exemplar_lab,writer)
 			   else:
 
 				   matches[exemplar_lab] = []
