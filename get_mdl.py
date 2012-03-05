@@ -204,7 +204,7 @@ def evaluate_model(miss_hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	if(has_fp):
 		split_thresh = math.fabs(fpmin - y1)/2.0
 	else:
-		split_thresh = 0.3
+		split_thresh = manual_split_thresh
 	for v in corr_misshit_val[exemp_lab]:
 #		print "v:",v
 		y2 = v
@@ -212,7 +212,7 @@ def evaluate_model(miss_hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 		split_thresh
 #		print "euclid: ",euc_dist(p1,p2)
 		eucd.append(euc_dist(p1,p2))
-		if ( (euc_dist(p1,p2) < split_thresh and y2 < 0.85) or (y2 < 0.3) ):  ## Match if eucl dist is below 0.75
+		if ( (euc_dist(p1,p2) < split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
 			newhits[exemp_lab].append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 			is_match.append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 		else:
@@ -323,6 +323,7 @@ match_score = {}
 outlier_lab = {} ## for outlier labels
 outlier_val = {} ## for outlier values
 split_thresh = 0 ## split threshold for the exemplar
+manual_split_thresh = 0.25 ## split incase no fp
 add =0
 count = 0
 ressum = 0;
@@ -453,7 +454,7 @@ for cat in topLevelCategories:
 				x1 = x2 = 0
 				p1 = [x1,y1]
 				p2 = [x2,y2]
-				if ( (euc_dist(p1,p2) < split_thresh and y2 < 0.85) or (y2 < 0.3) ):  ## Match if eucl dist is below 1.95
+				if ( (euc_dist(p1,p2) < split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 1.95
 	#					print match_labels[ref[cat][i][0]][j]
 	#					print i,j
 					matches[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 1.96
@@ -490,26 +491,30 @@ for cat in topLevelCategories:
 			     ## Call the evaluate_model function ## 
 #			     print "match_score:",match_score
 #			     print "match_label:",match_labels
-			     new_misshits,newhits,model = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model,has_fp,fpmin,iteration)
+#			     new_misshits,newhits,model = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model,has_fp,fpmin,iteration)
+			     new_misshits = miss_hits[exemplar_lab][:]
 			     while(len(new_misshits) > 0): ## recall the evaluate_model funct till there are no more misshits ##
 					iteration = iteration + 1
 				        print "New misshits:",new_misshits
 					new_misshits, newhits, model = evaluate_model(new_misshits,match_score,match_labels,cat,writer,model,has_fp,fpmin,iteration)
 			   			   
 			   else: ## NO FP found
-				   print "IN NO FP FOUND"
+				   iteration = 0
 				   matches[exemplar_lab] = []
 				   outlier_lab[exemplar_lab] = []
 				   outlier_val[exemplar_lab] = []
 				   sane = []
 				   count = 0
 				   x1 = x2 = y1 = y2 = 0
+				   print "IN NO FP FOUND, checking for misshits"
 				   writer.writerow(["IN NO FP FOUND, CHECKING FOR MISSHITS"])
+				   print "category: ",cat
 				   for myscore in val[exemplar_lab]:
 					if myscore < 0.85: ## Sanity threshold changed for NCD and spsum
 	# 				   print myscore
 					   sane.append(myscore)
 					   count = count + 1
+					'''   
 					else:
 						if exemplar_lab in outlier_lab:
 							outlier_lab[exemplar_lab].append(match_labels[exemplar_lab][val[exemplar_lab].index(score)])
@@ -520,18 +525,22 @@ for cat in topLevelCategories:
 							outlier_lab[exemplar_lab].append(match_labels[exemplar_lab][val[exemplar_lab].index(score)])
 							outlier_lab[exemplar_lab].append(val[exemplar_lab])
                                                         outlier_val[exemplar_lab].append(val[exemplar_lab])
+						
+						print "outlier variable found"
 						writer.writerow(["Outlier Labels and Values"])
 						writer.writerow(outlier_lab[exemplar_lab])
 						writer.writerow(outlier_val[exemplar_lab])
-
+					'''	
 				   y1 = numpy.median(sane)  ## Replace avg with median for all values
-			   	   writer.writerow(["Median",y1])
-
+				   print "Median in noFP:",y1
+				   writer.writerow(["Median",y1])
+				   split_threshold = manual_split_thresh
+			           writer.writerow(["split threshold",split_thresh])
 				   for j in range(len(val[exemplar_lab])):
 					y2 = val[exemplar_lab][j]
 					p1 = [x1,y1]
 					p2 = [x2,y2]
-					if ( (euc_dist(p1,p2) < 0.3 and y2 < 0.85) or (y2 < 0.3) ):  ## Match if eucl dist is below 1.95
+					if ( (euc_dist(p1,p2) < manual_split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 1.95
 	#					print match_labels[ref[cat][i][0]][j]
 	#					print i,j
 						matches[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 1.96
@@ -550,6 +559,14 @@ for cat in topLevelCategories:
 					writer.writerow(["Missmatch Labels"])
 					writer.writerow(miss_hits[exemplar_lab])
 					writer.writerow(["Count Missmatch labels",len(miss_hits[exemplar_lab])])
+	                                ## Changes to Model ##
+                                        model.pop(cat)
+  	                                model[cat] = []
+					writer.writerow(["Model Revised in FP:"])
+					model[cat].append([exemplar_lab,new_thresh])
+					writer.writerow(model[cat])
+
+
 					new_misshits, newhits = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model,has_fp,fpmin,iteration)
 					while(len(new_misshits) > 0): ## recall the evaluate_model funct till there are no more misshits
 						iteration = iteration + 1
