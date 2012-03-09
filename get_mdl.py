@@ -201,7 +201,7 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	#	split_thresh
 #		print "euclid: ",euc_dist(p1,p2)
 		eucd.append(euc_dist(p1,p2))
-		if ( (euc_dist(p1,p2) <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
+		if ( (y2 <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
 #			print "eucd: ",euc_dist(p1,p2)
 			newhits[hit_exemp_lab].append(corr_hit_lab[hit_exemp_lab][corr_hit_val[hit_exemp_lab].index(v)])
 			is_match.append(corr_hit_lab[hit_exemp_lab][corr_hit_val[hit_exemp_lab].index(v)])
@@ -213,11 +213,13 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	writer.writerow(["Euclidean distance:",eucd])
 	writer.writerow(is_match) ## write is_match results
 	## add revised model ##
-	writer.writerow(["MODEL REVISED after re-evaluation"])
+#	writer.writerow(["MODEL REVISED after re-evaluation"])
 #	       model[cat] = []
 	       ## recreate model with adjusted threshold
 	corr_thresh = split_thresh ## corr_thresh = split_thresh = new_max_exemp_thresh = max(corr_hit_val[hit_exemp_lab])
-	model[cat].append([ hit_exemp_lab,corr_thresh ])
+#	model[cat].append([ hit_exemp_lab,corr_thresh ])
+	if new_max_exemp_thresh == 0:
+		new_max_exemp_thresh = 0.2
 
 	return hit_exemp_lab,new_max_exemp_thresh,newhits[hit_exemp_lab],new_misshits[hit_exemp_lab]
 
@@ -325,7 +327,7 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 		split_thresh
 #		print "euclid: ",euc_dist(p1,p2)
 		eucd.append(euc_dist(p1,p2))
-		if ( (euc_dist(p1,p2) <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
+		if ( (y2 <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
 			newhits[exemp_lab].append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 			is_match.append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 		else:
@@ -336,13 +338,15 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 	writer.writerow(["Euclidean distance:",eucd])
 	writer.writerow(is_match) ## write is_match results
 	## add revised model ##
-	writer.writerow(["MODEL REVISED after re-evaluation"])
+#	writer.writerow(["MODEL REVISED after re-evaluation"])
 #	       model[cat] = []
 	       ## recreate model with adjusted threshold
 	corr_thresh = split_thresh
 	model[cat].append([ exemp_lab,corr_thresh ])
 
-	writer.writerow(model[cat]) ## write the model to the result file
+#	writer.writerow(model[cat]) ## write the model to the result file
+	if new_max_exemp_thresh == 0:
+		new_max_exemp_thresh = 0.2 ## so it can match similar items
 
 	return exemp_lab,new_max_exemp_thresh,newhits[exemp_lab],new_misshits[exemp_lab]
 
@@ -383,11 +387,12 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 
 #	print "Misshits:",miss_hits
 
-########### H A N D L I N G  M I S S H I T S ###########
-######## MISS HIT EXEMPLAR #########
+	########### H A N D L I N G  M I S S H I T S ###########
+
+	######## MISS HIT EXEMPLAR #########
+
 	miss_exemplar,miss_thresh,m_hits,m_misshits = handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration)
-	model[cat].append([miss_exemplar,miss_thresh])
-	########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
+		########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
         has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(cat,miss_exemplar,miss_thresh,writer)
 	if(has_fp):
 		print "FP found in misshits"
@@ -395,7 +400,7 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 		print "misshits found"
 	while(has_fp or len(m_misshits)>0):
 	        miss_exemplar,miss_thresh,m_hits,m_misshits = handle_misshits(m_misshits,m_hits,val,ref,cat,writer,model,has_fp,fpmin,iteration)
-	        model[cat].append([miss_exemplar,miss_thresh])
+#	        model[cat].append([miss_exemplar,miss_thresh])
         	########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
 	        has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(cat,miss_exemplar,miss_thresh,writer)
 		if(has_fp):
@@ -404,15 +409,30 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 			print "misshits found"
 
 	print "NO MORE MISSHITS FOUND"
+	print "before model:",model[cat]
+	for key,value in model.iteritems():
+		for exemplar in value:
+			if exemplar[0] == miss_exemplar: ## replace if same exemplar label with new thresh
+				exemplar[0] = miss_exemplar
+				exemplar[1] = miss_thresh
+		if key == cat:
+			if [miss_exemplar,miss_thresh] not in value:
+#				print "model value:",value
+				model[cat].append([miss_exemplar,miss_thresh]) ## append resulting exemplar and threshold to the model and write it to result file
+				print miss_exemplar
+				print "APPEND MODEL IN missHITS"
+
+
 	print "model:",model[cat]
-########### H A N D L I N G  H I T S ############
+
+	########### H A N D L I N G  H I T S ############
+
 #	if(has_fp): ## hits,hit_val,hit_lab,hit_index,corr_hit_lab,corr_hit_val
 	########## Now for Exemplar calculations ##############
 
 	######## HIT EXEMPLAR #########
 	
 	hit_exemplar,hit_thresh,h_hits,h_misshits = handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration)
-	model[cat].append([hit_exemplar,hit_thresh])
         ########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
         has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(cat,hit_exemplar,hit_thresh,writer)
 	if(has_fp):
@@ -422,68 +442,28 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 
 	while(has_fp or len(h_misshits)>0):
 		hit_exemplar,hit_thresh,h_hits,h_misshits = handle_hits(h_misshits,h_hits,val,ref,cat,writer,model,has_fp,fpmin,iteration)
-		model[cat].append([hit_exemplar,hit_thresh])
+#		model[cat].append([hit_exemplar,hit_thresh])
 		########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
 	        has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(cat,hit_exemplar,hit_thresh,writer)
 		if(has_fp):
 			print "FP found in hits"
 		if(len(h_misshits)>0):
 			print "misshits found"
+
 	print "NO MORE MISSHITS IN HITS"
-	'''
-########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
-	has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(cat,exemp_lab,new_max_exemp_thresh,writer)
-	print "In evaluate function has-fp value is:",has_fp
-	writer.writerow(["In evaluate function has-fp value is:",has_fp])
-	if(has_fp):
-#		split_thresh = math.fabs(fpmin - y1)/2.0 ## change this to max legal/hit value below fpmin
-		# e.g. for m in hits or val[currentexemplar]:
-		#	if m < fpmin:
-		#		temp.append(m)
-		#	split_thresh = max(m)  need to make sure evaluation later is <=split_thresh
-		for score in val[exemp_lab]:
-			if score < fpmin:
-				temp.append(score)
-		split_thresh = max(score)
-	else:
-		split_thresh = manual_split_thresh
-	for v in corr_misshit_val[exemp_lab]:
-#		print "v:",v
-		y2 = v
-		p2 = [x2,y2]
-		split_thresh
-#		print "euclid: ",euc_dist(p1,p2)
-		eucd.append(euc_dist(p1,p2))
-		if ( (euc_dist(p1,p2) <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
-			newhits[exemp_lab].append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
-			is_match.append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
-		else:
-			is_match.append("MISS-HIT")
-			new_misshits[exemp_lab].append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
- 	writer.writerow(["New split threshold:",split_thresh])	
-	writer.writerow(["New Median:",y1])
-	writer.writerow(["Euclidean distance:",eucd])
-	writer.writerow(is_match) ## write is_match results
-	## add revised model ##
-	writer.writerow(["MODEL REVISED after re-evaluation"])
-#	       model[cat] = []
-	       ## recreate model with adjusted threshold
-	if(has_fp):
-#		print "In evaluate has fp balay balay"
-		corr_thresh = split_thresh
-		model[cat].append([ hit_exemp_lab,corr_thresh ])
-	else:
-		if max(corr_misshit_val[exemp_lab]) > 0:
-			model[cat].append([ exemp_lab,max(corr_misshit_val[exemp_lab]) ])
-		else:
-	                corr_thresh = float(y1) + split_thresh
-	                model[cat].append([ exemp_lab,corr_thresh ])
-
+	for key,value in model.iteritems():
+		for exemplar in value:
+			if exemplar[0] == hit_exemplar: ## replace if same exemplar label with new thresh
+				exemplar[0] = hit_exemplar
+				exemplar[1] = hit_thresh
+		if key == cat:
+			if [hit_exemplar,hit_thresh] not in value:
+				print "APPEND MODEL IN HITS"
+				model[cat].append([hit_exemplar,hit_thresh]) ## append exemplar and thresh to model and write it to result file
+	
 	writer.writerow(model[cat]) ## write the model to the result file
+#	writer.writerow(model[cat]) ## write the model to the result file
 
-#	return new_misshits[exemp_lab], newhits[exemp_lab], model
-## should return just the model
-	'''
 	return model
 
 ########################################
@@ -521,14 +501,23 @@ def check_fp(cat,exemplar,ex_thresh,writer):
 		has_fp = 1  ## sample has fp, need to revise model
 		fpcount = fpcount + 1 ## fp counter
 #					temp = val[ref[cat][i][0]][:]
-   print "Mid check_fp exemplar",exemplar
-   if exemplar in fp_labels: 
+#   print "Mid check_fp exemplar",exemplar
+   if exemplar in fp_labels and fpcount > 0: 
 	print "FP result written out to file"
 	writer.writerow([cat,"FP labels:",fp_labels[exemplar] ])
 	writer.writerow([cat,"FP values:",fpval[exemplar] ])
 	writer.writerow([cat,"FP count:",fpcount ])
 	minfp = min(fpval[exemplar])
 	writer.writerow([cat,"FP MIN:",minfp ])
+	writer.writerow([cat,"Threshold that caused FP:",ex_thresh ])
+	writer.writerow([cat,"LABEL that caused FP:",exemplar ])
+	return has_fp, fpcount, fp_labels, fpval, minfp ## added min fp val
+   else:
+	has_fp = 0
+	fpcount = 0
+	minfp = 0
+	writer.writerow([cat,"NO FP FOUND FOR THIS LABEL"])
+	return has_fp, fpcount, fp_labels, fpval, minfp ## added min fp val
 
 #	print "has_fp:",has_fp
 #	print "fpcount:",fpcount
@@ -542,7 +531,6 @@ def check_fp(cat,exemplar,ex_thresh,writer):
 #   print "fpval:",fpval
 #   print "minfpval", min(fpval[exemplar])
 #   print "test"
-   return has_fp, fpcount, fp_labels, fpval, minfp ## added min fp val
 ##########################################
 
 
@@ -665,6 +653,8 @@ for cat in topLevelCategories:
 			   exemplar_thresh = max(val[ref[cat][i][0]])
 			   print "Initial Exemplar: ",exemplar_lab
 			   print "Initial thresh: ",exemplar_thresh
+			   writer.writerow(["Initial Exemplar: ",exemplar_lab])
+			   writer.writerow(["Initial thresh: ",exemplar_thresh])
 			   ########################################
 			   # Check possible fp with this threshold
 			   #########################################
@@ -706,7 +696,7 @@ for cat in topLevelCategories:
 				x1 = x2 = 0
 				p1 = [x1,y1]
 				p2 = [x2,y2]
-				if ( (euc_dist(p1,p2) <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 1.95
+				if ( (y2 <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 1.95
 	#					print match_labels[ref[cat][i][0]][j]
 	#					print i,j
 					matches[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 0.85
@@ -760,91 +750,16 @@ for cat in topLevelCategories:
 			   	   
 			   else: ## NO FP found
 				   print "NO FP FOUND !!!"
-			   '''
-				   iteration = 0
-				   matches[exemplar_lab] = []
-				   outlier_lab[exemplar_lab] = []
-				   outlier_val[exemplar_lab] = []
-				   sane = []
-				   count = 0
-				   x1 = x2 = y1 = y2 = 0
-				   print "IN NO FP FOUND, checking for misshits"
-				   writer.writerow(["IN NO FP FOUND, CHECKING FOR MISSHITS"])
-				   print "category: ",cat
-				   for myscore in val[exemplar_lab]:
-					if myscore < 0.85: ## Sanity threshold changed for NCD and spsum
-	# 				   print myscore
-					   sane.append(myscore)
-					   count = count + 1
-					   
-					else:
-						if exemplar_lab in outlier_lab:
-							outlier_lab[exemplar_lab].append(match_labels[exemplar_lab][val[exemplar_lab].index(score)])
-							outlier_val[exemplar_lab].append(myscore)
-						else:
-							outlier_lab[exemplar_lab] = []
-							outlier_val[exemplar_lab] = []
-							outlier_lab[exemplar_lab].append(match_labels[exemplar_lab][val[exemplar_lab].index(score)])
-							outlier_lab[exemplar_lab].append(val[exemplar_lab])
-                                                        outlier_val[exemplar_lab].append(val[exemplar_lab])
-						
-						print "outlier variable found"
-						writer.writerow(["Outlier Labels and Values"])
-						writer.writerow(outlier_lab[exemplar_lab])
-						writer.writerow(outlier_val[exemplar_lab])
-						
-				   y1 = numpy.median(sane)  ## Replace avg with median for all values
-				   print "Median in noFP:",y1
-				   writer.writerow(["Median",y1])
-				   split_threshold = manual_split_thresh
-			           writer.writerow(["split threshold",split_thresh])
-				   new_thresh = float(split_threshold) + y1
-				   writer.writerow(["New threshold",new_thresh])
-				   for j in range(len(val[exemplar_lab])):
-					y2 = val[exemplar_lab][j]
-					p1 = [x1,y1]
-					p2 = [x2,y2]
-					if ( (euc_dist(p1,p2) < manual_split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 1.95
-	#					print match_labels[ref[cat][i][0]][j]
-	#					print i,j
-						matches[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 1.96
-					else:
-						matches[exemplar_lab].append("MISS-HITS") ## Did not match
-						if exemplar_lab in miss_hits:
-							 miss_hits[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Did not match
-						else:
-							miss_hits[exemplar_lab] = []
-							miss_hits[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Did not match
-				   writer.writerow(["Euclidean Distance"])
-				   writer.writerow([ euc_dist( [j,y1],[j,val[exemplar_lab][j]]) for j in range(len(val[exemplar_lab])) ])
-				   writer.writerow(["Matching Labels"])
-				   writer.writerow(matches[exemplar_lab])
-				   if exemplar_lab in miss_hits:
-					writer.writerow(["Missmatch Labels"])
-					writer.writerow(miss_hits[exemplar_lab])
-					writer.writerow(["Count Missmatch labels",len(miss_hits[exemplar_lab])])
-	                                ## Changes to Model ##
-                                        model.pop(cat)
-  	                                model[cat] = []
-					writer.writerow(["Model Revised in no FP:"])
-					model[cat].append([exemplar_lab,new_thresh])
-					writer.writerow(model[cat])
-
-
-					new_misshits, newhits = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model,has_fp,fpmin,iteration)
-					while(len(new_misshits) > 0): ## recall the evaluate_model funct till there are no more misshits
-						iteration = iteration + 1
-					        new_misshits, newhits, model = evaluate_model(new_misshits,match_score,match_labels,cat,writer,model,has_fp,fpmin,iteration)
-				   else: ## no misshit found
-					   print "NO MISSHIT FOUND"
-					   writer.writerow(["NO MISSHIT FOUND"])
-				#          model[cat].append([exemplar_lab,exemplar_thresh])
-
-				   writer.writerow(["MODEL NO FP: ",model[cat]])
-				   maxt[cat] = []
-				   maxt[cat].append(ref[cat][i][0])
-				   maxt[cat].append( max(val[ref[cat][i][0]]) )
-			   '''
+				   for key,value in model.iteritems():
+						for exemplar in value:
+							if exemplar[0] == exemplar_lab: ## replace if same exemplar label with new thresh
+								exemplar[0] = exemplar_lab
+								exemplar[1] = exemplar_thresh
+						if key == cat:
+							if [exemplar_lab,exemplar_thresh] not in value:
+								print "APPEND MODEL IN HITS"
+								model[cat].append([exemplar_lab,exemplar_thresh]) ## append exemplar and thresh to model and write it to result file
+				   writer.writerow(["MODEL WHEN NO FP: ",model[cat]])
    except ValueError:
 	   print "ValueError occured for cat:",cat
 
