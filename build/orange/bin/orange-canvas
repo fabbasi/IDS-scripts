@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+import os
+import Orange
+__file = Orange.__file__
+
+__canvas = os.path.join(os.path.split(__file)[0], "OrangeCanvas", "orngCanvas.pyw")
+execfile(__canvas) 

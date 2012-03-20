@@ -480,6 +480,11 @@ if __name__ == '__main__':
 	#threshfile = sys.argv[3] ## path to threshold file
 	#========================================================================
 	loadThresh("perclassthresh.txt")	## load the threshold file and build a dictionary
+	## Might have to change the load per threshold funct to a load the model funct.
+	## The loadmodel will load the model from a file that has the model in the form of
+	## labels and their threshold for each category. The model file should be a csv file where each line holds
+	## a label,threshold pair. For any category there can be multiple rows of such pairs
+	
 	output = "%s-500-dyn-result"%int(time.time())
 	output = output + "-composite-" + metric + ".csv"
 	print topLevelCategories

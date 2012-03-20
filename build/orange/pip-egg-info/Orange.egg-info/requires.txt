@@ -1,0 +1,8 @@
+numpy
+
+[GUI]
+PyQt4
+PyQwt
+
+[NETWORK]
+networkx

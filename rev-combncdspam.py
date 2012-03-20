@@ -19,7 +19,8 @@
 # 20111220:
 # Take 2 files as input and calculate NCD and spamsum scores and write
 # the combined score to the result file
-# 
+# 20120314:
+# The combined score should be min(ncd,spsum)
 ######################################
 
 
