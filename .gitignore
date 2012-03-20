@@ -1,5 +1,6 @@
 profiles-rev/
 output/
+build/
 screenlog.*
 *.pkl
 
