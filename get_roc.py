@@ -255,6 +255,7 @@ def classifyAttack(line, categories, lineNo):
 #		print "part1: ",part1
 #		print "part2: ",part2
 #		print "model:",model
+		print "XXXXXXXXXXXXXX FOUND A FP XXXXXXXXXXXXXX"		
 		if category2 in fphitHistory and part1 not in fphitHistory[category2]:
 			fphitHistory[category2].append(str(part1))  ## add it to the history list
 			categoryFP[category2] = categoryFP[category2] + 1; ## FP counter (diff labels but score below threshold)
@@ -340,6 +341,8 @@ def processResultFile(filename, out):
     global u1categoryCount, u2categoryCount
     global thresh;
     global tphitHistory, fphitHistory, tnhitHistory, fnhitHistory
+    global tphit_list, tnhit_list, fphit_list,fnhit_list
+    global x_list, y_list
     accuracy = 0;
     f = open(filename, "r");
 #    out = open(output, 'a')
@@ -453,17 +456,30 @@ def processResultFile(filename, out):
 			tnhitH = len(tnhitHistory[items[0]])
 		   except KeyError:
 			tnhitH = 0
-				      
+
+	x_list.append(fprcat) ## roc x axis
+	y_list.append(tprcat) ## roc y axis
+
+	countsig_list.append(u2categoryCount[cat])
+	dataset_list.append(u1categoryCount[cat])
+	tphit_list.append(tphit)
+	fphit_list.append(fphit)
+	fnhit_list.append(fnhit)
+	tnhit_list.append(tnhit)
+			      
 	res.append( cat + ","+  str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + ","+ str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(tnhit) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 #	res.append( cat + ","+ str(items[0]) + "," + str(items[1]) + ","+ str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(tphitH) + "," +  str(fphitH) +  "," + str(fnhitH) + "," + str(tnhitH) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
 #	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
     out.write(''.join(res) + "\n")
+    out.write("Summary:")
+    tnsum =  sum(dataset_list) - ( sum(tphit_list) + sum(fphit_list) + sum(fnhit_list) )
+    t_accuracy = ( sum(tphit_list) + sum(fphit_list) + 0.0 )/( sum(tphit_list) + sum(fphit_list) + tnsum +  sum(fnhit_list) )
+    out.write(","+str(sum(dataset_list))+","+str(sum(countsig_list))+","+str(sum(tphit_list))+","+str(sum(fphit_list))+","+str(sum(fnhit_list))+","+str(tnsum)+",,,"+str(t_accuracy)+",")
     out.close()
-#    x_list.append(fpr)
-#    y_list.append(tpr)
-	
+
+    	
 
 #============================================
 # GET THRESHOLD FOR A CLASS get_thresh(class)
@@ -552,6 +568,12 @@ if __name__ == '__main__':
 	tphitHistory = {}
 	fnhitHistory = {}
 	tnhitHistory = {}
+	tphit_list = []
+	tnhit_list = []
+	fphit_list = []
+	fnhit_list = []
+	dataset_list = [] ## total number of samples in the dataset
+	countsig_list = [] ## count total number of exemplar samples
 	threshDict = {}
 	x_list = []
 	y_list = []
@@ -667,12 +689,16 @@ if __name__ == '__main__':
 	#	pylab.title("COMBINED")
 		title = "MIN(NCD,SPSUM)"
 		print "In COMBINED MIN"
+		print "file: ",fstring[-1]
 		os.system("python create_optimized_graph.py " + fstring[-1] )
-		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 
+		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
+	print "xlist:",x_list
+	print "ylist:",y_list
+	roc(x_list,y_list,fname,title,xlabel,ylabel)
+	print "ROC created"
 	os.system("mv output/* "+resultf) ## move results to result dir
 	os.system("mv *-500-dyn-result* "+resultf) ## move results to result dir
 	print "RESULTS MOVED TO RESULT FOLDER"
 
-#roc(x_list,y_list,fname,title,xlabel,ylabel)
 #else __name__ == 'Dynamic-category-parser-composite': 

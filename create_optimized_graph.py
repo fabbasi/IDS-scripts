@@ -14,10 +14,33 @@
 import sys
 import dynamic ## to access functions from the script
 
+#===========================================================
+# Load Model for each class in a dict loadThresh(filename)
+#===========================================================
+def loadModel(filename,categories):
+        global threshDict;
+        f = open(filename,'r')
+        for line in f:
+                if line == "": continue  ## ignore empty lines
+                line = line.strip()
+                ex_label, ex_thresh = line.split(',')
+                part1Class, part1Details = ex_label.split("-")
+                categ = dynamic.categorisePayload(part1Class, categories)           # Classify the header -> return 14 for 14.1, 14.1.1, 14.1.2
+#		print "categ: ",categ
+		if categ not in threshDict:
+                        threshDict[categ] = []
+                        threshDict[categ].append([ex_label,ex_thresh])  ## Append the model to the dictionary for the category
+                else:
+                        threshDict[categ].append([ex_label,ex_thresh])
+#	return threshDict
+################################################################
+## MAIN STARTS HERE ##
+#########################
+
 fname = sys.argv[1] ## the file name
 output = "output/" ## the output folder
 #thres = sys.argv[2]
-
+threshDict = {}
 infile = open(output+fname, 'r') ## open input file in read mode
 rows = infile.readlines() ## read lines from file
 infile.close()
@@ -25,8 +48,8 @@ infile.close()
 #threshold = float(thres)
 
 categories, topLevelCategories = dynamic.loadCategories("categories-500.txt")
-threshDict = dynamic.loadThresh("perclassthresh.txt")        ## load the threshold file and build a dictionary
-
+loadModel("mymodel.txt",categories)        ## load the threshold file and build a dictionary
+print "Threshdict:",threshDict
 bios = []
 links = []
 sig = []
@@ -40,13 +63,24 @@ for r in rows:
     part2Class, part2Details = part2.split("-")
     category1 = dynamic.categorisePayload(part1Class, categories)           # Classify the header -> return 14 for 14.1, 14.1.1, 14.1.2
     category2 = dynamic.categorisePayload(part2Class, categories)
-    threshold = dynamic.get_thresh(category2,threshDict)  ## Get threshold value for category
+    print "category2: ",category2
+    try: 
+	    if category2 in threshDict:
+		model = threshDict[category2]  ## Get threshold value for category
+		print "model:",model
+	    else:
+		model = 0
+    except TypeError:
+	    model = 0
 #    print ("class: %s,thresh: %s")%(category2, threshold)
-    if float(value) < float(threshold):
-	bios.append(part1)
-	bios.append(part2)
-	sig.append(part2)
-	links.append(row)
+    if model != 0:
+	    for exemplar in model:
+		    if exemplar[0] == part2:
+			    if float(value) <= float(exemplar[1]):
+				bios.append(part1)
+				bios.append(part2)
+				sig.append(part2)
+				links.append(row)
 	# print r,
         
 #print list(set(bios))

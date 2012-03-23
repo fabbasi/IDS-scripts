@@ -360,6 +360,24 @@ def loadThresh(filename):
 		threshDict[cat] = []
 		threshDict[cat] = t
 	return threshDict
+#===========================================================
+# Load Model for each class in a dict loadThresh(filename)
+#===========================================================
+def loadModel(filename,categories):
+#        global threshDict;
+	thredhDict = {}
+        f = open(filename,'r')
+        for line in f:
+                if line == "": continue  ## ignore empty lines
+                line = line.strip()
+                ex_label, ex_thresh = line.split(',')
+                part1Class, part1Details = ex_label.split("-")
+                categ = categorisePayload(part1Class, categories)           # Classify the header -> return 14 for 14.1, 14.1.1, 14.1.2
+                if categ not in threshDict:
+                        threshDict[categ] = []
+                        threshDict[categ].append([ex_label,ex_thresh])  ## Append the model to the dictionary for the category
+                else:
+                        threshDict[categ].append([ex_label,ex_thresh])
 
 #============================================
 # DRAW ROC CURVE roc(xlist,ylist,filename)

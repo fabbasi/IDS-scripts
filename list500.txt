@@ -1,4 +1,4 @@
-/home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1332126368-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1332126368-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1332126368-combined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1332126368-newcombined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/profiles-raw/1332378507-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/rev/profiles-raw/1332378507-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/rev/profiles-raw/1332378507-combined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/profiles-raw/1332378507-newcombined-out.txt
