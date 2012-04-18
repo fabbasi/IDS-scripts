@@ -124,7 +124,7 @@ oparser.add_option("-g","--makegraph",
 
 (options, args) = oparser.parse_args()
 
-
+print options
 location = options.outdir
 sigdir = options.sigdir
 datdir = options.datdir
@@ -249,7 +249,7 @@ if options.make_graph == 1:
 ## Append to output to create the list ##
 
 f = open("list500.txt",'a')
-
+location = str(location)
 #location = "/home/fimz/Dev/datasets/500-results"
 finalncd = location + "/" +  ncdstr
 finalspsum = location + "/" + spsumstr
@@ -261,5 +261,9 @@ f.write(finalspsum  + "\n")
 f.write(finalcombined  + "\n")
 f.write(finalnewcombined  + "\n")
 
+f.close()
+
+f = open("result.file",'w')
+f.write(finalnewcombined)
 f.close()
 

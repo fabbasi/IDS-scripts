@@ -5,6 +5,10 @@
 # $ python Dynamic-category-parser.py /path/to/ncd-result.txt numeric-metric-value 
 # $ mv *-500-dyn-result-6* /path/to/target
 #python Dynamic-category-parser-composite.py /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1327628422-newcombined-out.txt 3; mv *-500-dyn-result* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/;mv output/* /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/
+#########
+# Usage:#
+#########
+# python get_roc.py /home/fimz/Dev/datasets/500-results/rev/test-2/1334196595-newcombined-out.txt 3 /home/fimz/Dev/datasets/500-results/rev/test-2
 #
 #!/usr/bin/python
 import sys  ##  For grabbing input from SHELL
@@ -161,7 +165,7 @@ def classifyAttack(line, categories, lineNo):
     """
     global uniq1
     global uniq2
-    global tphitHistory, fphitHistory, tnhitHistory, fnhitHistory
+    global tphitHistory, fphitHistory, tnhitHistory, fnhitHistory, classified, outlier
 #    global thresh
     part1, part2, value = line.split()           # Split the three parts of the line
     part1Class, part1Details = part1.split("-")  # split the first and second headers at the "-" to extract class
@@ -186,7 +190,7 @@ def classifyAttack(line, categories, lineNo):
     # NOW DO SOMETHING :-)
 #    for item in model:
 #	    print item
-    if sameCategories:                   # Increment Correct classification count
+    if sameCategories or "X" in part1:                   # Increment Correct classification count
 ## Added by fahim: test for threshold
 #	combcounter = combcounter + 1
 	## Get threshold specific to signature class ##
@@ -196,7 +200,9 @@ def classifyAttack(line, categories, lineNo):
 	   if part2 == item[0]: ## get the model for the exemplar. now get its threshold
 #		print "GOTCHA"   
 		
-		if float(value) <= float(item[1]): ## adding lessthan or equals to, to support the model
+		if float(value) <= float(item[1])+0.005: ## adding lessthan or equals to, to support the model
+
+			classified.add(str(part1))  ## labels that got classified
 
 			if category1 in tphitHistory and part1 not in tphitHistory[category1]:
 				tphitHistory[category1].append(str(part1))  ## add it to the history list
@@ -206,7 +212,6 @@ def classifyAttack(line, categories, lineNo):
 				tphitHistory[category1] = []
 				categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 				tphitHistory[category1].append(str(part1))  ## add it to the history list
-
 			
 			if part1 in tphitHistory:
 				tphitHistory[part1].append(str(part2))
@@ -217,27 +222,39 @@ def classifyAttack(line, categories, lineNo):
 			if item[0] in tphitHistory:
 				tphitHistory[item[0]].append(part1)
 		else: ## FN
-			if category1 in fnhitHistory:
-				if part1 not in fnhitHistory[category1]:
+
+			outlier.add(str(part1))  ## labels that did not get classified
+			try:
+				if category1 in fnhitHistory:
+					if part1 not in fnhitHistory[category1]:
+						if category1 in tphitHistory:
+								if part1 not in tphitHistory[category1]:
+									fnhitHistory[category1].append(str(part1))  ## add it to the history list
+									categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
+									print "FN Sample:", part1
+									print "FN cat: ", category1
+						if category1 not in tphitHistory:
+		    	                              		        fnhitHistory[category1].append(str(part1))  ## add it to the history list
+                                                                        categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
+
+
+				if category1 not in fnhitHistory:
+					fnhitHistory[category1] = []
 					if category1 in tphitHistory:
-							if part1 not in tphitHistory[category1]:
-								fnhitHistory[category1].append(str(part1))  ## add it to the history list
-								categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
-								print "FN Sample:", part1
-								print "FN cat: ", category1
-
-			if category1 not in fnhitHistory:
-				fnhitHistory[category1] = []
-				if category1 in tphitHistory:
-					if part1 not in tphitHistory[category1]:
-						fnhitHistory[category1].append(str(part1))  ## add it to the history list
-						categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
-						print "FN Sample:", part1
-						print "FN cat: ", category1
-
-			if part1 not in fnhitHistory:  ## If the sample has not been previously seen/hit by the class
-				fnhitHistory[part1] = []
-				fnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
+						if part1 not in tphitHistory[category1]:
+							fnhitHistory[category1].append(str(part1))  ## add it to the history list
+							categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above thresh
+							print "FN Sample:", part1
+							print "FN cat: ", category1
+					if category1 not in tphitHistory:
+                                                      fnhitHistory[category1].append(str(part1))  ## add it to the history list
+                                                      categoryFN[category1] = categoryFN[category1] + 1; ## FN counter (further need to apply check that whether 1of this matched withsame cat). Same cat but above th
+					
+				if part1 not in fnhitHistory:  ## If the sample has not been previously seen/hit by the class
+					fnhitHistory[part1] = []
+					fnhitHistory[part1].append(str(part2)+","+str(value))  ## add it to the history list
+			except KeyError:
+				1	
 
 		try:
 			if part1 in fnhitHistory[category1] and part1 in tphitHistory[category1]:
@@ -247,6 +264,13 @@ def classifyAttack(line, categories, lineNo):
 			1
 		
     else:  ## Both categories not same
+	check_novel = get_thresh(category1)    ## check novel categories not in model
+	if check_novel == 0:
+#		myfile = open("novel-labels.txt",'a')
+		outlier.add(str(part1))  ## labels that were not in the model
+#		myfile.write(str(part1))
+#		myfile.close()
+
 	## Get threshold specific to signature class ##
         model = get_thresh(category2)
 	for item in model:
@@ -294,6 +318,7 @@ def classifyAttack(line, categories, lineNo):
 #			tnhitHistory[category1] = []
 #			tnhitHistory[category1].append(str(part2)+","+str(value))  ## add it to the history list
 
+    outlier = outlier - classified.intersection(outlier)
     categoryCount[category1] = categoryCount[category1] + 1 ;                  # Total Count  # Required only for cat X
 #    categoryCount[category2] = categoryCount[category2] +1;
     return sameCategories
@@ -343,6 +368,7 @@ def processResultFile(filename, out):
     global tphitHistory, fphitHistory, tnhitHistory, fnhitHistory
     global tphit_list, tnhit_list, fphit_list,fnhit_list
     global x_list, y_list
+    global outlier,classified
     accuracy = 0;
     f = open(filename, "r");
 #    out = open(output, 'a')
@@ -477,6 +503,12 @@ def processResultFile(filename, out):
     tnsum =  sum(dataset_list) - ( sum(tphit_list) + sum(fphit_list) + sum(fnhit_list) )
     t_accuracy = ( sum(tphit_list) + sum(fphit_list) + 0.0 )/( sum(tphit_list) + sum(fphit_list) + tnsum +  sum(fnhit_list) )
     out.write(","+str(sum(dataset_list))+","+str(sum(countsig_list))+","+str(sum(tphit_list))+","+str(sum(fphit_list))+","+str(sum(fnhit_list))+","+str(tnsum)+",,,"+str(t_accuracy)+",")
+    out.write("\nOutliers:\n")
+    outlier = outlier - classified.intersection(outlier)
+    temp_outlier = list(outlier)
+#    for item in temp_outlier:
+    out.write("Number of outliers found: "+str(len(temp_outlier))+"\n")
+    out.write(",".join(temp_outlier))
     out.close()
 
     	
@@ -572,6 +604,8 @@ if __name__ == '__main__':
 	tnhit_list = []
 	fphit_list = []
 	fnhit_list = []
+	outlier = set()
+	classified = set()
 	dataset_list = [] ## total number of samples in the dataset
 	countsig_list = [] ## count total number of exemplar samples
 	threshDict = {}
@@ -598,9 +632,10 @@ if __name__ == '__main__':
 	mx = 0
 	#========================================================================
 	## Command line arguments ##
-	infile = sys.argv[1]	## input result file to process
-	metric = sys.argv[2]	## Metric used to determine file
-	resultf = sys.argv[3]
+#	infile = sys.argv[1]	## input result file to process
+	infile = open("result.file",'r').read()
+	metric = sys.argv[1]	## Metric used to determine file
+	resultf = sys.argv[2]
 	#threshfile = sys.argv[3] ## path to threshold file
 	#========================================================================
 #	loadThresh("perclassthresh.txt")	## load the threshold file and build a dictionary
@@ -644,17 +679,18 @@ if __name__ == '__main__':
 	fnoutput = open('fnlist.pkl', 'w')
 	tpoutput = open('tplist.pkl', 'w')
 	fpoutput = open('fplist.pkl', 'w')
+	outl = open('outlier.pkl','w')
 
 	pickle.dump(tnhitHistory, tnoutput)
 	pickle.dump(tphitHistory, tpoutput)
 	pickle.dump(fphitHistory, fpoutput)
 	pickle.dump(fnhitHistory, fnoutput)
-
+	pickle.dump(outlier,outl) ## dump the outlier set
 	tnoutput.close()
 	tpoutput.close()
 	fnoutput.close()
 	fpoutput.close()
-
+	outl.close()
 
 	# ##########################
 	# Define Axes and plot graph
@@ -695,6 +731,7 @@ if __name__ == '__main__':
 		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 	print "xlist:",x_list
 	print "ylist:",y_list
+	x_list, y_list = zip(*sorted(zip(x_list, y_list)))  ## sort axis coordinates for ROC
 	roc(x_list,y_list,fname,title,xlabel,ylabel)
 	print "ROC created"
 	os.system("mv output/* "+resultf) ## move results to result dir

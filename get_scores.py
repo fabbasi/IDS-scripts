@@ -26,6 +26,8 @@
 # 20120319:
 # Move results to destination or output directory
 # Removo list500.txt
+# Usage:
+# python get_scores.py --sigdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --datdir /home/fimz/Dev/datasets/testset --iter 1 --outdir /home/fimz/Dev/datasets/500-results/rev/profiles-raw --model mymodel.txt
 ######################################
 
 
@@ -287,5 +289,7 @@ f.write(finalcombined  + "\n")
 f.write(finalnewcombined  + "\n")
 
 f.close()
-
+f = open("result.file",'w')
+f.write(finalnewcombined)
+f.close()
 os.system("mv output/* "+location+"/") ## MOVE TO OUTPUT DIR

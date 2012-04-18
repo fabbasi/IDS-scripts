@@ -2,7 +2,12 @@
 # 
 # Usage:
 # python get_mdl.py /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1328050699-newcombined-out.txt
+# new usage:
+# python get_model.py /home/fimz/Dev/datasets/500-results/rev/imbalanced-100/1332124710-newcombined-out.txt
 #
+# Ive hardcoded alot of pre-requisites in there e.g. all paths to data and sig dir etc
+# similarity matrix calculation etc. so now the script can simply be run as:
+# $ python get_model.py
 #
 import csv,os,sys,numpy,dynamic,math
 import matplotlib
@@ -561,7 +566,14 @@ manual_split_thresh = 0.25 ## split incase no fp
 add =0
 count = 0
 ressum = 0;
-fname = sys.argv[1]
+
+## Run shell script on this dir to create a distance matrix, which will be the new fname
+resultdir = "/home/fimz/Dev/datasets/500-results/rev/novelty"  ## result directory path
+os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --datdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --iter 1 --outdir "+resultdir)
+os.system("mv /home/fimz/Dev/scripts/output/* "+resultdir)
+
+#fname = sys.argv[1] ## take score file as input
+fname = open("result.file",'r').read()
 pairs = []
 categories, topLevelCategories = dynamic.loadCategories("categories-500.txt") ## Load categories from cat file
 resfile = csv.reader(open(fname, 'r'), delimiter=" ")

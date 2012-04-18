@@ -1,5 +1,6 @@
 profiles-rev/
 output/
+novelty/
 build/
 screenlog.*
 *.pkl
