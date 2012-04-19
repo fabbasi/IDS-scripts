@@ -500,7 +500,7 @@ def processResultFile(filename, out):
 
     out.write(''.join(res) + "\n")
     out.write("Summary:")
-    tnsum =  sum(dataset_list) - ( sum(tphit_list) + sum(fphit_list) + sum(fnhit_list) )
+    tnsum =  math.fabs(sum(dataset_list) - ( sum(tphit_list) + sum(fphit_list) + sum(fnhit_list) ))
     t_accuracy = ( sum(tphit_list) + sum(fphit_list) + 0.0 )/( sum(tphit_list) + sum(fphit_list) + tnsum +  sum(fnhit_list) )
     out.write(","+str(sum(dataset_list))+","+str(sum(countsig_list))+","+str(sum(tphit_list))+","+str(sum(fphit_list))+","+str(sum(fnhit_list))+","+str(tnsum)+",,,"+str(t_accuracy)+",")
     out.write("\nOutliers:\n")

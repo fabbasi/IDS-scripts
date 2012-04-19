@@ -1,8 +1,8 @@
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720653-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720653-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720653-combined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720653-newcombined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720667-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720667-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720667-combined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334720667-newcombined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-combined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-newcombined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-combined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-newcombined-out.txt

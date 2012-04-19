@@ -201,6 +201,7 @@ def loadModel(filename):
 			mymodel.append(ex_label)
 			threshDict[ex_label] = []
 			threshDict[ex_label].append(ex_thresh)
+	f.close()
 	return mymodel
 
 #===================
@@ -239,6 +240,8 @@ mymodel = loadModel("mymodel.txt")
 ## Load the outlier pickle set
 myoutlier = pickle.load(open("outlier.pkl",'rb'))
 os.system("rm -rf /home/fimz/Dev/scripts/novelty")
+## DATA DIR
+datadir = sys.argv[1]
 ## Create a directory and copy samples from both lists to this dir
 os.system("mkdir novelty")
 
@@ -247,10 +250,12 @@ for item in mymodel:
 	os.system("cp ~/Dev/datasets/balanced-raw/imbalanced-100/"+item+" novelty/") ## copy exemplars to novelty/
 for item in myoutlier:
 #	os.system("cp ~/Dev/datasets/testset-2/"+item+" novelty/")	## copy outliers to novelty/
-	os.system("cp /home/fimz/Dev/datasets/balanced-raw/imbalanced-100/"+item+" novelty/")	## copy outliers to novelty/
+	os.system("cp "+datadir+"/"+item+" novelty/")	## copy outliers to novelty/
 
 ## Run shell script on this dir to create a distance matrix, which will be the new fname
-resultdir = "/home/fimz/Dev/datasets/500-results/rev/novelty"  ## result directory path
+#resultdir = "/home/fimz/Dev/datasets/500-results/rev/novelty"  ## result directory path
+## result dir
+resultdir = sys.argv[2]
 os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --outdir "+resultdir)
 os.system("mv /home/fimz/Dev/scripts/output/* "+resultdir)
 
@@ -425,6 +430,8 @@ while(len(check_labels) > 0):
 			     split_thresh = max(temp)
 			     if split_thresh == 0: ## if the split threshold is zero, use fpmin - 0.1 as the new split threshold
 				     split_thresh =  0.2
+			     if split_thresh > 0.8: ## sanity check
+			     	     split_thresh = 0.75
 				     
 			     for j in range(len(possfpval[exemplar_lab])):
 				y2 = possfpval[exemplar_lab][j]
@@ -516,12 +523,15 @@ writer.writerow([""])
 writer.writerow(["Model(Median Exemplar, Max Threshold)"])
 
 f = open("novelty_mymodel.txt",'w')
+oldmodel = open("mymodel.txt",'a')
 for item in model:
 	print item
 	print model[item]
 	print model[item][0][0]
 	print model[item][0][1]	
 	f.write(str(model[item][0][0])+","+str(model[item][0][1])+"\n")
+	oldmodel.write(str(model[item][0][0])+","+str(model[item][0][1])+"\n") ## update the mymodel with new exemplars learned
+
 	print "model:",item
 #	writer.writerow(["Model:"])
 	writer.writerow([str(model[item][0][0])+","+str(model[item][0][1])])
