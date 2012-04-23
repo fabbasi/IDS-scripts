@@ -201,23 +201,24 @@ def classifyAttack(line, categories, lineNo):
 #		print "GOTCHA"   
 		
 		if float(value) <= float(item[1])+0.005: ## adding lessthan or equals to, to support the model
-
+			if category1 == "X":
+				category1 = category2
 			classified.add(str(part1))  ## labels that got classified
 
 			if category1 in tphitHistory and part1 not in tphitHistory[category1]:
-				tphitHistory[category1].append(str(part1))  ## add it to the history list
+				tphitHistory[part2].append(str(part1))  ## add it to the history list
 				categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 
 			if category1 not in tphitHistory:
-				tphitHistory[category1] = []
+				tphitHistory[part2] = []
 				categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
-				tphitHistory[category1].append(str(part1))  ## add it to the history list
+				tphitHistory[part2].append(str(part1))  ## add it to the history list
 			
 			if part1 in tphitHistory:
-				tphitHistory[part1].append(str(part2))
+				tphitHistory[part2].append(str(part2))
 			if part1 not in tphitHistory:  ## If the sample has not been previously seen/hit by the class
-				tphitHistory[part1] = []
-				tphitHistory[part1].append(str(part2))  ## add it to the history list
+				tphitHistory[part2] = []
+				tphitHistory[part2].append(str(part2))  ## add it to the history list
 			### adding per signature support ###
 			if item[0] in tphitHistory:
 				tphitHistory[item[0]].append(part1)
@@ -736,6 +737,8 @@ if __name__ == '__main__':
 	print "ROC created"
 	os.system("mv output/* "+resultf) ## move results to result dir
 	os.system("mv *-500-dyn-result* "+resultf) ## move results to result dir
+#	os.system("mv matrix.csv "+resultf) ## move results to result dir
+
 	print "RESULTS MOVED TO RESULT FOLDER"
 
 #else __name__ == 'Dynamic-category-parser-composite': 

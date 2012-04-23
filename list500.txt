@@ -1,8 +1,4 @@
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-combined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334798946-newcombined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-ncd-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-spsum-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-combined-out.txt
-/home/fimz/Dev/datasets/500-results/rev/novelty/1334799327-newcombined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/dionaea/1335214813-ncd-out.txt
+/home/fimz/Dev/datasets/500-results/rev/dionaea/1335214813-spsum-out.txt
+/home/fimz/Dev/datasets/500-results/rev/dionaea/1335214813-combined-out.txt
+/home/fimz/Dev/datasets/500-results/rev/dionaea/1335214813-newcombined-out.txt
