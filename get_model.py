@@ -199,6 +199,8 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	newhits[hit_exemp_lab] = []
 	new_misshits[hit_exemp_lab] = []
 	split_thresh = new_max_exemp_thresh
+	if split_thresh == 0:
+		split_thresh = 0.2
 	for v in corr_hit_val[hit_exemp_lab]:
 #		print "v:",v
 		y2 = v
@@ -325,6 +327,9 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 	new_misshits[exemp_lab] = []
 	eucd = []
 	split_thresh = new_max_exemp_thresh
+	if split_thresh == 0:
+		split_thresh = 0.2
+
 	for v in corr_misshit_val[exemp_lab]:
 #		print "v:",v
 		y2 = v

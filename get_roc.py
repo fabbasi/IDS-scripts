@@ -166,6 +166,9 @@ def classifyAttack(line, categories, lineNo):
     global uniq1
     global uniq2
     global tphitHistory, fphitHistory, tnhitHistory, fnhitHistory, classified, outlier
+    global categoryMatches, categoryTP, categoryTN, categoryFP, categoryFN
+    global xhit
+
 #    global thresh
     part1, part2, value = line.split()           # Split the three parts of the line
     part1Class, part1Details = part1.split("-")  # split the first and second headers at the "-" to extract class
@@ -200,28 +203,44 @@ def classifyAttack(line, categories, lineNo):
 	   if part2 == item[0]: ## get the model for the exemplar. now get its threshold
 #		print "GOTCHA"   
 		
-		if float(value) <= float(item[1])+0.005: ## adding lessthan or equals to, to support the model
-			if category1 == "X":
-				category1 = category2
+		if float(value) <= (float(item[1])+0.005): ## adding lessthan or equals to, to support the model
 			classified.add(str(part1))  ## labels that got classified
+#			print part1 + " " + part2 + " " + value
+			if category1 == "X":
+				if category1 in tphitHistory and part1 not in tphitHistory[category1]:
+					tphitHistory[category1].append(str(part1))  ## add it to the history list
+				if category1 not in tphitHistory:
+					tphitHistory[category1] = []
+					tphitHistory[category1].append(str(part1))  ## add it to the history list
+				if category2 in tphitHistory and part1 not in tphitHistory[category2]:
+					tphitHistory[category2].append(str(part1))  ## add it to the history list
+				if category2 not in tphitHistory:
+					tphitHistory[category2] = []
+					tphitHistory[category2].append(str(part1))  ## add it to the history list
 
-			if category1 in tphitHistory and part1 not in tphitHistory[category1]:
-				tphitHistory[part2].append(str(part1))  ## add it to the history list
-				categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+				xhit[category2] = xhit[category2] + 1
+#				category1 = category2
+				categoryMatches[category2] = categoryMatches[category2] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+#				print "matches for X: ",categoryMatches[category2]
+				
+			else: ## other than X
+				if category1 in tphitHistory and part1 not in tphitHistory[category1]:
+					tphitHistory[category1].append(str(part1))  ## add it to the history list
+					categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 
-			if category1 not in tphitHistory:
-				tphitHistory[part2] = []
-				categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
-				tphitHistory[part2].append(str(part1))  ## add it to the history list
-			
-			if part1 in tphitHistory:
-				tphitHistory[part2].append(str(part2))
-			if part1 not in tphitHistory:  ## If the sample has not been previously seen/hit by the class
-				tphitHistory[part2] = []
-				tphitHistory[part2].append(str(part2))  ## add it to the history list
-			### adding per signature support ###
-			if item[0] in tphitHistory:
-				tphitHistory[item[0]].append(part1)
+				if category1 not in tphitHistory:
+					tphitHistory[category1] = []
+					categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+					tphitHistory[category1].append(str(part1))  ## add it to the history list
+				
+				if part1 in tphitHistory:
+					tphitHistory[category1].append(str(part2))
+				if part1 not in tphitHistory:  ## If the sample has not been previously seen/hit by the class
+					tphitHistory[category1] = []
+					tphitHistory[category1].append(str(part2))  ## add it to the history list
+				### adding per signature support ###
+				if item[0] in tphitHistory:
+					tphitHistory[item[0]].append(part1)
 		else: ## FN
 
 			outlier.add(str(part1))  ## labels that did not get classified
@@ -340,6 +359,7 @@ def resetMatchCounts(topLevelCategories):
 	categoryFP[cat] = 0
 	categoryFN[cat] = 0
 	categoryTN[cat] = 0
+	xhit[cat] = 0
 	totalFP = 0
 	totalTN = 0
     
@@ -359,6 +379,7 @@ def processResultFile(filename, out):
     expectedTP = 0;
     totalcomb = 0;
     totalstreams = 0;
+    global categoryMatches, categoryTP, categoryTN, categoryFP, categoryFN
     global perclassdict;
     global optimized;
     global counter;
@@ -370,7 +391,9 @@ def processResultFile(filename, out):
     global tphit_list, tnhit_list, fphit_list,fnhit_list
     global x_list, y_list
     global outlier,classified
+    global xhit
     accuracy = 0;
+    xhitsum = 0;
     f = open(filename, "r");
 #    out = open(output, 'a')
     for line in f:
@@ -489,12 +512,14 @@ def processResultFile(filename, out):
 
 	countsig_list.append(u2categoryCount[cat])
 	dataset_list.append(u1categoryCount[cat])
-	tphit_list.append(tphit)
-	fphit_list.append(fphit)
-	fnhit_list.append(fnhit)
-	tnhit_list.append(tnhit)
+	if cat != "X": ## Take sum of all but cat X
+		tphit_list.append(tphit)
+		fphit_list.append(fphit)
+		fnhit_list.append(fnhit)
+		tnhit_list.append(tnhit)
+		xhitsum = xhitsum + int(xhit[cat])
 			      
-	res.append( cat + ","+  str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + ","+ str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(tnhit) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
+	res.append( cat + ","+  str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + ","+ str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(tnhit) + "," + str(tprcat) + "," + str(fprcat) + "," + str(xhit[cat]) + "," + str(acccat) + "," + str(auccat) + "\n" )
 #	res.append( cat + ","+ str(items[0]) + "," + str(items[1]) + ","+ str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(tphitH) + "," +  str(fphitH) +  "," + str(fnhitH) + "," + str(tnhitH) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
 
 #	res.append( str(get_thresh(cat)) + ","+ cat + "," + str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + "," + str(int(categoryCount[cat])) + "," + str(int(u1categoryCount[cat] + u2categoryCount[cat])) + "," + str(int(u1categoryCount[cat] * u2categoryCount[cat]) ) + "," + str(categoryMatches[cat]) + "," +  str(categoryFP[cat]) +  "," + str(categoryFN[cat]) + "," + str(categoryTN[cat]) + "," + str(tprcat) + "," + str(fprcat) + "," + str(acccat) + "," + str(auccat) + "\n" )
@@ -503,7 +528,8 @@ def processResultFile(filename, out):
     out.write("Summary:")
     tnsum =  math.fabs(sum(dataset_list) - ( sum(tphit_list) + sum(fphit_list) + sum(fnhit_list) ))
     t_accuracy = ( sum(tphit_list) + sum(fphit_list) + 0.0 )/( sum(tphit_list) + sum(fphit_list) + tnsum +  sum(fnhit_list) )
-    out.write(","+str(sum(dataset_list))+","+str(sum(countsig_list))+","+str(sum(tphit_list))+","+str(sum(fphit_list))+","+str(sum(fnhit_list))+","+str(tnsum)+",,,"+str(t_accuracy)+",")
+    
+    out.write(","+str(sum(dataset_list))+","+str(sum(countsig_list))+","+str(sum(tphit_list))+","+str(sum(fphit_list))+","+str(sum(fnhit_list))+","+str(tnsum)+",,,"+str(xhitsum)+","+str(t_accuracy)+",")
     out.write("\nOutliers:\n")
     outlier = outlier - classified.intersection(outlier)
     temp_outlier = list(outlier)
@@ -609,6 +635,7 @@ if __name__ == '__main__':
 	classified = set()
 	dataset_list = [] ## total number of samples in the dataset
 	countsig_list = [] ## count total number of exemplar samples
+	xhit = {}
 	threshDict = {}
 	x_list = []
 	y_list = []
@@ -657,7 +684,7 @@ if __name__ == '__main__':
 	#out.close()
 	fname = output
 	out = open(fname, 'w')
-	out.write("Class,  DatasetCount/category, SignatureCount/category, TP, FP, FN, TN, TPR, FPR, Accuracy, AUC\n")
+	out.write("Class,  DatasetCount/category, SignatureCount/category, TP, FP, FN, TN, TPR, FPR, X, Accuracy, AUC\n")
 	out.close()
 	if int(metric) == 3:
 		maxthresh = 2
@@ -727,9 +754,9 @@ if __name__ == '__main__':
 		title = "MIN(NCD,SPSUM)"
 		print "In COMBINED MIN"
 		print "file: ",fstring[-1]
-		os.system("python create_optimized_graph.py " + fstring[-1] )
+#		os.system("python create_optimized_graph.py " + fstring[-1] )
 
-		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
+#		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 	print "xlist:",x_list
 	print "ylist:",y_list
 	x_list, y_list = zip(*sorted(zip(x_list, y_list)))  ## sort axis coordinates for ROC

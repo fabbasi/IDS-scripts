@@ -1,0 +1,2 @@
+stream = [('in', b'HEAD / HTTP/1.0\x0d\x0a\x0d\x0a\x0d\x0a'),
+('out', b'HTTP/1.0 200 OK\x0d\x0aContent-type: text/html; charset=utf-8\x0d\x0aContent-Length: 204\x0d\x0aConnection: close\x0d\x0a\x0d\x0a')]
