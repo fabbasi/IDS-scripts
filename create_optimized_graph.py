@@ -63,11 +63,11 @@ for r in rows:
     part2Class, part2Details = part2.split("-")
     category1 = dynamic.categorisePayload(part1Class, categories)           # Classify the header -> return 14 for 14.1, 14.1.1, 14.1.2
     category2 = dynamic.categorisePayload(part2Class, categories)
-    print "category2: ",category2
+#    print "category2: ",category2
     try: 
 	    if category2 in threshDict:
 		model = threshDict[category2]  ## Get threshold value for category
-		print "model:",model
+#		print "model:",model
 	    else:
 		model = 0
     except TypeError:

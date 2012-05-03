@@ -772,11 +772,15 @@ for cat in topLevelCategories:
 						for exemplar in value:
 							if exemplar[0] == exemplar_lab: ## replace if same exemplar label with new thresh
 								exemplar[0] = exemplar_lab
+								if exemplar_thresh <= 0.05:
+									exemplar_thresh = 0.2
 								exemplar[1] = exemplar_thresh
 						if key == cat:
 							if [exemplar_lab,exemplar_thresh] not in value:
 								print "APPEND MODEL IN HITS"
-								model[cat].append([exemplar_lab,exemplar_thresh]) ## append exemplar and thresh to model and write it to result file
+								if exemplar_thresh <= 0.05:
+									exemplar_thresh = 0.2
+									model[cat].append([exemplar_lab,exemplar_thresh]) ## append exemplar and thresh to model and write it to result file
 				   writer.writerow(["MODEL WHEN NO FP: ",model[cat]])
    except ValueError:
 	   print "ValueError occured for cat:",cat
@@ -810,4 +814,4 @@ for cat in topLevelCategories:
 			f.write(item[0]+","+str(item[1])+"\n")
 			print "model:",item
 
-os.system("mv matrix.csv ../datasets/500-results/rev/imbalanced-100/ ; mv *.png ../datasets/500-results/rev/imbalanced-100/") ## MOVE RESULTS TO RESULT FOLDER
+#os.system("mv matrix.csv ../datasets/500-results/rev/imbalanced-100/ ; mv *.png ../datasets/500-results/rev/imbalanced-100/") ## MOVE RESULTS TO RESULT FOLDER

@@ -754,9 +754,9 @@ if __name__ == '__main__':
 		title = "MIN(NCD,SPSUM)"
 		print "In COMBINED MIN"
 		print "file: ",fstring[-1]
-#		os.system("python create_optimized_graph.py " + fstring[-1] )
+		os.system("python create_optimized_graph.py " + fstring[-1] )
 
-#		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
+		os.system("sfdp -Tsvg output/graph-" + fstring[-1]  + " -o " + "output/" + fstring[-1] +  ".svg")
 	print "xlist:",x_list
 	print "ylist:",y_list
 	x_list, y_list = zip(*sorted(zip(x_list, y_list)))  ## sort axis coordinates for ROC

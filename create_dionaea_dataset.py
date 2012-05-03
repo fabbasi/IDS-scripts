@@ -15,7 +15,7 @@
 
 #!/usr/bin/python
 
-import sys, os, hashlib, errno, re, shutil
+import sys, os, hashlib, errno, re, shutil, libemu
 
 print "2 arguments required <source dionaea dataset dir> <target dataset directory/>"
 
@@ -31,13 +31,14 @@ except os.error, e:
 			        raise
 
 mapf = open("/home/fimz/Dev/datasets/dionaea-mapping.txt",'w')
+shellcf = open("/home/fimz/Dev/datasets/dionaea-shellcode.txt",'w')
 cache = []
 for folder in listing:
    loc = source+"/"+folder	
    listofsamples = os.listdir(loc)
    for sample in listofsamples:
-        if "http" not in sample:
-		print "NON HTTP FLOW"
+#        if "http" not in sample:
+#		print "NON HTTP FLOW"
 	stream = 0
 	i = 0
 	myfile = loc + "/" + sample
@@ -52,22 +53,33 @@ for folder in listing:
 	if len(f) > 1:
 		import temp	
 		stream = temp.stream
+		count = 0
 		for i in stream:
-		    print "Stream is:",stream
-		    if stream not in cache:
-			cache.append(stream)
+		#    print "Stream is:",stream
+		    if i[1] not in cache:
+			emulator = libemu.Emulator()
+    			cache.append(stream)
 			print "i:",i
 			if i[0] == 'in':  ## attack
-				print "in stream:"
+				count += 1
+				print "in stream count: ",count
 				finalin = i[1]
 		#		print finalin
 				mhash = hashlib.md5(finalin).hexdigest()  ## create an md5sum of the source
 				outf = open(dest+"/"+"X-"+mhash,'w') ## open output file for writting
 				outf.write(finalin)	## Write to the newly renamed file
-				mapf.write(sample + " " + mhash + "\n") ## append to the mapping file
+				mapf.write(sample + " " + mhash + " " + str(count) +"\n") ## append to the mapping file
+#				if str(emulator.test(finalin)) != "None" and (emulator.test(finalin) > 0 or emulator.test(finalin) < 0):
+#				print "before offset"
+				offset = emulator.test(i[1])  ## check for shell code
+#				print "offset: ",offset
+#				print "after offset"
+				if offset: ## if found
+					shellcf.write("%s %s %s\n" % (sample,mhash,offset) )
+#					shellcf.write(sample + " " + mhash + " Has Shellcode " + str(offset) +"\n") ## append to the mapping file
 				outf.close()
 				finalin = 0
-
+			'''
 			if i[0] == 'out': ## response
 				print "out stream:"
 				finalout = i[1]
@@ -76,8 +88,14 @@ for folder in listing:
 				outf = open(dest+"/"+"X-"+mhash,'w') ## open output file for writting
 				outf.write(finalout)	## Write to the newly renamed file
 				mapf.write(sample + " " + mhash + "\n") ## append to the mapping file
+				offset = emulator.test(i[1])
+				if offset:
+					shellcf.write("%s %s %s\n" % (sample,mhash,offset) )
+#					shellcf.write(sample + " " + mhash +  " Has Shellcode " + str(offset) +"\n") ## append to the mapping file
+
 				outf.close()
 				finalout = 0
+			'''
 		print "Length of cache: ", len(cache)
 		del stream
 		if "temp" in sys.modules:
@@ -86,7 +104,7 @@ for folder in listing:
 	#	print "Final stream:", stream
 
 mapf.close()
-
+shellcf.close()
 
 
 
