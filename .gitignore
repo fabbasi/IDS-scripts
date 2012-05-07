@@ -4,4 +4,7 @@ novelty/
 build/
 screenlog.*
 *.pkl
+*.csv
+*.pickle
+*.pkl
 
