@@ -22,4 +22,4 @@ echo "RUNNING GET ROC, to create a confusion matrix and ROC curve for the classi
 python get_roc.py 3 $outdir
 echo "RUNNING GET NOVELTY, to detect unknown/unseen samples and suggest model for them"
 ## GET NOVELTY
-#python get_novelty.py $datdir $outdir
+python get_novelty.py $datdir $outdir

@@ -247,7 +247,9 @@ os.system("mkdir novelty")
 
 
 for item in mymodel:
-	os.system("cp ~/Dev/datasets/balanced-raw/imbalanced-100/"+item+" novelty/") ## copy exemplars to novelty/
+	os.system("cp ~/Dev/datasets/balanced-raw/imbalanced-500/"+item+" novelty/") ## copy exemplars to novelty/
+	os.system("cp "+ datadir +"/"+item+" novelty/") ## copy exemplars to novelty/
+
 for item in myoutlier:
 #	os.system("cp ~/Dev/datasets/testset-2/"+item+" novelty/")	## copy outliers to novelty/
 	os.system("cp "+datadir+"/"+item+" novelty/")	## copy outliers to novelty/
@@ -256,7 +258,8 @@ for item in myoutlier:
 #resultdir = "/home/fimz/Dev/datasets/500-results/rev/novelty"  ## result directory path
 ## result dir
 resultdir = sys.argv[2]
-os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --outdir "+resultdir)
+#os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --outdir "+resultdir)
+os.system("python get_scores.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --outdir "+resultdir)
 os.system("mv /home/fimz/Dev/scripts/output/* "+resultdir)
 
 fname = open("result.file",'r').read()
@@ -291,7 +294,7 @@ writer.writerow(["Labels and score of matching labels per category"])
 
 # labels,res,ressum,val,
 for label in labels:
-   if label not in mymodel:
+   if label not in mymodel: ## sum of non model labels only
 	print label   
 	s = []
 	score = []
@@ -426,19 +429,32 @@ while(len(check_labels) > 0):
 			     
 			     y1 = numpy.median(sane)  ## Replace avg with median for all values
 			     #split_thresh = math.fabs(fpmin - y1)/2.0## the threshold required to split data into groups
-			     print "Temp val:",temp
-			     split_thresh = max(temp)
+#			     print "Temp val:",temp
+			     try:
+				split_thresh = max(temp)
+				writer.writerow(["split max threshold",split_thresh])
+
+			     except ValueError:
+				split_thresh = 0
 			     if split_thresh == 0: ## if the split threshold is zero, use fpmin - 0.1 as the new split threshold
 				     split_thresh =  0.2
 			     if split_thresh > 0.8: ## sanity check
 			     	     split_thresh = 0.75
-				     
+	  		     hits[exemplar_lab] = [] ## reset hits and misshits list
+			     miss_hits[exemplar_lab] = [] ##
+			     writer.writerow(["Count Hit labels",len(miss_hits[exemplar_lab])])
+			     writer.writerow(["Count Missmatch labels",len(hits[exemplar_lab])])
+			     writer.writerow(["split threshold",split_thresh])
+
+		     
 			     for j in range(len(possfpval[exemplar_lab])):
 				y2 = possfpval[exemplar_lab][j]
-				x1 = x2 = 0
-				p1 = [x1,y1]
-				p2 = [x2,y2]
-				if ( (y2 <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 1.95
+				writer.writerow(["y2:split","%2d %2d" % (y2,split_thresh)])
+
+#				x1 = x2 = 0
+#				p1 = [x1,y1]
+#				p2 = [x2,y2]
+				if float(y2) <= float(split_thresh):  ## Match if eucl dist is below 1.95
 #					print "Matching labels:",possfp_labels[exemplar_lab][j]
 #					print i,j
 					matches[exemplar_lab].append(possfp_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 0.85
@@ -489,9 +505,11 @@ while(len(check_labels) > 0):
 			     print "New hits:",new_hits
                              writer.writerow(["New Hit Labels"])
                              writer.writerow(new_hits)
+			     writer.writerow(possfpval[exemplar_lab])
 			     writer.writerow(["New hit Labels count:"])
                              writer.writerow([len(new_hits)])
-
+                             writer.writerow([len(hits[exemplar_lab])])
+			     writer.writerow(matches[exemplar_lab])
 
 #			     while(len(new_misshits) > 0): ## recall the evaluate_model funct till there are no more misshits ##
  			     iteration = iteration + 1
@@ -538,5 +556,5 @@ for item in model:
 
 print "Model:"
 print model
-#os.system("mv matrix.csv "+resultdir+"; mv *.png "+resultdir) ## MOVE RESULTS TO RESULT FOLDER
+os.system("mv matrix.csv "+resultdir+"; mv *.png "+resultdir) ## MOVE RESULTS TO RESULT FOLDER
 

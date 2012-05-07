@@ -207,7 +207,7 @@ if __name__ == '__main__':
 	fname = sys.argv[1]
 	#print "Test2=",test2
 	pairs = []
-	ncdfile = csv.reader(open(fname, 'r'), delimiter=",")
+	ncdfile = csv.reader(open(fname, 'r'), delimiter=" ")
 	#pairs = ncdfile.readlines()
 	for rows in ncdfile:
 	#	print rows

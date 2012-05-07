@@ -1,5 +1,5 @@
 #######################################
-# combined-ncdspam.py
+# rev-combined-ncdspam.py
 # Functionality:
 #
 # 1. Use Cilibrasi and Vitanyi's Normalized Compression Distance
@@ -146,7 +146,7 @@ now = "%s"%int(time.time())
 ncdstr = "%s-ncd-out.txt"%now
 upgmastr = "%s-upgma-out.txt"%now
 spsumstr = "%s-spsum-out.txt"%now
-combinedstr = "%s-combined-out.txt"%now
+#combinedstr = "%s-combined-out.txt"%now
 newcombinedstr = "%s-newcombined-out.txt"%now
 
 output = "output/"
@@ -154,7 +154,7 @@ output = "output/"
 os.system("mkdir output")
 ncdfile = open( output+ncdstr, 'w')
 spsumfile = open( output+spsumstr,'w')
-combinedfile = open( output+combinedstr,'w')
+#combinedfile = open( output+combinedstr,'w')
 newcombinedfile = open( output+newcombinedstr,'w')
 
 ## Reduntant upgma file, ncd is sufficient
@@ -198,14 +198,14 @@ for i in range(0, len(selection)):
         ncdfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + "\n")
         spsumfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(spsum) + "\n")
         upgmafile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + "\n")
-        combinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + " " + str(spsum)  + "\n")
+#        combinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + " " + str(spsum)  + "\n")
 
 
 
 ncdfile.close()
 upgmafile.close()
 spsumfile.close()
-combinedfile.close()
+#combinedfile.close()
 newcombinedfile.close()
 
 print "Distances Successfully calculated and written out to files"
@@ -215,16 +215,16 @@ if options.make_graph == 1:
 	print "Calculating graph"
 	os.system("python ncd-fimz-graph.py " +ncdstr  + " " + "0.65" )
 	os.system("python ncd-fimz-graph.py " +spsumstr+ " " + "0.95"  )
-	os.system("python ncd-fimz-graph.py " +combinedstr + " " + "1.55" )
+	os.system("python ncd-fimz-graph.py " +newcombinedstr + " " + "1.55" )
 
 
 	graphncd = "output/graph-" + ncdstr
 	graphspsum = "output/graph-" + spsumstr
-	graphcombined = "output/graph-" + combinedstr
+	graphcombined = "output/graph-" + newcombinedstr
 
 	ncdpng = graphncd + ".svg"
 	spsumpng = graphspsum + ".svg"
-	combinedpng = graphcombined + ".svg"
+	newcombinedpng = graphcombined + ".svg"
 
 
 	print "Graph files Created"
@@ -253,12 +253,12 @@ location = str(location)
 #location = "/home/fimz/Dev/datasets/500-results"
 finalncd = location + "/" +  ncdstr
 finalspsum = location + "/" + spsumstr
-finalcombined = location + "/" + combinedstr
+#finalcombined = location + "/" + combinedstr
 finalnewcombined = location + "/" + newcombinedstr
 
 f.write(finalncd  + "\n")
 f.write(finalspsum  + "\n")
-f.write(finalcombined  + "\n")
+#f.write(finalcombined  + "\n")
 f.write(finalnewcombined  + "\n")
 
 f.close()
