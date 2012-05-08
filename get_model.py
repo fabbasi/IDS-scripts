@@ -199,7 +199,7 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	newhits[hit_exemp_lab] = []
 	new_misshits[hit_exemp_lab] = []
 	split_thresh = new_max_exemp_thresh
-	if split_thresh == 0:
+	if split_thresh == 0 or split_thresh < 0.1 :
 		split_thresh = 0.2
 	for v in corr_hit_val[hit_exemp_lab]:
 #		print "v:",v
@@ -225,7 +225,7 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	       ## recreate model with adjusted threshold
 	corr_thresh = split_thresh ## corr_thresh = split_thresh = new_max_exemp_thresh = max(corr_hit_val[hit_exemp_lab])
 #	model[cat].append([ hit_exemp_lab,corr_thresh ])
-	if new_max_exemp_thresh == 0:
+	if new_max_exemp_thresh == 0 or new_max_exemp_thresh < 0.1:
 		new_max_exemp_thresh = 0.2
 
 	return hit_exemp_lab,new_max_exemp_thresh,newhits[hit_exemp_lab],new_misshits[hit_exemp_lab]
@@ -327,7 +327,7 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 	new_misshits[exemp_lab] = []
 	eucd = []
 	split_thresh = new_max_exemp_thresh
-	if split_thresh == 0:
+	if split_thresh == 0 or split_thresh < 0.1 :
 		split_thresh = 0.2
 
 	for v in corr_misshit_val[exemp_lab]:
@@ -355,7 +355,7 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 	model[cat].append([ exemp_lab,corr_thresh ])
 
 #	writer.writerow(model[cat]) ## write the model to the result file
-	if new_max_exemp_thresh == 0:
+	if new_max_exemp_thresh == 0 or new_max_exemp_thresh < 0.1:
 		new_max_exemp_thresh = 0.2 ## so it can match similar items
 
 	return exemp_lab,new_max_exemp_thresh,newhits[exemp_lab],new_misshits[exemp_lab]
@@ -428,6 +428,8 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 		if key == cat:
 			if [miss_exemplar,miss_thresh] not in value:
 #				print "model value:",value
+				if miss_thresh < 0.1:
+					miss_thresh = 0.2
 				model[cat].append([miss_exemplar,miss_thresh]) ## append resulting exemplar and threshold to the model and write it to result file
 				print miss_exemplar
 				print "APPEND MODEL IN missHITS"
@@ -469,6 +471,8 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 		if key == cat:
 			if [hit_exemplar,hit_thresh] not in value:
 				print "APPEND MODEL IN HITS"
+				if hit_thresh < 0.1:
+					hit_thresh = 0.2
 				model[cat].append([hit_exemplar,hit_thresh]) ## append exemplar and thresh to model and write it to result file
 	
 	writer.writerow(model[cat]) ## write the model to the result file
@@ -772,13 +776,13 @@ for cat in topLevelCategories:
 						for exemplar in value:
 							if exemplar[0] == exemplar_lab: ## replace if same exemplar label with new thresh
 								exemplar[0] = exemplar_lab
-								if exemplar_thresh <= 0.05:
+								if exemplar_thresh < 0.1:
 									exemplar_thresh = 0.2
 								exemplar[1] = exemplar_thresh
 						if key == cat:
 							if [exemplar_lab,exemplar_thresh] not in value:
 								print "APPEND MODEL IN HITS"
-								if exemplar_thresh <= 0.05:
+								if exemplar_thresh < 0.1:
 									exemplar_thresh = 0.2
 									model[cat].append([exemplar_lab,exemplar_thresh]) ## append exemplar and thresh to model and write it to result file
 				   writer.writerow(["MODEL WHEN NO FP: ",model[cat]])

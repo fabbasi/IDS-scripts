@@ -217,6 +217,8 @@ matches = {} ## All matches under the eucl dist of 1.95
 match_labels = {} ## All matching labels for that category
 miss_hits = {} ## miss hits
 hits = {} ## hits
+hits_val = {}
+miss_hits_val = {}
 possfpval = {} ## possible fp values
 possfp_labels = {} # possible fp labels
 fpval = {} ## fp value
@@ -259,7 +261,7 @@ for item in myoutlier:
 ## result dir
 resultdir = sys.argv[2]
 #os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --outdir "+resultdir)
-os.system("python get_scores.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --outdir "+resultdir)
+os.system("python get_scores.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --squarematrix 1 --outdir "+resultdir)
 os.system("mv /home/fimz/Dev/scripts/output/* "+resultdir)
 
 fname = open("result.file",'r').read()
@@ -414,7 +416,12 @@ while(len(check_labels) > 0):
 			     sane = []
 			     temp = [] ## for split point
 			     count = 0
-			     
+	  		     hits[exemplar_lab] = [] ## reset hits and misshits list
+			     hits_val[exemplar_lab] = []
+			     miss_hits[exemplar_lab] = [] ##
+			     miss_hits_val[exemplar_lab] = []
+
+		     
 			     for myscore in possfpval[exemplar_lab]:
 				if myscore < 0.85: ## Sanity threshold changed for NCD and spsum
 	# 				   print myscore
@@ -427,9 +434,6 @@ while(len(check_labels) > 0):
 				if myscore < fpmin: ## for split thresh
 					temp.append(myscore)
 			     
-			     y1 = numpy.median(sane)  ## Replace avg with median for all values
-			     #split_thresh = math.fabs(fpmin - y1)/2.0## the threshold required to split data into groups
-#			     print "Temp val:",temp
 			     try:
 				split_thresh = max(temp)
 				writer.writerow(["split max threshold",split_thresh])
@@ -440,24 +444,21 @@ while(len(check_labels) > 0):
 				     split_thresh =  0.2
 			     if split_thresh > 0.8: ## sanity check
 			     	     split_thresh = 0.75
-	  		     hits[exemplar_lab] = [] ## reset hits and misshits list
-			     miss_hits[exemplar_lab] = [] ##
 			     writer.writerow(["Count Hit labels",len(miss_hits[exemplar_lab])])
 			     writer.writerow(["Count Missmatch labels",len(hits[exemplar_lab])])
 			     writer.writerow(["split threshold",split_thresh])
-
+			     writer.writerow(["poss fp values:",len(possfpval[exemplar_lab])])
 		     
 			     for j in range(len(possfpval[exemplar_lab])):
-				y2 = possfpval[exemplar_lab][j]
-				writer.writerow(["y2:split","%2d %2d" % (y2,split_thresh)])
-
-#				x1 = x2 = 0
-#				p1 = [x1,y1]
-#				p2 = [x2,y2]
-				if float(y2) <= float(split_thresh):  ## Match if eucl dist is below 1.95
+				simscore = possfpval[exemplar_lab][j]
+#				writer.writerow(["simscore:split","%2d %2d" % (simscore,split_thresh)])
+				writer.writerow(["simscore:",simscore])
+				writer.writerow(["split_thresh:",split_thresh])
+				if simscore <= split_thresh:  ## Match if eucl dist is below 1.95
 #					print "Matching labels:",possfp_labels[exemplar_lab][j]
 #					print i,j
 					matches[exemplar_lab].append(possfp_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 0.85
+					hits_val[exemplar_lab].append(possfpval[exemplar_lab][j])
 					if exemplar_lab in hits:
 						hits[exemplar_lab].append(possfp_labels[exemplar_lab][j]) ## append results to hits dictionary
 					else:
@@ -475,9 +476,6 @@ while(len(check_labels) > 0):
 
 			     writer.writerow(["split threshold",split_thresh])
 			     print "split thresh:",split_thresh
-#			     writer.writerow([split_thresh])
-#			     writer.writerow(["Matching label after euclid"])
-#			     writer.writerow(matches[exemplar_lab])
 			     new_thresh = float(split_thresh) ## should be the max of values under fpmin 
 			     if exemplar_lab in miss_hits:
                                         writer.writerow(["Missmatch Labels"])
@@ -495,9 +493,6 @@ while(len(check_labels) > 0):
 			     writer.writerow(model[counter])
 			     
 			     ## Call the evaluate_model function ## 
-#			     print "match_score:",match_score
-#			     print "match_label:",match_labels
-#			     new_misshits,newhits,model = evaluate_model(miss_hits[exemplar_lab],match_score,match_labels,cat,writer,model,has_fp,fpmin,iteration)
 			     print "Exemplar: ",exemplar_lab
 			     print "Threshold: ",new_thresh
 			     new_misshits = miss_hits[exemplar_lab][:]
@@ -505,6 +500,7 @@ while(len(check_labels) > 0):
 			     print "New hits:",new_hits
                              writer.writerow(["New Hit Labels"])
                              writer.writerow(new_hits)
+			     writer.writerow(hits_val[exemplar_lab])
 			     writer.writerow(possfpval[exemplar_lab])
 			     writer.writerow(["New hit Labels count:"])
                              writer.writerow([len(new_hits)])

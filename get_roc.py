@@ -293,6 +293,8 @@ def classifyAttack(line, categories, lineNo):
 
 	## Get threshold specific to signature class ##
         model = get_thresh(category2)
+#	print "category2:",category2
+#	print "model is: ",model
 	for item in model:
 	  if part2 == item[0]: ## confirm if its the exemplar, then fetch the threshold
 	    if float(value) <= float(item[1]): ## FP
@@ -547,6 +549,8 @@ def get_thresh(testclass):
 	if testclass in threshDict:
 		return threshDict[testclass]
 	else:
+		print "class:",testclass
+		print "No such class in model"
 		return 0
 #===========================================================
 # Load optimum threshold for each class in a dict loadThresh(filename)

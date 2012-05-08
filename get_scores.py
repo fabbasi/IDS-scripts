@@ -128,6 +128,11 @@ oparser.add_option("-g","--makegraph",
                    dest = "make_graph",
                    default = False,
                    help = "Create graphs")
+oparser.add_option("-n","--squarematrix",
+                   action='store_true',
+                   dest = "square_matrix",
+                   default = False,
+                   help = "Create graphs")
 oparser.add_option("-m","--model",
                    action='store',
                    dest = "model",
@@ -142,6 +147,7 @@ sigdir = options.sigdir  ## path to signature/exemplar dir
 datdir = options.datdir  ## path to dataset dir
 iteration = options.itera ## iterations
 model = options.model  ## /path/to/model file
+square_matrix = options.square_matrix
 
 siglist = os.listdir(sigdir)
 listing = os.listdir(datdir)
@@ -161,10 +167,16 @@ for infile in listing:
     print "current file is: " + infile
     selection.append( infile )
 
-for infile in siglist: ## for all the files in the signature list
-    if infile in exemplars:  ## if the file is an exemplar	
-    	print "current file is: " + infile
-	sigselect.append( infile ) ## append the file
+## need to edit this to integrate with novelty
+if square_matrix == 1:
+	for infile in siglist:
+		print "current file is: " + infile
+	        sigselect.append( infile )
+else:
+	for infile in siglist: ## for all the files in the signature list
+	    if infile in exemplars:  ## if the file is an exemplar	
+		print "current file is: " + infile
+		sigselect.append( infile ) ## append the file
 
 print "sigselect: ",sigselect
 print len(selection), selection[0]
