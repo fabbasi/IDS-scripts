@@ -435,7 +435,10 @@ def processResultFile(filename, out):
 	totalTP = totalTP + int(categoryMatches[cat])
 	totalTN = totalTN + int(categoryTN[cat])
 	totalFN = totalFN + int(categoryFN[cat])
-	samesum = samesum + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
+	try:
+		samesum = samesum + (int(categoryCount[cat]/totalstreams) * int(categoryCount[cat]/totalstreams))
+	except ZeroDivisionError, e:
+		samesum = 0
 	print "Category: ",cat
 	try:
 		tphit = len(tphitHistory[cat])

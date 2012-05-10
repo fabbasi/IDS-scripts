@@ -18,14 +18,24 @@
 19 :: RDP Buffer Overflow Exploit
 20 :: HTTP GET Request (absolute http Path)
 21 :: HTTP HEAD Request :: 21.1 :: 21.2
-22 :: HTTP GET Request :: 22.1 :: 22.2 :: 22.3.1 :: 22.3.2
+22 :: HTTP GET Request :: 22 :: 22.1 :: 22.2 :: 22.3.1 :: 22.3.2 :: 22.4 :: 22.5 :: 22.6 :: 22.7
 23 :: HTTP POST Request with Host and Connection Info
-24 :: HTTP OPTIONS Request :: 24.1 :: 24.2
+24 :: HTTP OPTIONS Request :: 24.1 :: 24.2 :: 24.3
 25 :: RTSP OPTIONS Request
 26 :: HTTP CONNECT Request with Host Info
 27 :: Radmin Connection Attempt :: 27.1 :: 27.2
 28 :: BrightStor ARCserve Backup Buffer Overflow Exploit
 29 :: POP3 Login Attempt :: 29 :: 29.1
-30 :: SIP scanner
+30 :: SIP scanner,ack,invite,cancel :: 30 :: 30.1 :: 30.2 :: 30.3
+31 :: MS-directory service (port445) 
 32 :: MSSQL
+33 :: NMAP SERVICE PROBE
+34 :: SHELLCODE
+35 :: ORACLE TNS
+36 :: MMS stream
+37 :: malware
+39 :: NTP
+40 :: EPMAPPER (port 135)
+41 :: PROPFIND WEBDAV
+42 :: Random strings
 X  :: Unknown category possible outlier

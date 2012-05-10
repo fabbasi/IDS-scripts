@@ -158,24 +158,26 @@ threshold = []
 f = open("mymodel.txt",'r') ## open model file to read
 lines = f.readlines() ## read file line by line
 for line in lines:
-	ex_label,ex_thresh = line.split(',') ## get exemplar and its threshold
-	os.system("cp "+datdir+"/"+line+" "+sigdir)
-	exemplars.append(ex_label) ## append lables
-	threshold.append(ex_thresh) ## append threshold
+   ex_label,ex_thresh = line.split(',') ## get exemplar and its threshold
+   exemplars.append(ex_label) ## append lables
+   threshold.append(ex_thresh) ## append threshold
+   if ex_label not in siglist:
+	print "Copying exemplar:",ex_label
+	os.system("cp "+datdir+"/"+ex_label+" "+sigdir)
 
 for infile in listing:
-    print "current file is: " + infile
+#    print "current file is: " + infile
     selection.append( infile )
 
 ## need to edit this to integrate with novelty
 if square_matrix == 1:
 	for infile in siglist:
-		print "current file is: " + infile
+		print "current file for novelty is: " + infile
 	        sigselect.append( infile )
 else:
 	for infile in siglist: ## for all the files in the signature list
 	    if infile in exemplars:  ## if the file is an exemplar	
-		print "current file is: " + infile
+#		print "current file is: " + infile
 		sigselect.append( infile ) ## append the file
 
 print "sigselect: ",sigselect
@@ -190,8 +192,8 @@ newcombinedstr = "%s-newcombined-out.txt"%now
 output = "output/"
 
 os.system("mkdir output")
-ncdfile = open( output+ncdstr, 'w')
-spsumfile = open( output+spsumstr,'w')
+#ncdfile = open( output+ncdstr, 'w')
+#spsumfile = open( output+spsumstr,'w')
 #combinedfile = open( output+combinedstr,'w')
 newcombinedfile = open( output+newcombinedstr,'w')
 
@@ -233,16 +235,16 @@ for i in range(0, len(selection)):
 	combscore = []
         combscore = [float(spsum) , float(ncdscore)]
         newcombinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(min(combscore)) + "\n")
-        ncdfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + "\n")
-        spsumfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(spsum) + "\n")
+#        ncdfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + "\n")
+#        spsumfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(spsum) + "\n")
 #        upgmafile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + "\n")
 #        combinedfile.write(str(selection[i]) + " " + str(sigselect[j]) + " " + str(ncdscore) + " " + str(spsum)  + "\n")
 
 
 
-ncdfile.close()
+#ncdfile.close()
 #upgmafile.close()
-spsumfile.close()
+#spsumfile.close()
 #combinedfile.close()
 newcombinedfile.close()
 
@@ -251,17 +253,17 @@ print "Distances Successfully calculated and written out to files"
 if options.make_graph == 1:
 	print "##########################################################"
 	print "Calculating graph"
-	os.system("python ncd-fimz-graph.py " +ncdstr  + " " + "0.65" )
-	os.system("python ncd-fimz-graph.py " +spsumstr+ " " + "0.95"  )
+#	os.system("python ncd-fimz-graph.py " +ncdstr  + " " + "0.65" )
+#	os.system("python ncd-fimz-graph.py " +spsumstr+ " " + "0.95"  )
 	os.system("python ncd-fimz-graph.py " +newcombinedstr + " " + "1.55" )
 
 
-	graphncd = "output/graph-" + ncdstr
-	graphspsum = "output/graph-" + spsumstr
+#	graphncd = "output/graph-" + ncdstr
+#	graphspsum = "output/graph-" + spsumstr
 	graphcombined = "output/graph-" + newcombinedstr
 
-	ncdpng = graphncd + ".svg"
-	spsumpng = graphspsum + ".svg"
+#	ncdpng = graphncd + ".svg"
+#	spsumpng = graphspsum + ".svg"
 	newcombinedpng = graphcombined + ".svg"
 
 
@@ -269,14 +271,14 @@ if options.make_graph == 1:
 	print "##########################################################"
 	print "Running Neato on ncd"
 
-	os.system("sfdp -Tsvg "+ graphncd + " -o " + ncdpng)
+#	os.system("sfdp -Tsvg "+ graphncd + " -o " + ncdpng)
 	#os.system("sfdp -Tpng "+ graphncd + " -o " + ".png")
 
 	print "Running Neato on spsum"
-	os.system("sfdp -Tsvg "+ graphspsum + " -o " + spsumpng)
+#	os.system("sfdp -Tsvg "+ graphspsum + " -o " + spsumpng)
 
 	print "Running Neato on combined"
-	os.system("sfdp -Tsvg "+ graphcombined + " -o " + combinedpng)
+#	os.system("sfdp -Tsvg "+ graphcombined + " -o " + combinedpng)
 
 	## Adding UPGMA support
 	print "Calculating UPGMA"
@@ -292,13 +294,13 @@ f = open("list500.txt",'w')
 #location = "/home/fimz/Dev/datasets/500-results"
 print "location: ",location
 print "ncdstr: ",ncdstr
-finalncd = location + "/" +  ncdstr
-finalspsum = location + "/" + spsumstr
+#finalncd = location + "/" +  ncdstr
+#finalspsum = location + "/" + spsumstr
 #finalcombined = location + "/" + combinedstr
 finalnewcombined = location + "/" + newcombinedstr
-
-f.write(finalncd  + "\n")
-f.write(finalspsum  + "\n")
+print "Final result file:",finalnewcombined
+#f.write(finalncd  + "\n")
+#f.write(finalspsum  + "\n")
 #f.write(finalcombined  + "\n")
 f.write(finalnewcombined  + "\n")
 

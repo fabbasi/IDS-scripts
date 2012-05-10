@@ -452,8 +452,8 @@ while(len(check_labels) > 0):
 			     for j in range(len(possfpval[exemplar_lab])):
 				simscore = possfpval[exemplar_lab][j]
 #				writer.writerow(["simscore:split","%2d %2d" % (simscore,split_thresh)])
-				writer.writerow(["simscore:",simscore])
-				writer.writerow(["split_thresh:",split_thresh])
+#				writer.writerow(["simscore:",simscore])
+#				writer.writerow(["split_thresh:",split_thresh])
 				if simscore <= split_thresh:  ## Match if eucl dist is below 1.95
 #					print "Matching labels:",possfp_labels[exemplar_lab][j]
 #					print i,j

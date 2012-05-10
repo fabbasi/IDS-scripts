@@ -2,9 +2,10 @@
 #sigdir=/home/fimz/Dev/datasets/balanced-raw/imbalanced-100 
 sigdir=/home/fimz/Dev/datasets/balanced-raw/imbalanced-500 
 
-datdir=/home/fimz/Dev/datasets/balanced-raw/imbalanced-500
+#datdir=/home/fimz/Dev/datasets/balanced-raw/imbalanced-500
 #datdir=/home/fimz/Dev/datasets/testset
-#datdir=/home/fimz/Dev/datasets/dionaea-streams
+datdir=/home/fimz/Dev/datasets/dionaea-streams
+#datdir=/home/fimz/Dev/datasets/dionaea-testset-1
 
 #outdir=/home/fimz/Dev/datasets/500-results/rev/novelty
 outdir=/home/fimz/Dev/datasets/500-results/rev/dionaea
@@ -22,4 +23,4 @@ echo "RUNNING GET ROC, to create a confusion matrix and ROC curve for the classi
 python get_roc.py 3 $outdir
 echo "RUNNING GET NOVELTY, to detect unknown/unseen samples and suggest model for them"
 ## GET NOVELTY
-python get_novelty.py $datdir $outdir
+#python get_novelty.py $datdir $outdir
