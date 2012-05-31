@@ -244,12 +244,14 @@ myoutlier = pickle.load(open("outlier.pkl",'rb'))
 os.system("rm -rf /home/fimz/Dev/scripts/novelty")
 ## DATA DIR
 datadir = sys.argv[1]
+## Sig DIR
+sigdir = sys.argv[2]
 ## Create a directory and copy samples from both lists to this dir
 os.system("mkdir novelty")
 
 
 for item in mymodel:
-	os.system("cp ~/Dev/datasets/balanced-raw/imbalanced-500/"+item+" novelty/") ## copy exemplars to novelty/
+	os.system("cp "+ sigdir + "/" + item + " novelty/") ## copy exemplars to novelty/
 	os.system("cp "+ datadir +"/"+item+" novelty/") ## copy exemplars to novelty/
 
 for item in myoutlier:
@@ -259,7 +261,7 @@ for item in myoutlier:
 ## Run shell script on this dir to create a distance matrix, which will be the new fname
 #resultdir = "/home/fimz/Dev/datasets/500-results/rev/novelty"  ## result directory path
 ## result dir
-resultdir = sys.argv[2]
+resultdir = sys.argv[3]
 #os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --outdir "+resultdir)
 os.system("python get_scores.py --sigdir /home/fimz/Dev/scripts/novelty --datdir /home/fimz/Dev/scripts/novelty --iter 1 --squarematrix 1 --outdir "+resultdir)
 os.system("mv /home/fimz/Dev/scripts/output/* "+resultdir)
@@ -440,7 +442,7 @@ while(len(check_labels) > 0):
 
 			     except ValueError:
 				split_thresh = 0
-			     if split_thresh == 0: ## if the split threshold is zero, use fpmin - 0.1 as the new split threshold
+			     if split_thresh == 0 and fpmin > 0.2 : ## if the split threshold is zero, use fpmin - 0.1 as the new split threshold
 				     split_thresh =  0.2
 			     if split_thresh > 0.8: ## sanity check
 			     	     split_thresh = 0.75

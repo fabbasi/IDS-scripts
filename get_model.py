@@ -199,8 +199,13 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	newhits[hit_exemp_lab] = []
 	new_misshits[hit_exemp_lab] = []
 	split_thresh = new_max_exemp_thresh
-	if split_thresh == 0 or split_thresh < 0.1 :
+	writer.writerow(["FPMIN in handle_hits:",fpmin])
+
+	if (split_thresh == 0 or split_thresh < 0.1) and fpmin > 0.2:
 		split_thresh = 0.2
+	if split_thresh > 0.8:
+		split_thresh = 0.75
+
 	for v in corr_hit_val[hit_exemp_lab]:
 #		print "v:",v
 		y2 = v
@@ -208,13 +213,13 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	#	split_thresh
 #		print "euclid: ",euc_dist(p1,p2)
 		eucd.append(euc_dist(p1,p2))
-		if ( (y2 <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
+		if ( (y2 <= split_thresh and y2 < 0.85)):  ## Match if eucl dist is below 0.75
 #			print "eucd: ",euc_dist(p1,p2)
 			newhits[hit_exemp_lab].append(corr_hit_lab[hit_exemp_lab][corr_hit_val[hit_exemp_lab].index(v)])
 			is_match.append(corr_hit_lab[hit_exemp_lab][corr_hit_val[hit_exemp_lab].index(v)])
 		else:
 			is_match.append("MISS-HIT")
-			new_misshits[hit_exemp_lab].append(corr_misshit_lab[hi_exemp_lab][corr_misshit_val[hit_exemp_lab].index(v)])
+			new_misshits[hit_exemp_lab].append(corr_hit_lab[hit_exemp_lab][corr_hit_val[hit_exemp_lab].index(v)])
 	writer.writerow(["New split threshold:",split_thresh])	
 	writer.writerow(["New Median:",y1])
 #	writer.writerow(["Euclidean distance:",eucd])
@@ -225,8 +230,10 @@ def handle_hits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteration):
 	       ## recreate model with adjusted threshold
 	corr_thresh = split_thresh ## corr_thresh = split_thresh = new_max_exemp_thresh = max(corr_hit_val[hit_exemp_lab])
 #	model[cat].append([ hit_exemp_lab,corr_thresh ])
-	if new_max_exemp_thresh == 0 or new_max_exemp_thresh < 0.1:
+	if (new_max_exemp_thresh == 0 or new_max_exemp_thresh < 0.1) and fpmin > 0.2:
 		new_max_exemp_thresh = 0.2
+	if new_max_exemp_thresh > 0.8:
+		new_max_exemp_thresh = 0.75
 
 	return hit_exemp_lab,new_max_exemp_thresh,newhits[hit_exemp_lab],new_misshits[hit_exemp_lab]
 
@@ -327,9 +334,10 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 	new_misshits[exemp_lab] = []
 	eucd = []
 	split_thresh = new_max_exemp_thresh
-	if split_thresh == 0 or split_thresh < 0.1 :
+	if split_thresh == 0 or split_thresh < 0.1 and fpmin > 0.2:
 		split_thresh = 0.2
-
+	if split_thresh > 0.8:
+		split_thresh = 0.75
 	for v in corr_misshit_val[exemp_lab]:
 #		print "v:",v
 		y2 = v
@@ -337,7 +345,7 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 		split_thresh
 #		print "euclid: ",euc_dist(p1,p2)
 		eucd.append(euc_dist(p1,p2))
-		if ( (y2 <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 0.75
+		if ( (y2 <= split_thresh and y2 < 0.85)  ):  ## Match if eucl dist is below 0.75
 			newhits[exemp_lab].append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 			is_match.append(corr_misshit_lab[exemp_lab][corr_misshit_val[exemp_lab].index(v)])
 		else:
@@ -355,9 +363,10 @@ def handle_misshits(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iterati
 	model[cat].append([ exemp_lab,corr_thresh ])
 
 #	writer.writerow(model[cat]) ## write the model to the result file
-	if new_max_exemp_thresh == 0 or new_max_exemp_thresh < 0.1:
+	if new_max_exemp_thresh == 0 or new_max_exemp_thresh < 0.1 and fpmin > 0.2:
 		new_max_exemp_thresh = 0.2 ## so it can match similar items
-
+	if new_max_exemp_thresh > 0.8:
+		new_max_exemp_thresh = 0.75
 	return exemp_lab,new_max_exemp_thresh,newhits[exemp_lab],new_misshits[exemp_lab]
 
 
@@ -409,7 +418,11 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 	if(len(m_misshits)>0):
 		print "misshits found"
 	while(has_fp or len(m_misshits)>0):
+		writer.writerow(["In first While loop:"])
+
 	        miss_exemplar,miss_thresh,m_hits,m_misshits = handle_misshits(m_misshits,m_hits,val,ref,cat,writer,model,has_fp,fpmin,iteration)
+		writer.writerow(["misshit_exemp,misshit_thresh",miss_exemplar,miss_thresh])
+
 #	        model[cat].append([miss_exemplar,miss_thresh])
         	########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
 	        has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(cat,miss_exemplar,miss_thresh,writer)
@@ -430,6 +443,8 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 #				print "model value:",value
 				if miss_thresh < 0.1:
 					miss_thresh = 0.2
+				if miss_thresh > 0.8:
+					miss_thresh = 0.7
 				model[cat].append([miss_exemplar,miss_thresh]) ## append resulting exemplar and threshold to the model and write it to result file
 				print miss_exemplar
 				print "APPEND MODEL IN missHITS"
@@ -453,7 +468,11 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 		print "misshits found"
 
 	while(has_fp or len(h_misshits)>0):
+		writer.writerow(["In second while loop:"])
+
 		hit_exemplar,hit_thresh,h_hits,h_misshits = handle_hits(h_misshits,h_hits,val,ref,cat,writer,model,has_fp,fpmin,iteration)
+		writer.writerow(["hit_exemp,hit_thresh",hit_exemplar,hit_thresh])
+
 #		model[cat].append([hit_exemplar,hit_thresh])
 		########### CHECK THE NEW EXEMPLAR AND THRESHOLD FOR FP ################
 	        has_fp,fpcount,fp_labels,fpval,fpmin = check_fp(cat,hit_exemplar,hit_thresh,writer)
@@ -473,6 +492,8 @@ def evaluate_model(miss_hits,hits,val,ref,cat,writer,model,has_fp,fpmin,iteratio
 				print "APPEND MODEL IN HITS"
 				if hit_thresh < 0.1:
 					hit_thresh = 0.2
+				if hit_thresh > 0.8:
+					hit_thresh = 0.75
 				model[cat].append([hit_exemplar,hit_thresh]) ## append exemplar and thresh to model and write it to result file
 	
 	writer.writerow(model[cat]) ## write the model to the result file
@@ -576,10 +597,17 @@ add =0
 count = 0
 ressum = 0;
 
+sigdir = sys.argv[1] ## signature directory
 ## Run shell script on this dir to create a distance matrix, which will be the new fname
-resultdir = "/home/fimz/Dev/datasets/500-results/rev/novelty"  ## result directory path
-os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --datdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --iter 1 --outdir "+resultdir)
+#resultdir = "/home/fimz/Dev/datasets/500-results/rev/novelty"  ## result directory path
+resultdir = sys.argv[2] ## output or result directory
+
+#os.system("python rev-combncdspam.py --sigdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --datdir /home/fimz/Dev/datasets/balanced-raw/imbalanced-100 --iter 1 --outdir "+resultdir)
+os.system("rm -f mymodel.txt")
+os.system("python get_scores.py --sigdir " + sigdir  + " --datdir " + sigdir + " --iter 1 --squarematrix 1 --outdir " + resultdir)
 os.system("mv /home/fimz/Dev/scripts/output/* "+resultdir)
+
+#os.system("mv /home/fimz/Dev/scripts/output/* "+resultdir)
 
 #fname = sys.argv[1] ## take score file as input
 fname = open("result.file",'r').read()
@@ -711,13 +739,17 @@ for cat in topLevelCategories:
 			     y1 = numpy.median(sane)  ## Replace avg with median for all values
 			     #split_thresh = math.fabs(fpmin - y1)/2.0## the threshold required to split data into groups
 			     split_thresh = max(temp)
+			     if split_thresh == 0 or split_thresh < 0.1 and fpmin > 0.2:
+					split_thresh = 0.2
+			     if split_thresh > 0.8:
+					split_thresh = 0.75
 
 			     for j in range(len(val[exemplar_lab])):
 				y2 = val[exemplar_lab][j]
 				x1 = x2 = 0
 				p1 = [x1,y1]
 				p2 = [x2,y2]
-				if ( (y2 <= split_thresh and y2 < 0.85) or (y2 < 0.4) ):  ## Match if eucl dist is below 1.95
+				if ( (y2 <= split_thresh and y2 < 0.85) ):  ## Match if eucl dist is below 1.95
 	#					print match_labels[ref[cat][i][0]][j]
 	#					print i,j
 					matches[exemplar_lab].append(match_labels[exemplar_lab][j]) ## Append labels of matching criteria of eucl distance of < 0.85
@@ -778,12 +810,16 @@ for cat in topLevelCategories:
 								exemplar[0] = exemplar_lab
 								if exemplar_thresh < 0.1:
 									exemplar_thresh = 0.2
+								if exemplar_thresh > 0.8:
+									exemplar_thresh = 0.75
 								exemplar[1] = exemplar_thresh
 						if key == cat:
 							if [exemplar_lab,exemplar_thresh] not in value:
 								print "APPEND MODEL IN HITS"
 								if exemplar_thresh < 0.1:
 									exemplar_thresh = 0.2
+								if exemplar_thresh > 0.8:
+									exemplar_thresh = 0.75
 									model[cat].append([exemplar_lab,exemplar_thresh]) ## append exemplar and thresh to model and write it to result file
 				   writer.writerow(["MODEL WHEN NO FP: ",model[cat]])
    except ValueError:

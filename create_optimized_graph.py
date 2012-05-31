@@ -49,7 +49,7 @@ infile.close()
 
 categories, topLevelCategories = dynamic.loadCategories("categories-500.txt")
 loadModel("mymodel.txt",categories)        ## load the threshold file and build a dictionary
-print "Threshdict:",threshDict
+#print "Threshdict:",threshDict
 bios = []
 links = []
 sig = []

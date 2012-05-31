@@ -155,15 +155,17 @@ selection = []
 sigselect = []
 exemplars=[]
 threshold = []
-f = open("mymodel.txt",'r') ## open model file to read
-lines = f.readlines() ## read file line by line
-for line in lines:
-   ex_label,ex_thresh = line.split(',') ## get exemplar and its threshold
-   exemplars.append(ex_label) ## append lables
-   threshold.append(ex_thresh) ## append threshold
-   if ex_label not in siglist:
-	print "Copying exemplar:",ex_label
-	os.system("cp "+datdir+"/"+ex_label+" "+sigdir)
+
+if(os.path.isfile("mymodel.txt")):
+	f = open("mymodel.txt",'r') ## open model file to read
+	lines = f.readlines() ## read file line by line
+	for line in lines:
+	   ex_label,ex_thresh = line.split(',') ## get exemplar and its threshold
+	   exemplars.append(ex_label) ## append lables
+	   threshold.append(ex_thresh) ## append threshold
+	   if ex_label not in siglist:
+		print "Copying exemplar:",ex_label
+		os.system("cp "+datdir+"/"+ex_label+" "+sigdir)
 
 for infile in listing:
 #    print "current file is: " + infile
@@ -172,7 +174,7 @@ for infile in listing:
 ## need to edit this to integrate with novelty
 if square_matrix == 1:
 	for infile in siglist:
-		print "current file for novelty is: " + infile
+		print "current file for sq_matrix is: " + infile
 	        sigselect.append( infile )
 else:
 	for infile in siglist: ## for all the files in the signature list

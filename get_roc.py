@@ -185,6 +185,9 @@ def classifyAttack(line, categories, lineNo):
 #    print type(line)
 #    print valu
     
+#    print "cat1: ",category1
+#    print "cat2: ",category2
+#    print "score: ",value
     determine_fn = 0
 #    print "Model len: ",len(model)
 #=================================================================================
@@ -207,37 +210,42 @@ def classifyAttack(line, categories, lineNo):
 			classified.add(str(part1))  ## labels that got classified
 #			print part1 + " " + part2 + " " + value
 			if category1 == "X":
-				if category1 in tphitHistory and part1 not in tphitHistory[category1]:
-					tphitHistory[category1].append(str(part1))  ## add it to the history list
-				if category1 not in tphitHistory:
-					tphitHistory[category1] = []
-					tphitHistory[category1].append(str(part1))  ## add it to the history list
+#				if category1 in tphitHistory and part1 not in tphitHistory[category1]:
+#					tphitHistory[category1].append(str(part1))  ## add it to the history list
+#				if category1 not in tphitHistory:
+#					tphitHistory[category1] = []
+#					tphitHistory[category1].append(str(part1))  ## add it to the history list
 				if category2 in tphitHistory and part1 not in tphitHistory[category2]:
 					tphitHistory[category2].append(str(part1))  ## add it to the history list
+					xhit[category2] = xhit[category2] + 1
+					categoryMatches[category2] = categoryMatches[category2] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 				if category2 not in tphitHistory:
 					tphitHistory[category2] = []
-					tphitHistory[category2].append(str(part1))  ## add it to the history list
+					tphitHistory[category2].append(str(part1))  ## add it to the history lis
+					xhit[category2] = xhit[category2] + 1
+					categoryMatches[category2] = categoryMatches[category2] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 
-				xhit[category2] = xhit[category2] + 1
-#				category1 = category2
-				categoryMatches[category2] = categoryMatches[category2] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 #				print "matches for X: ",categoryMatches[category2]
 				
 			else: ## other than X
-				if category1 in tphitHistory and part1 not in tphitHistory[category1]:
-					tphitHistory[category1].append(str(part1))  ## add it to the history list
-					categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+#				if category1 in tphitHistory and part1 not in tphitHistory[category1]:
+#					tphitHistory[category1].append(str(part1))  ## add it to the history list
+#					categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
 
-				if category1 not in tphitHistory:
-					tphitHistory[category1] = []
-					categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
-					tphitHistory[category1].append(str(part1))  ## add it to the history list
+#				if category1 not in tphitHistory:
+#					tphitHistory[category1] = []
+#					categoryMatches[category1] = categoryMatches[category1] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+#					tphitHistory[category1].append(str(part1))  ## add it to the history list
 				
-				if part1 in tphitHistory:
-					tphitHistory[category1].append(str(part2))
-				if part1 not in tphitHistory:  ## If the sample has not been previously seen/hit by the class
-					tphitHistory[category1] = []
-					tphitHistory[category1].append(str(part2))  ## add it to the history list
+				if category2 in tphitHistory:
+					tphitHistory[category2].append(str(part1))
+					categoryMatches[category2] = categoryMatches[category2] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+
+				if category2 not in tphitHistory:  ## If the sample has not been previously seen/hit by the class
+					tphitHistory[category2] = []
+					tphitHistory[category2].append(str(part1))  ## add it to the history list
+					categoryMatches[category2] = categoryMatches[category2] + 1;  ## Increment TP counter for this category X if both labels same, and score below threshold
+
 				### adding per signature support ###
 				if item[0] in tphitHistory:
 					tphitHistory[item[0]].append(part1)
@@ -441,7 +449,8 @@ def processResultFile(filename, out):
 		samesum = 0
 	print "Category: ",cat
 	try:
-		tphit = len(tphitHistory[cat])
+		print tphitHistory[cat]
+		tphit = len(set(tphitHistory[cat]))
 	except KeyError, e:
 		tphit = 0;
 	try:
@@ -493,7 +502,7 @@ def processResultFile(filename, out):
 		for items in model:
 		   try:	
 #			print "tphitHistorys:", len(tphitHistory[items[0]])  
-			tphitH = len(tphitHistory[items[0]])
+			tphitH = len(set(tphitHistory[items[0]]))
 		   except KeyError:
 			tphitH = 0
 		   try:	
@@ -522,6 +531,7 @@ def processResultFile(filename, out):
 		fphit_list.append(fphit)
 		fnhit_list.append(fnhit)
 		tnhit_list.append(tnhit)
+#		xcount = set(xhit[cat])
 		xhitsum = xhitsum + int(xhit[cat])
 			      
 	res.append( cat + ","+  str(u1categoryCount[cat]) + "," + str(u2categoryCount[cat]) + ","+ str(tphit) + "," +  str(fphit) +  "," + str(fnhit) + "," + str(tnhit) + "," + str(tprcat) + "," + str(fprcat) + "," + str(xhit[cat]) + "," + str(acccat) + "," + str(auccat) + "\n" )
