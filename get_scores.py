@@ -134,10 +134,20 @@ oparser.add_option("-n","--squarematrix",
                    default = False,
                    help = "Create graphs")
 oparser.add_option("-m","--model",
-                   action='store',
+                   action="store",
                    dest = "model",
-                   default = 'mymodel.txt',
+                   default = False,
                    help = "Path to Model file")
+oparser.add_option("-r","--random",
+                   action="store",
+                   dest = "rand",
+                   default = False,
+                   help = "Number of random exemplars to select")
+oparser.add_option("-t","--threshold",
+                   action="store",
+                   dest = "thresh",
+                   default = False,
+                   help = "Threshold for fixed model")
 
 (options, args) = oparser.parse_args()
 
@@ -148,6 +158,7 @@ datdir = options.datdir  ## path to dataset dir
 iteration = options.itera ## iterations
 model = options.model  ## /path/to/model file
 square_matrix = options.square_matrix
+rand = int(options.rand) ## random picking
 
 siglist = os.listdir(sigdir)
 listing = os.listdir(datdir)
@@ -156,7 +167,8 @@ sigselect = []
 exemplars=[]
 threshold = []
 
-if(os.path.isfile("mymodel.txt")):
+if(model):
+    if(os.path.isfile("mymodel.txt")):
 	f = open("mymodel.txt",'r') ## open model file to read
 	lines = f.readlines() ## read file line by line
 	for line in lines:
@@ -166,6 +178,16 @@ if(os.path.isfile("mymodel.txt")):
 	   if ex_label not in siglist:
 		print "Copying exemplar:",ex_label
 		os.system("cp "+datdir+"/"+ex_label+" "+sigdir)
+
+## ADD SUPPORT FOR RANDOM EXEMPLAR PICKING ##
+
+if(rand > 0):
+	for i in range(0,rand):
+		sigselect.append(random.choice(siglist))
+	f = open("random_exemplars.txt",'w') ## open file to write
+	for exemp in sigselect:
+		f.write(exemp + "\n")
+	f.close()
 
 for infile in listing:
 #    print "current file is: " + infile
@@ -311,3 +333,5 @@ f = open("result.file",'w')
 f.write(finalnewcombined)
 f.close()
 os.system("mv output/* "+location+"/") ## MOVE TO OUTPUT DIR
+
+

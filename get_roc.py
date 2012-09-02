@@ -454,7 +454,7 @@ def processResultFile(filename, out):
 	except KeyError, e:
 		tphit = 0;
 	try:
-		fphit = len(fphitHistory[cat])
+		fphit = len(set(fphitHistory[cat]))
 	except KeyError, e:
 		fphit = 0;
 	try:
@@ -714,7 +714,7 @@ if __name__ == '__main__':
 	resetMatchCounts(topLevelCategories)
 	out = open(fname, 'a')
 	#	out.close()
-	processResultFile(infile, out)  ## This is the main processing function to call
+	processResultFile(infile.rstrip('\n'), out)  ## This is the main processing function to call
 	counter = counter + 1
 
 	#=======================================================
