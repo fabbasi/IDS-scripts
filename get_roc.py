@@ -678,7 +678,7 @@ if __name__ == '__main__':
 	#========================================================================
 	## Command line arguments ##
 #	infile = sys.argv[1]	## input result file to process
-	infile = open("result.file",'r').read()
+	infile = open("result.file",'r').read()  # NO NEED FOR INPUT HERE
 	metric = sys.argv[1]	## Metric used to determine file
 	resultf = sys.argv[2]
 	#threshfile = sys.argv[3] ## path to threshold file

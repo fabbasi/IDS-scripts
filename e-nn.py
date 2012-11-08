@@ -31,10 +31,11 @@ def get_matrix(pairs):
 	    distance_matrix[i][j] = float(pair[2])
 	return distance_matrix,labels,exemplars
 
-def k_nearest_neighbor(distance_matrix,labels,exemplars,k):
+def k_nearest_neighbor(distance_matrix,labels,exemplars,k,sourcedir,destdir):
 	counter = 0
 	tp = fp = 0
 	knn_index = []
+	selection = set()
 	for row in distance_matrix:
 		idx = argsort(row)
 #		print "idx = ",idx
@@ -57,13 +58,15 @@ def k_nearest_neighbor(distance_matrix,labels,exemplars,k):
 				r_cat = r_cat + 1
 				print("datapoint = %s, index = %s , exemplar/neighbor = %s , TP") % (labels[counter] , idx[:int(k)] , exemplars[x])
 
-		counter = counter + 1
 		if r_cat > w_cat:
 			tp = tp + 1
 			print "Majority vote True: ", r_cat
+			print "Adding to set: ", labels[counter]
+			selection.add(labels[counter])
 		else:
 			fp = fp + 1
 			print "Majority vote False: ", w_cat
+		counter = counter + 1
 
 	dimension_c = len(exemplars)
 	dimension_r = len(labels)
@@ -71,7 +74,14 @@ def k_nearest_neighbor(distance_matrix,labels,exemplars,k):
 	print "Datapoints: ", dimension_r
 	print "Total TP = ",tp
 	print "Total FP = ",fp
-
+	selection = list(selection)
+	selection.sort()
+	s = open("knn-select.txt",'a')
+	for item in selection:
+		s.write("\n" + str(item))
+		os.system("cp " + sourcedir + "/" + str(item) + " " + destdir)
+	s.close()
+	print "Selection set size: ", len(selection)
 	f = open("knn.txt",'a')
 #	f.write("\n####### NEW RECORD ########")
 #	f.write( "\nExemplars: " + str(dimension_c) )
@@ -83,6 +93,8 @@ def k_nearest_neighbor(distance_matrix,labels,exemplars,k):
 #### MAIN STARTS HERE ####
 
 k = sys.argv[1]
+sourcedir = sys.argv[2]
+destdir = sys.argv[3]
 print "k = ",k
 fname = open("result.file",'r').read()
 pairs = []
@@ -108,6 +120,6 @@ for row in distance_matrix:
         writer.writerow(temp)
         counter = counter + 1
 
-k_nearest_neighbor(distance_matrix,labels,exemplars,k)
+k_nearest_neighbor(distance_matrix,labels,exemplars,k, sourcedir, destdir)
 
 
